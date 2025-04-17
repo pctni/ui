@@ -19,7 +19,10 @@ jobs:
         uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Render Quarto Project
-        run: quarto render # Build the project based on _quarto.yml
+        uses: quarto-dev/quarto-actions/render@v2
+        with:
+          to: html # If set, it will be equivalent to `quarto render --to html`
+          path: ./index.qmd # Path to the Quarto file to render
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
