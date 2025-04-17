@@ -18,6 +18,12 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
+      - name: Download release from private repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: gh release download release -R pctni/backend -D .
+
+
       - name: Render Quarto Project
         uses: quarto-dev/quarto-actions/render@v2
         with:
