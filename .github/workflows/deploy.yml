@@ -1,0 +1,44 @@
+name: Deploy Quarto Website
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read # Read permissions needed for checkout
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render Quarto Dashboard
+        run: quarto render index.qmd # Or use 'quarto render' if it's a project
+
+      - name: Deploy to pctni.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          # PAT with repo scope for pctni/pctni.github.io
+          # Stored as GH_PAT secret in the ui repository
+          personal_token: ${{ secrets.GH_PAT }}
+          # Target repository
+          external_repository: pctni/pctni.github.io
+          # Branch to deploy to in the target repository
+          publish_branch: gh-pages
+          # Directory containing the rendered site (adjust if needed)
+          publish_dir: ./_site
+          # User deploying the pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          # Commit message
+          commit_message: Deploy Quarto dashboard from ui repository ${{ github.sha }}
+          # Allow publishing empty commits if needed (e.g., first deploy)
+          allow_empty_commit: true
+          # Keep history or force push
+          force_orphan: true # Creates a clean history on gh-pages

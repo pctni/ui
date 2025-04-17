@@ -1,0 +1,15 @@
+# Quarto outputs
+/_site/
+/_freeze/
+*.html
+*.pdf
+*.docx
+
+# R specific
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# VS Code
+.vscode/

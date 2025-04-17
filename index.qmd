@@ -1,0 +1,27 @@
+---
+title: "PCTNI Placeholder"
+format: dashboard
+---
+
+# Introduction
+
+Evidence on cycling potential at the network can inform more cost-effective investment and help ensure that the schemes offering most 'boom for buck' are prioritised in planned pipelines of work.
+The proposal is to develop a Propensity to Cycle Tool for Northern Ireland (PCTNI) to help achieve these aims.
+The work can move quickly because all input datasets for a 'fastrack' version of the tool are available and the team has experience in developing similar tools for other parts of the UK and Ireland.
+An early prototype of the results has already been developed to demonstrate the approach.
+
+## Existing Tools and Resources
+
+-   The PCT for England and Wales: [www.pct.bike](https://www.pct.bike/)
+    -   Main tool for strategic network planning
+    -   Large multi-year DfT funded project
+    -   Built foundations that led to more cost-efficient projects
+-   The CRUSE tool for Republic of Ireland: [www.cruse.bike](https://www.cruse.bike/)
+    -   Deployed across all of Ireland
+    -   Added functionality for multiple trip purposes
+    -   Uses origin-destination data with 'odjitter' software
+    -   Provides estimates of current and potential future cycling levels
+-   The NPT for Scotland: [www.npt.scot](https://www.npt.scot/)
+    -   Web application for strategic cycle network planning
+    -   Original "fast track" version delivered within 3 months
+    -   Based on commuting data
