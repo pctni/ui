@@ -18,6 +18,9 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
+      - name: Render Quarto Project
+        run: quarto render # Build the project based on _quarto.yml
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -38,4 +41,3 @@ jobs:
           allow_empty_commit: true
           # Keep history or force push
           force_orphan: true # Creates a clean history on gh-pages
-
