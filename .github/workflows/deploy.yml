@@ -26,7 +26,7 @@ jobs:
         with:
           # PAT with repo scope for pctni/pctni.github.io
           # Stored as GH_PAT secret in the ui repository
-          personal_token: ${{ secrets.GH_PAT }}
+          personal_token: ${{ secrets.GITHUB_TOKEN }}
           # Target repository
           external_repository: pctni/pctni.github.io
           # Branch to deploy to in the target repository
