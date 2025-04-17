@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read # Read permissions needed for checkout
+  contents: write # Allow writing to the gh-pages branch
 
 jobs:
   build-deploy:
@@ -18,27 +18,16 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Render Quarto Dashboard
-        run: quarto render index.qmd # Or use 'quarto render' if it's a project
-
-      - name: Deploy to pctni.github.io
-        uses: peaceiris/actions-gh-pages@v4
+      # Render and Publish directly to the target repository's gh-pages branch
+      - name: Publish to pctni.github.io
+        uses: quarto-dev/quarto-actions/publish@v2
         with:
-          # PAT with repo scope for pctni/pctni.github.io
-          # Stored as GH_PAT secret in the ui repository
-          personal_token: ${{ secrets.GITHUB_TOKEN }}
-          # Target repository
-          external_repository: pctni/pctni.github.io
-          # Branch to deploy to in the target repository
-          publish_branch: gh-pages
-          # Directory containing the rendered site (adjust if needed)
-          publish_dir: ./_site
-          # User deploying the pages
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          # Commit message
-          commit_message: Deploy Quarto dashboard from ui repository ${{ github.sha }}
-          # Allow publishing empty commits if needed (e.g., first deploy)
-          allow_empty_commit: true
-          # Keep history or force push
-          force_orphan: true # Creates a clean history on gh-pages
+          target: gh-pages # Publish to the gh-pages branch
+          # Use a Personal Access Token (PAT) with repo scope stored as a secret
+          # This PAT needs access to the pctni/pctni.github.io repository
+          # Create a secret named GH_PAT in the ui repository settings
+          github-token: ${{ secrets.GH_PAT }}
+          # Specify the target repository
+          target-repo: pctni/pctni.github.io
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # Pass the PAT to the environment as well
