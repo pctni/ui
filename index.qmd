@@ -6,32 +6,7 @@ execute:
   echo: false
 ---
 
-
-```{r}
-#| label: setup
-# system("gh release download release -R pctni/backend -D .")
-# if (!requireNamespace("pak", quietly = TRUE)) {
-#   install.packages("pak", repos = "https://cran.rstudio.com/")
-# }
-
-# # Install osmactive from GitHub using pak
-# pak::pkg_install("nptscot/osmactive")
-
-# # Load necessary libraries
-# library(sf)
-# library(osmactive)
-# library(tmap)
-```
-
-```{r}
-#| label: cycle_net_processed
-#| include: true
-# Load the cycle network data
-# cycle_net_processed <- sf::st_read("cycle_net_processed.gpkg")
-# m = osmactive::plot_osm_tmap(cycle_net_processed)
-# tmap::tmap_mode("view")
-# m
-```
+<iframe width="780" height="500" src="osm_network_plot.html" title="Map"></iframe>
 
 <!-- # Introduction
 

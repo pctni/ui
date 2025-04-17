@@ -21,7 +21,7 @@ jobs:
       - name: Download release from private repo
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: gh release download release -R pctni/backend -D .
+        run: gh release download v2025-04 --repo pctni/backend
 
 
       - name: Render Quarto Project
