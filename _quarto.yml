@@ -3,7 +3,7 @@ project:
   output-dir: _site
 
 website:
-  title: "PCTNI Placeholder"
+  title: "PCTNI: Propensity to Cycle Tool for Northern Ireland"
   navbar:
     left:
       - href: index.qmd
