@@ -2,12 +2,26 @@
 # title: "PCTNI: Propensity to Cycle Tool for Northern Ireland"
 # format: dashboard
 execute: 
-  include: false
+  include: true
   echo: false
+  message: false
+  warning: false
 ---
 
 
-<iframe width="780" height="500" src="osm_network_plot.html" title="Map"></iframe>
+<!-- <iframe width="780" height="500" src="osm_network_plot.html" title="Map"></iframe> -->
+
+```{r}
+# Idea: replace with tmap.mapgl pkg? 
+library(tmap)
+tmap_mode("view")
+# Replace this with sf::read_sf("path/to/your/network_data.gpkg") from the pctni/backend releases
+rnet_data = tmap::World
+tm_shape(rnet_data) +
+  tm_lines(
+    # ...
+  )
+```
 
 <!-- # Introduction
 
