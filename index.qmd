@@ -116,7 +116,7 @@ main,
     <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Use the layer control in the top-left of the map to toggle different datasets.</p>
     
     <div class="legend-item">
-      <h4>All Fastest Bicycle Go Dutch</h4>
+      <h4>Cycling potential (Go Dutch)</h4>
       <div class="legend-color-item">
         <div class="legend-color-box" style="background-color: #ffff80;"></div>
         <span>0 to 50</span>
