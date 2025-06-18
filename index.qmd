@@ -47,7 +47,7 @@ iframe {
 </style>
 ```
 
-<iframe src="osm_network_plot_2025-06-13.html" title="Map"></iframe>
+<iframe src="osm_network_plot.html" title="Map"></iframe>
 
 <!-- # Introduction
 
