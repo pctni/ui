@@ -11,43 +11,172 @@ format:
 
 ```{=html}
 <style>
-/* Remove all margins and padding */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Override Quarto's default layout but preserve header */
+body, html {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
 }
 
-/* Make html and body full viewport */
-html, body {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-/* Make the iframe full screen */
-iframe {
-  width: 100vw !important;
-  height: 100vh !important;
-  border: none !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 1000;
-}
-
-/* Override any Quarto containers */
-.container, .container-fluid, main, .content, body > div {
+/* Reset all Quarto containers except header */
+.quarto-container:not(#quarto-header .quarto-container),
+.container:not(#quarto-header .container),
+.container-fluid:not(#quarto-header .container-fluid),
+main,
+.content,
+#quarto-content {
   max-width: none !important;
   width: 100% !important;
-  height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
-</style>
-```
 
-<iframe src="osm_network_plot.html" title="Map"></iframe>
+/* Map container - position below header */
+.map-layout {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  display: flex;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  margin: 0;
+  padding: 0;
+  z-index: 100;
+}
+
+/* Make the iframe take 75% width */
+.map-iframe {
+  width: 75vw;
+  height: 100%;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Right panel for legend */
+.legend-panel {
+  width: 25vw;
+  height: 100%;
+  background-color: #f8f9fa;
+  border-left: 2px solid #dee2e6;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.legend-panel h3 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-family: Arial, sans-serif;
+}
+
+.legend-item {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.legend-item h4 {
+  color: #495057;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.legend-color-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.legend-color-box {
+  width: 18px;
+  height: 12px;
+  margin-right: 8px;
+  border: 1px solid #999;
+}
+
+/* Ensure header stays visible and positioned correctly */
+#quarto-header {
+  position: relative !important;
+  z-index: 1001 !important;
+}
+</style>
+
+<div class="map-layout">
+  <iframe src="osm_network_plot.html" title="Map" class="map-iframe"></iframe>
+  
+  <div class="legend-panel">
+    <h3>Map Legend</h3>
+    <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Use the layer control in the top-left of the map to toggle different datasets.</p>
+    
+    <div class="legend-item">
+      <h4>Cycling potential (Go Dutch)</h4>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #ffff80;"></div>
+        <span>0 to 50</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #80ff80;"></div>
+        <span>50 to 100</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #80ffff;"></div>
+        <span>100 to 250</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #8080ff;"></div>
+        <span>250 to 500</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #0000ff;"></div>
+        <span>500 to 1,000</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #8000ff;"></div>
+        <span>1,000 to 2,000</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #ff00ff;"></div>
+        <span>2,000 to 3,000</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #ff80ff;"></div>
+        <span>3,000 or more</span>
+      </div>
+    </div>
+    
+    <div class="legend-item">
+      <h4>Cycle Segregation</h4>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #90ee90;"></div>
+        <span>Off Road Path</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #ff6b6b;"></div>
+        <span>Painted Cycle Lane</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #a0a0a0;"></div>
+        <span>Segregated Track (narrow)</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #606060;"></div>
+        <span>Segregated Track (wide)</span>
+      </div>
+      <div class="legend-color-item">
+        <div class="legend-color-box" style="background-color: #deb887;"></div>
+        <span>Shared Footway</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
 
 <!-- # Introduction
 
