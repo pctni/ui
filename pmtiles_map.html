@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route Network Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- MapLibre GL CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+    
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    
+    <!-- PMTiles -->
+    <script src="https://unpkg.com/pmtiles@3.0.6/dist/pmtiles.js"></script>
+    
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        console.log('Starting PMTiles map initialization...');
+        
+        // Initialize PMTiles protocol
+        let protocol = new pmtiles.Protocol();
+        maplibregl.addProtocol("pmtiles", protocol.tile);
+        console.log('PMTiles protocol registered');
+
+        // Get the current page URL to build absolute paths
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+        console.log('Base URL:', baseUrl);
+        console.log('Current URL:', currentUrl);
+        
+        // Alternative: Try relative paths without baseUrl
+        const useRelativePaths = true;
+
+        // Initialize map with Esri WorldGrayCanvas
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'esri-gray': {
+                        type: 'raster',
+                        tiles: [
+                            'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+                        ],
+                        tileSize: 256,
+                        attribution: '© Esri'
+                    }
+                },
+                layers: [
+                    {
+                        id: 'esri-gray',
+                        type: 'raster',
+                        source: 'esri-gray'
+                    }
+                ]
+            },
+            center: [-6.5, 54.6],
+            zoom: 8
+        });
+
+        let currentLayer = null;
+        let currentTab = 'route-network';
+        let currentNetworkType = 'fast';
+
+        // Test function to inspect PMTiles files
+        async function testPMTiles() {
+            console.log('Testing PMTiles files...');
+            
+            const files = [
+                useRelativePaths ? 'route_network_fastest_2025-06.pmtiles' : `${baseUrl}route_network_fastest_2025-06.pmtiles`,
+                useRelativePaths ? 'route_network_quietest_2025-06.pmtiles' : `${baseUrl}route_network_quietest_2025-06.pmtiles`,
+                useRelativePaths ? 'corenet_network_ni_2025-06.pmtiles.pmtiles' : `${baseUrl}corenet_network_ni_2025-06.pmtiles.pmtiles`,
+                useRelativePaths ? 'gap_map_2025-06.pmtiles' : `${baseUrl}gap_map_2025-06.pmtiles`
+            ];
+            
+            for (const file of files) {
+                try {
+                    console.log(`Testing file: ${file}`);
+                    const p = new pmtiles.PMTiles(file);
+                    const header = await p.getHeader();
+                    const metadata = await p.getMetadata();
+                    
+                    console.log(`✅ ${file}:`, {
+                        header: header,
+                        metadata: metadata
+                    });
+                    
+                    if (metadata && metadata.vector_layers) {
+                        const vectorLayers = JSON.parse(metadata.vector_layers);
+                        console.log(`Vector layers in ${file}:`, vectorLayers);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error loading ${file}:`, error);
+                }
+            }
+        }
+
+        map.on('load', () => {
+            console.log('Map loaded successfully');
+            
+            // Test PMTiles files
+            testPMTiles();
+            
+            // Fit to Northern Ireland bounds
+            map.fitBounds([
+                [-8.2, 53.9], // Southwest
+                [-5.4, 55.3]  // Northeast
+            ]);
+        });
+
+        function addLayer(layerId) {
+            console.log(`🎯 Attempting to add layer: ${layerId}`);
+            
+            // Remove current layer if exists
+            if (currentLayer && map.getLayer(currentLayer)) {
+                console.log(`Removing current layer: ${currentLayer}`);
+                map.removeLayer(currentLayer);
+            }
+
+            // Define sources and try different source layer names
+            let sourceConfig, sourceLayerOptions;
+            
+            switch(layerId) {
+                case 'route-network-fast':
+                    sourceConfig = {
+                        type: 'vector',
+                        url: useRelativePaths ? 'pmtiles://route_network_fastest_2025-06.pmtiles' : `pmtiles://${baseUrl}route_network_fastest_2025-06.pmtiles`
+                    };
+                    sourceLayerOptions = ['route_network_fastest', 'default', 'layer0', 'routes'];
+                    break;
+                case 'route-network-quiet':
+                    sourceConfig = {
+                        type: 'vector',
+                        url: useRelativePaths ? 'pmtiles://route_network_quietest_2025-06.pmtiles' : `pmtiles://${baseUrl}route_network_quietest_2025-06.pmtiles`
+                    };
+                    sourceLayerOptions = ['route_network_quietest', 'default', 'layer0', 'routes'];
+                    break;
+                case 'coherent-network':
+                    sourceConfig = {
+                        type: 'vector',
+                        url: useRelativePaths ? 'pmtiles://corenet_network_ni_2025-06.pmtiles.pmtiles' : `pmtiles://${baseUrl}corenet_network_ni_2025-06.pmtiles.pmtiles`
+                    };
+                    sourceLayerOptions = ['corenet_network_ni', 'default', 'layer0', 'network'];
+                    break;
+                case 'gap-analysis':
+                    sourceConfig = {
+                        type: 'vector',
+                        url: useRelativePaths ? 'pmtiles://gap_map_2025-06.pmtiles' : `pmtiles://${baseUrl}gap_map_2025-06.pmtiles`
+                    };
+                    sourceLayerOptions = ['gap_map', 'default', 'layer0', 'gaps'];
+                    break;
+                default:
+                    console.error(`Unknown layer ID: ${layerId}`);
+                    return;
+            }
+
+            // Add source if it doesn't exist
+            if (!map.getSource(layerId)) {
+                console.log(`Adding source for ${layerId}:`, sourceConfig);
+                map.addSource(layerId, sourceConfig);
+            }
+
+            // Try different source layer names
+            let layerAdded = false;
+            for (const sourceLayer of sourceLayerOptions) {
+                if (layerAdded) break;
+                
+                try {
+                    console.log(`Trying source-layer: ${sourceLayer} for ${layerId}`);
+                    
+                    map.addLayer({
+                        id: `${layerId}-${sourceLayer}`,
+                        type: 'line',
+                        source: layerId,
+                        'source-layer': sourceLayer,
+                        paint: {
+                            'line-color': '#ff0000', // Bright red for visibility
+                            'line-width': [
+                                'interpolate',
+                                ['linear'],
+                                ['zoom'],
+                                8, 4,
+                                12, 6,
+                                16, 10
+                            ],
+                            'line-opacity': 0.9
+                        }
+                    });
+
+                    currentLayer = `${layerId}-${sourceLayer}`;
+                    layerAdded = true;
+                    console.log(`✅ Successfully added layer: ${currentLayer}`);
+
+                    // Add click handler
+                    map.on('click', currentLayer, (e) => {
+                        console.log('Feature clicked:', e.features[0].properties);
+                        const properties = e.features[0].properties;
+                        const html = `
+                            <div style="font-family: Arial, sans-serif; font-size: 12px; max-width: 300px;">
+                                <strong>PMTiles Data</strong><br>
+                                <strong>Layer:</strong> ${layerId}<br>
+                                <strong>Source Layer:</strong> ${sourceLayer}<br>
+                                <hr>
+                                ${Object.entries(properties).slice(0, 8).map(([key, value]) => 
+                                    `<strong>${key}:</strong> ${value}`
+                                ).join('<br>')}
+                            </div>
+                        `;
+                        
+                        new maplibregl.Popup()
+                            .setLngLat(e.lngLat)
+                            .setHTML(html)
+                            .addTo(map);
+                    });
+
+                    // Change cursor on hover
+                    map.on('mouseenter', currentLayer, () => {
+                        map.getCanvas().style.cursor = 'pointer';
+                    });
+
+                    map.on('mouseleave', currentLayer, () => {
+                        map.getCanvas().style.cursor = '';
+                    });
+
+                } catch (error) {
+                    console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error);
+                    // Clean up failed attempt
+                    if (map.getLayer(`${layerId}-${sourceLayer}`)) {
+                        map.removeLayer(`${layerId}-${sourceLayer}`);
+                    }
+                }
+            }
+
+            if (!layerAdded) {
+                console.error(`❌ Failed to add any layer for ${layerId} with any source-layer option`);
+            }
+        }
+
+        function removeCurrentLayer() {
+            if (currentLayer && map.getLayer(currentLayer)) {
+                console.log(`Removing layer: ${currentLayer}`);
+                map.removeLayer(currentLayer);
+                currentLayer = null;
+            }
+        }
+
+        function getLayerForTab(tab, networkType = 'fast') {
+            if (tab === 'route-network') {
+                return networkType === 'fast' ? 'route-network-fast' : 'route-network-quiet';
+            } else if (tab === 'coherent-network') {
+                return 'coherent-network';
+            } else if (tab === 'gap-analysis') {
+                return 'gap-analysis';
+            }
+            return null;
+        }
+
+        // Listen for messages from parent frame
+        window.addEventListener('message', function(event) {
+            console.log('📨 Received message:', event.data);
+            
+            if (event.data.type === 'switchLayer') {
+                currentTab = event.data.layer;
+                console.log(`Switched to tab: ${currentTab}`);
+            } else if (event.data.type === 'changeNetworkType') {
+                currentNetworkType = event.data.networkType;
+                console.log(`Network type changed to: ${currentNetworkType}`);
+                if (currentTab === 'route-network' && currentLayer) {
+                    const layerId = getLayerForTab(currentTab, currentNetworkType);
+                    addLayer(layerId);
+                }
+            } else if (event.data.type === 'toggleLayer') {
+                console.log(`🔄 Toggle layer: ${event.data.show} for tab: ${currentTab}`);
+                if (event.data.show) {
+                    const layerId = getLayerForTab(currentTab, currentNetworkType);
+                    if (layerId) {
+                        addLayer(layerId);
+                    }
+                } else {
+                    removeCurrentLayer();
+                }
+            }
+        });
+
+        // Enhanced error handling
+        map.on('error', (e) => {
+            console.error('🚨 Map error:', e);
+        });
+
+        map.on('sourcedata', (e) => {
+            if (e.isSourceLoaded) {
+                console.log(`📊 Source loaded: ${e.sourceId}`);
+            }
+            if (e.sourceDataType === 'metadata') {
+                console.log(`📋 Source metadata loaded: ${e.sourceId}`);
+            }
+        });
+
+        map.on('data', (e) => {
+            if (e.dataType === 'source' && e.isSourceLoaded) {
+                console.log(`📁 Data loaded for source: ${e.sourceId}`);
+            }
+        });
+
+        // Auto-test after 5 seconds for debugging
+        setTimeout(() => {
+            console.log('🧪 Auto-testing route network fast layer...');
+            addLayer('route-network-fast');
+        }, 5000);
+    </script>
+</body>
+</html> 

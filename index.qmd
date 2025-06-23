@@ -53,40 +53,188 @@ main,
   padding: 0;
 }
 
-/* Right panel for legend */
+/* Right panel for layer controls */
 .legend-panel {
   width: 25vw;
   height: 100%;
   background-color: #f8f9fa;
   border-left: 2px solid #dee2e6;
   overflow-y: auto;
-  padding: 20px;
+  padding: 0;
   box-sizing: border-box;
   margin: 0;
+  font-family: Arial, sans-serif;
 }
 
 .legend-panel h3 {
   color: #333;
   font-size: 18px;
-  margin-bottom: 15px;
-  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px 20px 15px 20px;
+  border-bottom: 2px solid #dee2e6;
+  background-color: #fff;
 }
 
+/* Tab styles */
+.tab-container {
+  background-color: #fff;
+}
+
+.tab-nav {
+  display: flex;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.tab-button.active {
+  color: #0066cc;
+  border-bottom-color: #0066cc;
+  background-color: #fff;
+}
+
+.tab-content {
+  display: none;
+  padding: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Control styles */
+.control-group {
+  margin-bottom: 20px;
+}
+
+.control-group label {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.control-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: #fff;
+}
+
+/* Legend styles */
 .legend-item {
   margin-bottom: 20px;
   padding: 12px;
-  background: white;
+  background: #f8f9fa;
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #dee2e6;
 }
 
 .legend-item h4 {
   color: #495057;
   font-size: 14px;
-  margin-bottom: 8px;
+  margin: 0 0 12px 0;
   font-weight: bold;
 }
 
+/* Horizontal color bar styles */
+.color-bar-container {
+  margin-bottom: 15px;
+}
+
+.color-bar {
+  width: 100%;
+  height: 20px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  position: relative;
+}
+
+.cycling-bar {
+  background: linear-gradient(to right, 
+    #808080 0%,      /* 1- (grey) */
+    #ffff80 12.5%,   /* 50- (light yellow) */
+    #80ff80 25%,     /* 100- (light green) */
+    #80ffff 37.5%,   /* 250- (cyan) */
+    #8080ff 50%,     /* 500- (light blue) */
+    #0000ff 62.5%,   /* 1000- (blue) */
+    #8000ff 75%,     /* 2000- (purple) */
+    #ff00ff 87.5%,   /* 3000- (magenta) */
+    #ff80ff 100%     /* 3000+ (light magenta) */
+  );
+}
+
+.coherent-bar {
+  background: linear-gradient(to right, 
+    #ffcccc 0%,      /* Low coherence (light red) */
+    #ff9999 25%,     /* Medium-low (light red) */
+    #66ccff 50%,     /* Medium (light blue) */
+    #3399ff 75%,     /* Medium-high (blue) */
+    #0066cc 100%     /* High coherence (dark blue) */
+  );
+}
+
+.gap-bar {
+  background: linear-gradient(to right, 
+    #00ff00 0%,      /* No gap (green) */
+    #80ff80 25%,     /* Small gap (light green) */
+    #ffff00 50%,     /* Medium gap (yellow) */
+    #ff8000 75%,     /* Large gap (orange) */
+    #ff0000 100%     /* Critical gap (red) */
+  );
+}
+
+.color-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #666;
+  margin-top: 5px;
+  padding: 0 2px;
+}
+
+.color-bar-label {
+  text-align: center;
+  flex: 1;
+}
+
+/* Layer toggle styles */
+.layer-toggle {
+  margin-bottom: 8px;
+}
+
+.layer-toggle input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.layer-toggle label {
+  font-weight: normal;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Discrete legend items */
 .legend-color-item {
   display: flex;
   align-items: center;
@@ -99,6 +247,7 @@ main,
   height: 12px;
   margin-right: 8px;
   border: 1px solid #999;
+  border-radius: 2px;
 }
 
 /* Ensure header stays visible and positioned correctly */
@@ -109,73 +258,204 @@ main,
 </style>
 
 <div class="map-layout">
-  <iframe src="osm_network_plot.html" title="Map" class="map-iframe"></iframe>
+  <iframe src="pmtiles_map.html" title="Map" class="map-iframe"></iframe>
   
   <div class="legend-panel">
-    <h3>Map Legend</h3>
-    <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Use the layer control in the top-left of the map to toggle different datasets.</p>
+    <h3>Layer controls</h3>
     
-    <div class="legend-item">
-      <h4>Cycling potential (Go Dutch)</h4>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #ffff80;"></div>
-        <span>0 to 50</span>
+    <div class="tab-container">
+      <div class="tab-nav">
+        <button class="tab-button active" onclick="switchTab(event, 'route-network')">Route network</button>
+        <button class="tab-button" onclick="switchTab(event, 'coherent-network')">Coherent network</button>
+        <button class="tab-button" onclick="switchTab(event, 'gap-analysis')">Gap analysis</button>
       </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #80ff80;"></div>
-        <span>50 to 100</span>
+      
+      <!-- Route Network Tab -->
+      <div id="route-network" class="tab-content active">
+        <div class="control-group">
+          <div class="layer-toggle">
+            <input type="checkbox" id="show-layer-route">
+            <label for="show-layer-route">Show layer</label>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label for="network-type">Network type</label>
+          <select id="network-type">
+            <option value="fast">Fast</option>
+            <option value="quiet">Quiet</option>
+          </select>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Cycling potential (Go Dutch)</h4>
+          <div class="color-bar-container">
+            <div class="color-bar cycling-bar"></div>
+            <div class="color-bar-labels">
+              <span class="color-bar-label">1-</span>
+              <span class="color-bar-label">50-</span>
+              <span class="color-bar-label">100-</span>
+              <span class="color-bar-label">250-</span>
+              <span class="color-bar-label">500-</span>
+              <span class="color-bar-label">1000-</span>
+              <span class="color-bar-label">2000-</span>
+              <span class="color-bar-label">3000-</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #80ffff;"></div>
-        <span>100 to 250</span>
+      
+      <!-- Coherent Network Tab -->
+      <div id="coherent-network" class="tab-content">
+        <div class="control-group">
+          <div class="layer-toggle">
+            <input type="checkbox" id="show-layer-coherent">
+            <label for="show-layer-coherent">Show layer</label>
+          </div>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Network Coherence</h4>
+          <div class="color-bar-container">
+            <div class="color-bar coherent-bar"></div>
+            <div class="color-bar-labels">
+              <span class="color-bar-label">Low</span>
+              <span class="color-bar-label">Med-Low</span>
+              <span class="color-bar-label">Medium</span>
+              <span class="color-bar-label">Med-High</span>
+              <span class="color-bar-label">High</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Infrastructure Types</h4>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #0066cc;"></div>
+            <span>Primary Cycle Route</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #3399ff;"></div>
+            <span>Secondary Cycle Route</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #66ccff;"></div>
+            <span>Local Cycle Route</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #99ddff;"></div>
+            <span>Shared Path</span>
+          </div>
+        </div>
       </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #8080ff;"></div>
-        <span>250 to 500</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #0000ff;"></div>
-        <span>500 to 1,000</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #8000ff;"></div>
-        <span>1,000 to 2,000</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #ff00ff;"></div>
-        <span>2,000 to 3,000</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #ff80ff;"></div>
-        <span>3,000 or more</span>
-      </div>
-    </div>
-    
-    <div class="legend-item">
-      <h4>Cycle Segregation</h4>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #90ee90;"></div>
-        <span>Off Road Path</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #ff6b6b;"></div>
-        <span>Painted Cycle Lane</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #a0a0a0;"></div>
-        <span>Segregated Track (narrow)</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #606060;"></div>
-        <span>Segregated Track (wide)</span>
-      </div>
-      <div class="legend-color-item">
-        <div class="legend-color-box" style="background-color: #deb887;"></div>
-        <span>Shared Footway</span>
+      
+      <!-- Gap Analysis Tab -->
+      <div id="gap-analysis" class="tab-content">
+        <div class="control-group">
+          <div class="layer-toggle">
+            <input type="checkbox" id="show-layer-gap">
+            <label for="show-layer-gap">Show layer</label>
+          </div>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Infrastructure Gaps</h4>
+          <div class="color-bar-container">
+            <div class="color-bar gap-bar"></div>
+            <div class="color-bar-labels">
+              <span class="color-bar-label">None</span>
+              <span class="color-bar-label">Small</span>
+              <span class="color-bar-label">Medium</span>
+              <span class="color-bar-label">Large</span>
+              <span class="color-bar-label">Critical</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Gap Priorities</h4>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ff0000;"></div>
+            <span>Critical Priority</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ff8000;"></div>
+            <span>High Priority</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ffff00;"></div>
+            <span>Medium Priority</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #80ff80;"></div>
+            <span>Low Priority</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #00ff00;"></div>
+            <span>No Gap</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+function switchTab(evt, tabName) {
+  // Hide all tab contents
+  var tabContents = document.getElementsByClassName("tab-content");
+  for (var i = 0; i < tabContents.length; i++) {
+    tabContents[i].classList.remove("active");
+  }
+  
+  // Remove active class from all tab buttons
+  var tabButtons = document.getElementsByClassName("tab-button");
+  for (var i = 0; i < tabButtons.length; i++) {
+    tabButtons[i].classList.remove("active");
+  }
+  
+  // Show the selected tab content and mark button as active
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+  
+  // Send message to iframe to switch layer if needed
+  var iframe = document.querySelector('.map-iframe');
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({
+      type: 'switchLayer',
+      layer: tabName
+    }, '*');
+  }
+}
+
+// Handle show layer checkboxes and network type changes
+document.addEventListener('change', function(e) {
+  var iframe = document.querySelector('.map-iframe');
+  if (!iframe || !iframe.contentWindow) return;
+  
+  if (e.target.id === 'network-type') {
+    iframe.contentWindow.postMessage({
+      type: 'changeNetworkType',
+      networkType: e.target.value
+    }, '*');
+  } else if (e.target.id === 'show-layer-route') {
+    iframe.contentWindow.postMessage({
+      type: 'toggleLayer',
+      show: e.target.checked
+    }, '*');
+  } else if (e.target.id === 'show-layer-coherent') {
+    iframe.contentWindow.postMessage({
+      type: 'toggleLayer',
+      show: e.target.checked
+    }, '*');
+  } else if (e.target.id === 'show-layer-gap') {
+    iframe.contentWindow.postMessage({
+      type: 'toggleLayer',
+      show: e.target.checked
+    }, '*');
+  }
+});
+</script>
 ```
 
 <!-- # Introduction
