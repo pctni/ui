@@ -44,9 +44,6 @@
         console.log('Base URL:', baseUrl);
         console.log('Current URL:', currentUrl);
         
-        // Alternative: Try relative paths without baseUrl
-        const useRelativePaths = true;
-
         // Initialize map with Esri WorldGrayCanvas
         const map = new maplibregl.Map({
             container: 'map',
@@ -74,227 +71,234 @@
             zoom: 8
         });
 
-        let currentLayer = null;
+        let activeLayerId = null;  // e.g., 'route-network-fast'
+        let activeLayerName = null; // e.g., 'route-network-fast-route_network_fastest'
         let currentTab = 'route-network';
         let currentNetworkType = 'fast';
 
-        // Test function to inspect PMTiles files
-        async function testPMTiles() {
-            console.log('Testing PMTiles files...');
-            
-            const files = [
-                useRelativePaths ? 'route_network_fastest_2025-06.pmtiles' : `${baseUrl}route_network_fastest_2025-06.pmtiles`,
-                useRelativePaths ? 'route_network_quietest_2025-06.pmtiles' : `${baseUrl}route_network_quietest_2025-06.pmtiles`,
-                useRelativePaths ? 'corenet_network_ni_2025-06.pmtiles.pmtiles' : `${baseUrl}corenet_network_ni_2025-06.pmtiles.pmtiles`,
-                useRelativePaths ? 'gap_map_2025-06.pmtiles' : `${baseUrl}gap_map_2025-06.pmtiles`
-            ];
-            
-            for (const file of files) {
+        async function inspectAndLoad() {
+            console.log('--- Running Diagnostics ---');
+            await inspectPMTiles();
+            console.log('--- Diagnostics Complete ---');
+
+            // Now, show the initial layer
+            const initialCheckbox = window.parent.document.getElementById('show-layer-route');
+            if (initialCheckbox && initialCheckbox.checked) {
+                addLayer('route-network-fast');
+            }
+        }
+
+        async function inspectPMTiles() {
+            console.log('🔍 Inspecting PMTiles Data Fields...');
+            const files = {
+                'route_network_fastest_2025-06.pmtiles': 'Route Network (Fast)',
+                'route_network_quietest_2025-06.pmtiles': 'Route Network (Quiet)',
+                'corenet_network_ni_2025-06.pmtiles': 'Coherent Network',
+                'gap_map_2025-06.pmtiles': 'Gap Analysis'
+            };
+            for (const [file, name] of Object.entries(files)) {
                 try {
-                    console.log(`Testing file: ${file}`);
                     const p = new pmtiles.PMTiles(file);
-                    const header = await p.getHeader();
                     const metadata = await p.getMetadata();
-                    
-                    console.log(`✅ ${file}:`, {
-                        header: header,
-                        metadata: metadata
-                    });
-                    
-                    if (metadata && metadata.vector_layers) {
-                        const vectorLayers = JSON.parse(metadata.vector_layers);
-                        console.log(`Vector layers in ${file}:`, vectorLayers);
+                     if (metadata && metadata.vector_layers) {
+                        const layerInfo = metadata.vector_layers;
+                        console.log(`--- ${name} ---`);
+                        layerInfo.forEach(l => {
+                            console.log(`  Layer Name: "${l.id}"`);
+                            console.log(`  Available Fields for styling:`, Object.keys(l.fields));
+                        });
+                        console.log('--------------------');
+                    } else {
+                        console.log(`No vector_layers metadata found for ${file}`);
                     }
                 } catch (error) {
-                    console.error(`❌ Error loading ${file}:`, error);
+                    console.error(`❌ Error inspecting ${file}:`, error);
                 }
             }
         }
 
         map.on('load', () => {
             console.log('Map loaded successfully');
-            
-            // Test PMTiles files
-            testPMTiles();
-            
-            // Fit to Northern Ireland bounds
             map.fitBounds([
                 [-8.2, 53.9], // Southwest
                 [-5.4, 55.3]  // Northeast
             ]);
+            // Show the initial layer by default if its checkbox is checked
+            const initialCheckbox = window.parent.document.getElementById('show-layer-route');
+            if (initialCheckbox && initialCheckbox.checked) {
+                addLayer('route-network-fast');
+            }
         });
 
         function addLayer(layerId) {
-            console.log(`🎯 Attempting to add layer: ${layerId}`);
-            
-            // Remove current layer if exists
-            if (currentLayer && map.getLayer(currentLayer)) {
-                console.log(`Removing current layer: ${currentLayer}`);
-                map.removeLayer(currentLayer);
-            }
+            if (!layerId) return;
 
-            // Define sources and try different source layer names
+            // Clean up previous layer and source first
+            removeCurrentLayer();
+            
+            console.log(`🎯 Attempting to add layer: ${layerId}`);
+            activeLayerId = layerId;
+
             let sourceConfig, sourceLayerOptions;
             
             switch(layerId) {
                 case 'route-network-fast':
-                    sourceConfig = {
-                        type: 'vector',
-                        url: useRelativePaths ? 'pmtiles://route_network_fastest_2025-06.pmtiles' : `pmtiles://${baseUrl}route_network_fastest_2025-06.pmtiles`
-                    };
-                    sourceLayerOptions = ['route_network_fastest', 'default', 'layer0', 'routes'];
+                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_fastest_2025-06.pmtiles' };
+                    sourceLayerOptions = ['route_network_fastest_2025-06', 'route_network_fastest'];
                     break;
                 case 'route-network-quiet':
-                    sourceConfig = {
-                        type: 'vector',
-                        url: useRelativePaths ? 'pmtiles://route_network_quietest_2025-06.pmtiles' : `pmtiles://${baseUrl}route_network_quietest_2025-06.pmtiles`
-                    };
-                    sourceLayerOptions = ['route_network_quietest', 'default', 'layer0', 'routes'];
+                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_quietest_2025-06.pmtiles' };
+                    sourceLayerOptions = ['route_network_quietest_2025-06', 'route_network_quietest'];
                     break;
                 case 'coherent-network':
-                    sourceConfig = {
-                        type: 'vector',
-                        url: useRelativePaths ? 'pmtiles://corenet_network_ni_2025-06.pmtiles.pmtiles' : `pmtiles://${baseUrl}corenet_network_ni_2025-06.pmtiles.pmtiles`
-                    };
-                    sourceLayerOptions = ['corenet_network_ni', 'default', 'layer0', 'network'];
+                    sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
+                    sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
                     break;
                 case 'gap-analysis':
-                    sourceConfig = {
-                        type: 'vector',
-                        url: useRelativePaths ? 'pmtiles://gap_map_2025-06.pmtiles' : `pmtiles://${baseUrl}gap_map_2025-06.pmtiles`
-                    };
-                    sourceLayerOptions = ['gap_map', 'default', 'layer0', 'gaps'];
+                    sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
+                    sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
                     break;
                 default:
                     console.error(`Unknown layer ID: ${layerId}`);
                     return;
             }
 
-            // Add source if it doesn't exist
-            if (!map.getSource(layerId)) {
-                console.log(`Adding source for ${layerId}:`, sourceConfig);
-                map.addSource(layerId, sourceConfig);
+            if (!map.getSource(activeLayerId)) {
+                console.log(`Adding source for ${activeLayerId}:`, sourceConfig);
+                map.addSource(activeLayerId, sourceConfig);
             }
 
-            // Try different source layer names
             let layerAdded = false;
             for (const sourceLayer of sourceLayerOptions) {
                 if (layerAdded) break;
                 
                 try {
-                    console.log(`Trying source-layer: ${sourceLayer} for ${layerId}`);
+                    console.log(`Trying source-layer: ${sourceLayer} for ${activeLayerId}`);
                     
+                    let paintProps;
+                    switch(activeLayerId) {
+                        case 'route-network-fast':
+                            paintProps = {
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_fastest_bicycle_go_dutch'], 1, '#808080', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'route-network-quiet':
+                            paintProps = {
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_quietest_bicycle_go_dutch'], 1, '#808080', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'coherent-network':
+                            paintProps = {
+                                'line-color': [
+                                    'match',
+                                    ['get', 'cycle_potential_category'],
+                                    'Primary', '#de3163',
+                                    'Secondary', '#ffbf00',
+                                    '#cccccc' // Default color
+                                ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'gap-analysis':
+                            paintProps = {
+                                 'line-color': [
+                                    'match',
+                                    ['get', 'gap_priority'],
+                                    'Critical Gap', '#ff0000',
+                                    'High Priority Gap', '#ff8000',
+                                    'Medium Priority Gap', '#ffff00',
+                                    'No Gap', '#cccccc', // Light Gray for No Gap
+                                    'rgba(0, 0, 0, 0)' // Make other values transparent
+                                ],
+                                 'line-width': [
+                                    'case',
+                                    ['==', ['get', 'gap_priority'], 'No Gap'],
+                                    1, // Thinner width for No Gap
+                                    3  // Default width for other gaps
+                                 ], 
+                                 'line-opacity': 0.8
+                            };
+                            break;
+                        default:
+                            paintProps = { 'line-color': '#000000', 'line-width': 2 };
+                    }
+                    
+                    activeLayerName = `${activeLayerId}-${sourceLayer}`;
+
                     map.addLayer({
-                        id: `${layerId}-${sourceLayer}`,
+                        id: activeLayerName,
                         type: 'line',
-                        source: layerId,
+                        source: activeLayerId,
                         'source-layer': sourceLayer,
-                        paint: {
-                            'line-color': '#ff0000', // Bright red for visibility
-                            'line-width': [
-                                'interpolate',
-                                ['linear'],
-                                ['zoom'],
-                                8, 4,
-                                12, 6,
-                                16, 10
-                            ],
-                            'line-opacity': 0.9
-                        }
+                        paint: paintProps
                     });
 
-                    currentLayer = `${layerId}-${sourceLayer}`;
                     layerAdded = true;
-                    console.log(`✅ Successfully added layer: ${currentLayer}`);
+                    console.log(`✅ Successfully added layer: ${activeLayerName}`);
 
-                    // Add click handler
-                    map.on('click', currentLayer, (e) => {
+                    map.on('click', activeLayerName, (e) => {
                         console.log('Feature clicked:', e.features[0].properties);
-                        const properties = e.features[0].properties;
-                        const html = `
-                            <div style="font-family: Arial, sans-serif; font-size: 12px; max-width: 300px;">
-                                <strong>PMTiles Data</strong><br>
-                                <strong>Layer:</strong> ${layerId}<br>
-                                <strong>Source Layer:</strong> ${sourceLayer}<br>
-                                <hr>
-                                ${Object.entries(properties).slice(0, 8).map(([key, value]) => 
-                                    `<strong>${key}:</strong> ${value}`
-                                ).join('<br>')}
-                            </div>
-                        `;
-                        
-                        new maplibregl.Popup()
-                            .setLngLat(e.lngLat)
-                            .setHTML(html)
-                            .addTo(map);
+                        new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<div><strong>Properties:</strong><br>${Object.entries(e.features[0].properties).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>`).addTo(map);
                     });
 
-                    // Change cursor on hover
-                    map.on('mouseenter', currentLayer, () => {
-                        map.getCanvas().style.cursor = 'pointer';
-                    });
-
-                    map.on('mouseleave', currentLayer, () => {
-                        map.getCanvas().style.cursor = '';
-                    });
+                    map.on('mouseenter', activeLayerName, () => { map.getCanvas().style.cursor = 'pointer'; });
+                    map.on('mouseleave', activeLayerName, () => { map.getCanvas().style.cursor = ''; });
 
                 } catch (error) {
-                    console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error);
-                    // Clean up failed attempt
-                    if (map.getLayer(`${layerId}-${sourceLayer}`)) {
-                        map.removeLayer(`${layerId}-${sourceLayer}`);
+                    console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error.message);
+                    if (map.getLayer(`${activeLayerId}-${sourceLayer}`)) {
+                        map.removeLayer(`${activeLayerId}-${sourceLayer}`);
                     }
                 }
-            }
-
-            if (!layerAdded) {
-                console.error(`❌ Failed to add any layer for ${layerId} with any source-layer option`);
             }
         }
 
         function removeCurrentLayer() {
-            if (currentLayer && map.getLayer(currentLayer)) {
-                console.log(`Removing layer: ${currentLayer}`);
-                map.removeLayer(currentLayer);
-                currentLayer = null;
+            if (activeLayerName && map.getLayer(activeLayerName)) {
+                console.log(`Removing current layer: ${activeLayerName}`);
+                map.removeLayer(activeLayerName);
             }
+            if (activeLayerId && map.getSource(activeLayerId)) {
+                console.log(`Removing current source: ${activeLayerId}`);
+                map.removeSource(activeLayerId);
+            }
+            activeLayerId = null;
+            activeLayerName = null;
         }
 
-        function getLayerForTab(tab, networkType = 'fast') {
-            if (tab === 'route-network') {
-                return networkType === 'fast' ? 'route-network-fast' : 'route-network-quiet';
-            } else if (tab === 'coherent-network') {
-                return 'coherent-network';
-            } else if (tab === 'gap-analysis') {
-                return 'gap-analysis';
-            }
-            return null;
-        }
+        window.addEventListener('message', (event) => {
+            const { type, layer, show, networkType } = event.data;
+            if (!type) return;
 
-        // Listen for messages from parent frame
-        window.addEventListener('message', function(event) {
-            console.log('📨 Received message:', event.data);
-            
-            if (event.data.type === 'switchLayer') {
-                currentTab = event.data.layer;
-                console.log(`Switched to tab: ${currentTab}`);
-            } else if (event.data.type === 'changeNetworkType') {
-                currentNetworkType = event.data.networkType;
-                console.log(`Network type changed to: ${currentNetworkType}`);
-                if (currentTab === 'route-network' && currentLayer) {
-                    const layerId = getLayerForTab(currentTab, currentNetworkType);
-                    addLayer(layerId);
-                }
-            } else if (event.data.type === 'toggleLayer') {
-                console.log(`🔄 Toggle layer: ${event.data.show} for tab: ${currentTab}`);
-                if (event.data.show) {
-                    const layerId = getLayerForTab(currentTab, currentNetworkType);
-                    if (layerId) {
+            switch (type) {
+                case 'switchLayer':
+                    currentTab = layer;
+                    const checkboxId = `show-layer-${currentTab.split('-')[0]}`;
+                    const isChecked = window.parent.document.getElementById(checkboxId)?.checked;
+                    if (isChecked) {
+                        let layerId = currentTab === 'route-network' ? `${currentTab}-${currentNetworkType}` : currentTab;
                         addLayer(layerId);
+                    } else {
+                        removeCurrentLayer();
                     }
-                } else {
-                    removeCurrentLayer();
-                }
+                    break;
+                case 'toggleLayer':
+                    if (show) {
+                        let layerId = currentTab === 'route-network' ? `${currentTab}-${currentNetworkType}` : currentTab;
+                        addLayer(layerId);
+                    } else {
+                        removeCurrentLayer();
+                    }
+                    break;
+                case 'changeNetworkType':
+                    currentNetworkType = networkType;
+                    const routeCheckbox = window.parent.document.getElementById('show-layer-route');
+                    if (currentTab === 'route-network' && routeCheckbox?.checked) {
+                        addLayer(`route-network-${currentNetworkType}`);
+                    }
+                    break;
             }
         });
 
@@ -317,12 +321,6 @@
                 console.log(`📁 Data loaded for source: ${e.sourceId}`);
             }
         });
-
-        // Auto-test after 5 seconds for debugging
-        setTimeout(() => {
-            console.log('🧪 Auto-testing route network fast layer...');
-            addLayer('route-network-fast');
-        }, 5000);
     </script>
 </body>
 </html> 

@@ -315,36 +315,14 @@ main,
         </div>
         
         <div class="legend-item">
-          <h4>Network Coherence</h4>
-          <div class="color-bar-container">
-            <div class="color-bar coherent-bar"></div>
-            <div class="color-bar-labels">
-              <span class="color-bar-label">Low</span>
-              <span class="color-bar-label">Med-Low</span>
-              <span class="color-bar-label">Medium</span>
-              <span class="color-bar-label">Med-High</span>
-              <span class="color-bar-label">High</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="legend-item">
           <h4>Infrastructure Types</h4>
           <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #0066cc;"></div>
-            <span>Primary Cycle Route</span>
+            <div class="legend-color-box" style="background-color: #de3163;"></div>
+            <span>Primary</span>
           </div>
           <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #3399ff;"></div>
-            <span>Secondary Cycle Route</span>
-          </div>
-          <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #66ccff;"></div>
-            <span>Local Cycle Route</span>
-          </div>
-          <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #99ddff;"></div>
-            <span>Shared Path</span>
+            <div class="legend-color-box" style="background-color: #ffbf00;"></div>
+            <span>Secondary</span>
           </div>
         </div>
       </div>
@@ -359,39 +337,21 @@ main,
         </div>
         
         <div class="legend-item">
-          <h4>Infrastructure Gaps</h4>
-          <div class="color-bar-container">
-            <div class="color-bar gap-bar"></div>
-            <div class="color-bar-labels">
-              <span class="color-bar-label">None</span>
-              <span class="color-bar-label">Small</span>
-              <span class="color-bar-label">Medium</span>
-              <span class="color-bar-label">Large</span>
-              <span class="color-bar-label">Critical</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="legend-item">
           <h4>Gap Priorities</h4>
           <div class="legend-color-item">
             <div class="legend-color-box" style="background-color: #ff0000;"></div>
-            <span>Critical Priority</span>
+            <span>Critical Gap</span>
           </div>
           <div class="legend-color-item">
             <div class="legend-color-box" style="background-color: #ff8000;"></div>
-            <span>High Priority</span>
+            <span>High Priority Gap</span>
           </div>
           <div class="legend-color-item">
             <div class="legend-color-box" style="background-color: #ffff00;"></div>
-            <span>Medium Priority</span>
+            <span>Medium Priority Gap</span>
           </div>
           <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #80ff80;"></div>
-            <span>Low Priority</span>
-          </div>
-          <div class="legend-color-item">
-            <div class="legend-color-box" style="background-color: #00ff00;"></div>
+            <div class="legend-color-box" style="background-color: #cccccc;"></div>
             <span>No Gap</span>
           </div>
         </div>
