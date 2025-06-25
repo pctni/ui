@@ -25,10 +25,136 @@
             height: 100vh;
             width: 100%;
         }
+
+        /* Custom Basemap Control Styles */
+        .maplibregl-ctrl-group.custom-ctrl {
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+        }
+
+        .basemap-button {
+            background-color: #fff;
+            border: 0;
+            border-radius: 4px;
+            width: 29px;
+            height: 29px;
+            padding: 0;
+            margin: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .basemap-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        #basemap-panel {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.15);
+            padding: 15px;
+            display: none; /* Hidden by default */
+            z-index: 100;
+            width: 300px;
+        }
+
+        #basemap-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .basemap-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+
+        .basemap-thumbnail {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .basemap-thumbnail span {
+            font-size: 10px;
+            text-align: center;
+            display: block;
+        }
+
+        .basemap-thumbnail img {
+            width: 100%;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 2px;
+            display: block;
+        }
+
+        .basemap-thumbnail.selected {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+        }
+
+        .basemap-toggle-button {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-layers-fill" viewBox="0 0 16 16"><path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/><path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .basemap-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .basemap-option {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .basemap-option:hover {
+            background-color: #f0f0f0;
+        }
+        .basemap-option.selected {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .basemap-control-button {
+            width: 29px;
+            height: 29px;
+            padding: 0;
+            background-color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .basemap-control-button svg {
+            width: 18px;
+            height: 18px;
+            fill: #333;
+        }
+        .basemap-control-button:hover {
+            background-color: #f0f0f0;
+        }
+
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="basemap-panel">
+        <h3>Basemap</h3>
+        <div class="basemap-options"></div>
+    </div>
 
     <script>
         console.log('Starting PMTiles map initialization...');
@@ -38,7 +164,74 @@
         maplibregl.addProtocol("pmtiles", protocol.tile);
         console.log('PMTiles protocol registered');
 
-        // Get the current page URL to build absolute paths
+        const basemapStyles = {
+            'gray': {
+                version: 8,
+                sources: { 'esri-gray': { type: 'raster', tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, attribution: '© Esri' } },
+                layers: [{ id: 'esri-gray', type: 'raster', source: 'esri-gray' }],
+                name: 'gray'
+            },
+            'streets': {
+                uri: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+                name: 'streets'
+            },
+            'cycling': {
+                version: 8,
+                sources: { 'cyclosm-raster': { type: 'raster', tiles: ['https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© CyclOSM | Map data: © OpenStreetMap contributors' } },
+                layers: [{ id: 'cyclosm-raster', type: 'raster', source: 'cyclosm-raster' }],
+                name: 'cycling'
+            }
+        };
+        let currentStyleKey = 'gray';
+
+        class BasemapControl {
+            onAdd(map) {
+                this._map = map;
+                this._container = document.createElement('div');
+                this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+                
+                const button = document.createElement('button');
+                button.className = 'basemap-control-button';
+                button.type = 'button';
+                button.title = 'Change basemap';
+                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/><path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/></svg>`;
+
+                button.onclick = () => {
+                    const panel = document.getElementById('basemap-panel');
+                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                };
+
+                this._container.appendChild(button);
+                return this._container;
+            }
+
+            onRemove() {
+                this._container.parentNode.removeChild(this._container);
+                this._map = undefined;
+            }
+        }
+
+        function populateBasemapPanel() {
+            const optionsContainer = document.querySelector('.basemap-options');
+            optionsContainer.innerHTML = '';
+
+            Object.entries({ gray: 'Gray', streets: 'Streets', cycling: 'Cycling' }).forEach(([key, title]) => {
+                const option = document.createElement('div');
+                option.className = 'basemap-option';
+                option.textContent = title;
+                if (key === currentStyleKey) {
+                    option.classList.add('selected');
+                }
+                option.onclick = () => {
+                    currentStyleKey = key;
+                    const style = basemapStyles[key];
+                    map.setStyle(style.uri || style);
+                    document.getElementById('basemap-panel').style.display = 'none';
+                };
+                optionsContainer.appendChild(option);
+            });
+        }
+        
         const currentUrl = window.location.href;
         const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
         console.log('Base URL:', baseUrl);
@@ -47,30 +240,31 @@
         // Initialize map with Esri WorldGrayCanvas
         const map = new maplibregl.Map({
             container: 'map',
-            style: {
-                version: 8,
-                sources: {
-                    'esri-gray': {
-                        type: 'raster',
-                        tiles: [
-                            'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-                        ],
-                        tileSize: 256,
-                        attribution: '© Esri'
-                    }
-                },
-                layers: [
-                    {
-                        id: 'esri-gray',
-                        type: 'raster',
-                        source: 'esri-gray'
-                    }
-                ]
-            },
+            style: basemapStyles.gray,
             center: [-6.5, 54.6],
             zoom: 8
         });
 
+        function populateBasemapGallery() {
+            const gallery = document.querySelector('.basemap-gallery');
+            gallery.innerHTML = '';
+            basemapStyles.forEach((style, index) => {
+                const item = document.createElement('div');
+                item.className = 'basemap-thumbnail';
+                item.innerHTML = `<img src="${style.icon}" alt="${style.title}"><span>${style.title}</span>`;
+                
+                if (map.getStyle().name.toLowerCase().includes(style.title.toLowerCase()) || (index === 0 && !map.getStyle().name)) {
+                   item.classList.add('selected');
+                }
+
+                item.onclick = () => {
+                    map.setStyle(style.uri);
+                    document.getElementById('basemap-panel').style.display = 'none';
+                };
+                gallery.appendChild(item);
+            });
+        }
+        
         let activeLayerId = null;  // e.g., 'route-network-fast'
         let activeLayerName = null; // e.g., 'route-network-fast-route_network_fastest'
         let currentTab = 'route-network';
@@ -119,15 +313,44 @@
 
         map.on('load', () => {
             console.log('Map loaded successfully');
+            
+            // Add map controls
+            map.addControl(new maplibregl.NavigationControl(), 'top-left');
+            map.addControl(new maplibregl.FullscreenControl(), 'top-left');
+            map.addControl(new maplibregl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: true
+            }), 'top-left');
+            map.addControl(new BasemapControl(), 'top-left');
+
             map.fitBounds([
                 [-8.2, 53.9], // Southwest
                 [-5.4, 55.3]  // Northeast
             ]);
-            // Show the initial layer by default if its checkbox is checked
+
+            populateBasemapGallery();
+            addInitialDataLayers();
+            populateBasemapPanel();
+        });
+
+        function addInitialDataLayers() {
             const initialCheckbox = window.parent.document.getElementById('show-layer-route');
             if (initialCheckbox && initialCheckbox.checked) {
-                addLayer('route-network-fast');
+                const networkType = window.parent.document.getElementById('network-type').value || 'fast';
+                addLayer(`route-network-${networkType}`);
             }
+        }
+
+        // Re-add sources and layers when the map style changes
+        map.on('style.load', () => {
+            console.log('Style loaded, re-adding data layers if needed.');
+            // Re-register protocol and re-add layers
+            let protocol = new pmtiles.Protocol();
+            maplibregl.addProtocol("pmtiles", protocol.tile);
+            addInitialDataLayers();
+            populateBasemapPanel(); // Update panel selection state
         });
 
         function addLayer(layerId) {
