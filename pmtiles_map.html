@@ -245,6 +245,62 @@
             zoom: 8
         });
 
+        const activeLayers = new Map();
+        let currentNetworkType = 'fast';
+
+        function removeLayer(layerId) {
+            if (activeLayers.has(layerId)) {
+                const { name, source } = activeLayers.get(layerId);
+                if (map.getLayer(name)) map.removeLayer(name);
+                
+                // Check if any other active layer uses the same source before removing
+                let sourceInUse = false;
+                for (const [key, value] of activeLayers) {
+                    if (key !== layerId && value.source === source) {
+                        sourceInUse = true;
+                        break;
+                    }
+                }
+                if (!sourceInUse && map.getSource(source)) {
+                    map.removeSource(source);
+                }
+
+                activeLayers.delete(layerId);
+                console.log(`✅ Removed layer: ${layerId}`);
+            }
+        }
+        
+        map.on('load', () => {
+            console.log('Map loaded successfully');
+            
+            // Add map controls
+            map.addControl(new maplibregl.NavigationControl(), 'top-left');
+            map.addControl(new maplibregl.FullscreenControl(), 'top-left');
+            map.addControl(new maplibregl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: true
+            }), 'top-left');
+            map.addControl(new BasemapControl(), 'top-left');
+            map.addControl(new BasemapToggleControl(), 'top-left');
+
+            map.fitBounds([
+                [-8.2, 53.9], // Southwest
+                [-5.4, 55.3]  // Northeast
+            ]);
+            // Show initially checked layers
+            ['route', 'coherent', 'gap'].forEach(type => {
+                const checkbox = window.parent.document.getElementById(`show-layer-${type}`);
+                if (checkbox && checkbox.checked) {
+                    addLayer(checkbox.dataset.layerId);
+                }
+            });
+
+            populateBasemapGallery();
+            populateBasemapPanel();
+        });
+
         function populateBasemapGallery() {
             const gallery = document.querySelector('.basemap-gallery');
             gallery.innerHTML = '';
@@ -265,130 +321,41 @@
             });
         }
         
-        let activeLayerId = null;  // e.g., 'route-network-fast'
-        let activeLayerName = null; // e.g., 'route-network-fast-route_network_fastest'
-        let currentTab = 'route-network';
-        let currentNetworkType = 'fast';
-
-        async function inspectAndLoad() {
-            console.log('--- Running Diagnostics ---');
-            await inspectPMTiles();
-            console.log('--- Diagnostics Complete ---');
-
-            // Now, show the initial layer
-            const initialCheckbox = window.parent.document.getElementById('show-layer-route');
-            if (initialCheckbox && initialCheckbox.checked) {
-                addLayer('route-network-fast');
-            }
-        }
-
-        async function inspectPMTiles() {
-            console.log('🔍 Inspecting PMTiles Data Fields...');
-            const files = {
-                'route_network_fastest_2025-06.pmtiles': 'Route Network (Fast)',
-                'route_network_quietest_2025-06.pmtiles': 'Route Network (Quiet)',
-                'corenet_network_ni_2025-06.pmtiles': 'Coherent Network',
-                'gap_map_2025-06.pmtiles': 'Gap Analysis'
-            };
-            for (const [file, name] of Object.entries(files)) {
-                try {
-                    const p = new pmtiles.PMTiles(file);
-                    const metadata = await p.getMetadata();
-                     if (metadata && metadata.vector_layers) {
-                        const layerInfo = metadata.vector_layers;
-                        console.log(`--- ${name} ---`);
-                        layerInfo.forEach(l => {
-                            console.log(`  Layer Name: "${l.id}"`);
-                            console.log(`  Available Fields for styling:`, Object.keys(l.fields));
-                        });
-                        console.log('--------------------');
-                    } else {
-                        console.log(`No vector_layers metadata found for ${file}`);
-                    }
-                } catch (error) {
-                    console.error(`❌ Error inspecting ${file}:`, error);
-                }
-            }
-        }
-
-        map.on('load', () => {
-            console.log('Map loaded successfully');
-            
-            // Add map controls
-            map.addControl(new maplibregl.NavigationControl(), 'top-left');
-            map.addControl(new maplibregl.FullscreenControl(), 'top-left');
-            map.addControl(new maplibregl.GeolocateControl({
-                positionOptions: {
-                    enableHighAccuracy: true
-                },
-                trackUserLocation: true
-            }), 'top-left');
-            map.addControl(new BasemapControl(), 'top-left');
-
-            map.fitBounds([
-                [-8.2, 53.9], // Southwest
-                [-5.4, 55.3]  // Northeast
-            ]);
-
-            populateBasemapGallery();
-            addInitialDataLayers();
-            populateBasemapPanel();
-        });
-
-        function addInitialDataLayers() {
-            const initialCheckbox = window.parent.document.getElementById('show-layer-route');
-            if (initialCheckbox && initialCheckbox.checked) {
-                const networkType = window.parent.document.getElementById('network-type').value || 'fast';
-                addLayer(`route-network-${networkType}`);
-            }
-        }
-
-        // Re-add sources and layers when the map style changes
-        map.on('style.load', () => {
-            console.log('Style loaded, re-adding data layers if needed.');
-            // Re-register protocol and re-add layers
-            let protocol = new pmtiles.Protocol();
-            maplibregl.addProtocol("pmtiles", protocol.tile);
-            addInitialDataLayers();
-            populateBasemapPanel(); // Update panel selection state
-        });
-
         function addLayer(layerId) {
-            if (!layerId) return;
+            if (!layerId || activeLayers.has(layerId)) return;
 
-            // Clean up previous layer and source first
-            removeCurrentLayer();
-            
             console.log(`🎯 Attempting to add layer: ${layerId}`);
-            activeLayerId = layerId;
 
-            let sourceConfig, sourceLayerOptions;
-            
-            switch(layerId) {
-                case 'route-network-fast':
+            let sourceId, sourceConfig, sourceLayerOptions;
+
+            if (layerId === 'route-network') {
+                sourceId = `route-network-${currentNetworkType}`;
+                if (currentNetworkType === 'fast') {
                     sourceConfig = { type: 'vector', url: 'pmtiles://route_network_fastest_2025-06.pmtiles' };
                     sourceLayerOptions = ['route_network_fastest_2025-06', 'route_network_fastest'];
-                    break;
-                case 'route-network-quiet':
+                } else {
                     sourceConfig = { type: 'vector', url: 'pmtiles://route_network_quietest_2025-06.pmtiles' };
                     sourceLayerOptions = ['route_network_quietest_2025-06', 'route_network_quietest'];
-                    break;
-                case 'coherent-network':
-                    sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
-                    sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
-                    break;
-                case 'gap-analysis':
-                    sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
-                    sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
-                    break;
-                default:
-                    console.error(`Unknown layer ID: ${layerId}`);
-                    return;
+                }
+            } else {
+                 sourceId = layerId;
+                 switch(layerId) {
+                    case 'coherent-network':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
+                        sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
+                        break;
+                    case 'gap-analysis':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
+                        sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
+                        break;
+                    default:
+                        console.error(`Unknown layer ID: ${layerId}`);
+                        return;
+                }
             }
 
-            if (!map.getSource(activeLayerId)) {
-                console.log(`Adding source for ${activeLayerId}:`, sourceConfig);
-                map.addSource(activeLayerId, sourceConfig);
+            if (!map.getSource(sourceId)) {
+                map.addSource(sourceId, sourceConfig);
             }
 
             let layerAdded = false;
@@ -396,10 +363,10 @@
                 if (layerAdded) break;
                 
                 try {
-                    console.log(`Trying source-layer: ${sourceLayer} for ${activeLayerId}`);
-                    
                     let paintProps;
-                    switch(activeLayerId) {
+                    let effectiveLayerId = layerId === 'route-network' ? `route-network-${currentNetworkType}` : layerId;
+
+                    switch(effectiveLayerId) {
                         case 'route-network-fast':
                             paintProps = {
                                 'line-color': [ 'interpolate', ['linear'], ['get', 'all_fastest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
@@ -414,114 +381,63 @@
                             break;
                         case 'coherent-network':
                             paintProps = {
-                                'line-color': [
-                                    'match',
-                                    ['get', 'cycle_potential_category'],
-                                    'Primary', '#de3163',
-                                    'Secondary', '#ffbf00',
-                                    '#cccccc' // Default color
-                                ],
+                                'line-color': [ 'match', ['get', 'cycle_potential_category'], 'Primary', '#de3163', 'Secondary', '#ffbf00', '#cccccc' ],
                                 'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
                             };
                             break;
                         case 'gap-analysis':
                             paintProps = {
-                                 'line-color': [
-                                    'match',
-                                    ['get', 'gap_priority'],
-                                    'Critical Gap', '#ff0000',
-                                    'High Priority Gap', '#ff8000',
-                                    'Medium Priority Gap', '#ffff00',
-                                    'No Gap', '#cccccc', // Light Gray for No Gap
-                                    'rgba(0, 0, 0, 0)' // Make other values transparent
-                                ],
-                                 'line-width': [
-                                    'case',
-                                    ['==', ['get', 'gap_priority'], 'No Gap'],
-                                    1, // Thinner width for No Gap
-                                    3  // Default width for other gaps
-                                 ], 
-                                 'line-opacity': 0.8
+                                 'line-color': [ 'match', ['get', 'gap_priority'], 'Critical Gap', '#ff0000', 'High Priority Gap', '#ff8000', 'Medium Priority Gap', '#ffff00', 'No Gap', '#cccccc', 'rgba(0, 0, 0, 0)' ],
+                                 'line-width': [ 'case', ['==', ['get', 'gap_priority'], 'No Gap'], 1, 3 ], 'line-opacity': 0.8
                             };
                             break;
                         default:
                             paintProps = { 'line-color': '#000000', 'line-width': 2 };
                     }
                     
-                    activeLayerName = `${activeLayerId}-${sourceLayer}`;
+                    const fullLayerName = `${sourceId}-${sourceLayer}`;
 
                     map.addLayer({
-                        id: activeLayerName,
+                        id: fullLayerName,
                         type: 'line',
-                        source: activeLayerId,
+                        source: sourceId,
                         'source-layer': sourceLayer,
                         paint: paintProps
                     });
 
                     layerAdded = true;
-                    console.log(`✅ Successfully added layer: ${activeLayerName}`);
+                    activeLayers.set(layerId, { name: fullLayerName, source: sourceId });
+                    console.log(`✅ Successfully added layer: ${fullLayerName}`);
 
-                    map.on('click', activeLayerName, (e) => {
+                    map.on('click', fullLayerName, (e) => {
                         console.log('Feature clicked:', e.features[0].properties);
                         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<div><strong>Properties:</strong><br>${Object.entries(e.features[0].properties).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>`).addTo(map);
                     });
 
-                    map.on('mouseenter', activeLayerName, () => { map.getCanvas().style.cursor = 'pointer'; });
-                    map.on('mouseleave', activeLayerName, () => { map.getCanvas().style.cursor = ''; });
+                    map.on('mouseenter', fullLayerName, () => { map.getCanvas().style.cursor = 'pointer'; });
+                    map.on('mouseleave', fullLayerName, () => { map.getCanvas().style.cursor = ''; });
 
                 } catch (error) {
                     console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error.message);
-                    if (map.getLayer(`${activeLayerId}-${sourceLayer}`)) {
-                        map.removeLayer(`${activeLayerId}-${sourceLayer}`);
-                    }
                 }
             }
         }
 
-        function removeCurrentLayer() {
-            if (activeLayerName && map.getLayer(activeLayerName)) {
-                console.log(`Removing current layer: ${activeLayerName}`);
-                map.removeLayer(activeLayerName);
-            }
-            if (activeLayerId && map.getSource(activeLayerId)) {
-                console.log(`Removing current source: ${activeLayerId}`);
-                map.removeSource(activeLayerId);
-            }
-            activeLayerId = null;
-            activeLayerName = null;
-        }
-
         window.addEventListener('message', (event) => {
-            const { type, layer, show, networkType } = event.data;
-            if (!type) return;
-
-            switch (type) {
-                case 'switchLayer':
-                    currentTab = layer;
-                    const checkboxId = `show-layer-${currentTab.split('-')[0]}`;
-                    const isChecked = window.parent.document.getElementById(checkboxId)?.checked;
-                    if (isChecked) {
-                        let layerId = currentTab === 'route-network' ? `${currentTab}-${currentNetworkType}` : currentTab;
-                        addLayer(layerId);
-                    } else {
-                        removeCurrentLayer();
-                    }
-                    break;
-                case 'toggleLayer':
-                    if (show) {
-                        let layerId = currentTab === 'route-network' ? `${currentTab}-${currentNetworkType}` : currentTab;
-                        addLayer(layerId);
-                    } else {
-                        removeCurrentLayer();
-                    }
-                    break;
-                case 'changeNetworkType':
-                    currentNetworkType = networkType;
-                    const routeCheckbox = window.parent.document.getElementById('show-layer-route');
-                    if (currentTab === 'route-network' && routeCheckbox?.checked) {
-                        addLayer(`route-network-${currentNetworkType}`);
-                    }
-                    break;
+            const { type, layerId, show, networkType } = event.data;
+            if (type === 'toggleLayer' && layerId) {
+                if (show) {
+                    addLayer(layerId);
+                } else {
+                    removeLayer(layerId);
+                }
+            } else if (type === 'changeNetworkType') {
+                const routeLayerIsActive = activeLayers.has('route-network');
+                if (routeLayerIsActive) removeLayer('route-network');
+                
+                currentNetworkType = networkType;
+                
+                if (routeLayerIsActive) addLayer('route-network');
             }
         });
 
