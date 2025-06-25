@@ -172,7 +172,7 @@ main,
 
 .cycling-bar {
   background: linear-gradient(to right, 
-    #808080 0%,      /* 1- (grey) */
+    #cccccc 0%,      /* 1- (light grey) */
     #ffff80 12.5%,   /* 50- (light yellow) */
     #80ff80 25%,     /* 100- (light green) */
     #80ffff 37.5%,   /* 250- (cyan) */
