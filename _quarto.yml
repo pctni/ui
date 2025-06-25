@@ -9,8 +9,12 @@ website:
       - href: index.qmd
         text: Home
 
+resources:
+  - "*.pmtiles"
+
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
+    page-layout: full

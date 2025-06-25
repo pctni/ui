@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route Network Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- MapLibre GL CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+    
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    
+    <!-- PMTiles -->
+    <script src="https://unpkg.com/pmtiles@3.0.6/dist/pmtiles.js"></script>
+    
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Custom Basemap Control Styles */
+        .maplibregl-ctrl-group.custom-ctrl {
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+        }
+
+        .basemap-button {
+            background-color: #fff;
+            border: 0;
+            border-radius: 4px;
+            width: 29px;
+            height: 29px;
+            padding: 0;
+            margin: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .basemap-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        #basemap-panel {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.15);
+            padding: 15px;
+            display: none; /* Hidden by default */
+            z-index: 100;
+            width: 300px;
+        }
+
+        #basemap-panel h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .basemap-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+
+        .basemap-thumbnail {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .basemap-thumbnail span {
+            font-size: 10px;
+            text-align: center;
+            display: block;
+        }
+
+        .basemap-thumbnail img {
+            width: 100%;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 2px;
+            display: block;
+        }
+
+        .basemap-thumbnail.selected {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+        }
+
+        .basemap-toggle-button {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-layers-fill" viewBox="0 0 16 16"><path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/><path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .basemap-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .basemap-option {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .basemap-option:hover {
+            background-color: #f0f0f0;
+        }
+        .basemap-option.selected {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .basemap-control-button {
+            width: 29px;
+            height: 29px;
+            padding: 0;
+            background-color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .basemap-control-button svg {
+            width: 18px;
+            height: 18px;
+            fill: #333;
+        }
+        .basemap-control-button:hover {
+            background-color: #f0f0f0;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="basemap-panel">
+        <h3>Basemap</h3>
+        <div class="basemap-options"></div>
+    </div>
+
+    <script>
+        console.log('Starting PMTiles map initialization...');
+        
+        // Initialize PMTiles protocol
+        let protocol = new pmtiles.Protocol();
+        maplibregl.addProtocol("pmtiles", protocol.tile);
+        console.log('PMTiles protocol registered');
+
+        const basemapStyles = {
+            'gray': {
+                version: 8,
+                sources: { 'esri-gray': { type: 'raster', tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, attribution: '© Esri' } },
+                layers: [{ id: 'esri-gray', type: 'raster', source: 'esri-gray' }],
+                name: 'gray'
+            },
+            'streets': {
+                uri: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+                name: 'streets'
+            },
+            'cycling': {
+                version: 8,
+                sources: { 'cyclosm-raster': { type: 'raster', tiles: ['https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© CyclOSM | Map data: © OpenStreetMap contributors' } },
+                layers: [{ id: 'cyclosm-raster', type: 'raster', source: 'cyclosm-raster' }],
+                name: 'cycling'
+            }
+        };
+        let currentStyleKey = 'gray';
+
+        class BasemapControl {
+            onAdd(map) {
+                this._map = map;
+                this._container = document.createElement('div');
+                this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+                
+                const button = document.createElement('button');
+                button.className = 'basemap-control-button';
+                button.type = 'button';
+                button.title = 'Change basemap';
+                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/><path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/></svg>`;
+
+                button.onclick = () => {
+                    const panel = document.getElementById('basemap-panel');
+                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                };
+
+                this._container.appendChild(button);
+                return this._container;
+            }
+
+            onRemove() {
+                this._container.parentNode.removeChild(this._container);
+                this._map = undefined;
+            }
+        }
+
+        function populateBasemapPanel() {
+            const optionsContainer = document.querySelector('.basemap-options');
+            optionsContainer.innerHTML = '';
+
+            Object.entries({ gray: 'Gray', streets: 'Streets', cycling: 'Cycling' }).forEach(([key, title]) => {
+                const option = document.createElement('div');
+                option.className = 'basemap-option';
+                option.textContent = title;
+                if (key === currentStyleKey) {
+                    option.classList.add('selected');
+                }
+                option.onclick = () => {
+                    currentStyleKey = key;
+                    const style = basemapStyles[key];
+                    map.setStyle(style.uri || style);
+                    document.getElementById('basemap-panel').style.display = 'none';
+                };
+                optionsContainer.appendChild(option);
+            });
+        }
+        
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+        console.log('Base URL:', baseUrl);
+        console.log('Current URL:', currentUrl);
+        
+        // Initialize map with Esri WorldGrayCanvas
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: basemapStyles.gray,
+            center: [-6.5, 54.6],
+            zoom: 8
+        });
+
+        const activeLayers = new Map();
+        let currentNetworkType = 'fast';
+
+        function removeLayer(layerId) {
+            if (activeLayers.has(layerId)) {
+                const { name, source } = activeLayers.get(layerId);
+                if (map.getLayer(name)) map.removeLayer(name);
+                
+                // Check if any other active layer uses the same source before removing
+                let sourceInUse = false;
+                for (const [key, value] of activeLayers) {
+                    if (key !== layerId && value.source === source) {
+                        sourceInUse = true;
+                        break;
+                    }
+                }
+                if (!sourceInUse && map.getSource(source)) {
+                    map.removeSource(source);
+                }
+
+                activeLayers.delete(layerId);
+                console.log(`✅ Removed layer: ${layerId}`);
+            }
+        }
+        
+        map.on('load', () => {
+            console.log('Map loaded successfully');
+            
+            // Add map controls
+            map.addControl(new maplibregl.NavigationControl(), 'top-left');
+            map.addControl(new maplibregl.FullscreenControl(), 'top-left');
+            map.addControl(new maplibregl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                trackUserLocation: true
+            }), 'top-left');
+            map.addControl(new BasemapControl(), 'top-left');
+
+            map.fitBounds([
+                [-8.2, 53.9], // Southwest
+                [-5.4, 55.3]  // Northeast
+            ]);
+            // Show initially checked layers
+            ['route', 'coherent', 'gap'].forEach(type => {
+                const checkbox = window.parent.document.getElementById(`show-layer-${type}`);
+                if (checkbox && checkbox.checked) {
+                    addLayer(checkbox.dataset.layerId);
+                }
+            });
+
+            populateBasemapPanel();
+        });
+
+        function populateBasemapGallery() {
+            const gallery = document.querySelector('.basemap-gallery');
+            gallery.innerHTML = '';
+            basemapStyles.forEach((style, index) => {
+                const item = document.createElement('div');
+                item.className = 'basemap-thumbnail';
+                item.innerHTML = `<img src="${style.icon}" alt="${style.title}"><span>${style.title}</span>`;
+                
+                if (map.getStyle().name.toLowerCase().includes(style.title.toLowerCase()) || (index === 0 && !map.getStyle().name)) {
+                   item.classList.add('selected');
+                }
+
+                item.onclick = () => {
+                    map.setStyle(style.uri);
+                    document.getElementById('basemap-panel').style.display = 'none';
+                };
+                gallery.appendChild(item);
+            });
+        }
+        
+        function addLayer(layerId) {
+            if (!layerId || activeLayers.has(layerId)) return;
+
+            console.log(`🎯 Attempting to add layer: ${layerId}`);
+
+            let sourceId, sourceConfig, sourceLayerOptions;
+
+            if (layerId === 'route-network') {
+                sourceId = `route-network-${currentNetworkType}`;
+                if (currentNetworkType === 'fast') {
+                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_fastest_2025-06.pmtiles' };
+                    sourceLayerOptions = ['route_network_fastest_2025-06', 'route_network_fastest'];
+                } else {
+                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_quietest_2025-06.pmtiles' };
+                    sourceLayerOptions = ['route_network_quietest_2025-06', 'route_network_quietest'];
+                }
+            } else {
+                 sourceId = layerId;
+                 switch(layerId) {
+                    case 'coherent-network':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
+                        sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
+                        break;
+                    case 'cycle-network':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://cycle_net_processed_2025-06.pmtiles' };
+                        sourceLayerOptions = ['cycle_net_processed_2025-06', 'cycle_net_processed'];
+                        break;
+                    case 'gap-analysis':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
+                        sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
+                        break;
+                    default:
+                        console.error(`Unknown layer ID: ${layerId}`);
+                        return;
+                }
+            }
+
+            if (!map.getSource(sourceId)) {
+                map.addSource(sourceId, sourceConfig);
+            }
+
+            let layerAdded = false;
+            for (const sourceLayer of sourceLayerOptions) {
+                if (layerAdded) break;
+                
+                try {
+                    let paintProps;
+                    let effectiveLayerId = layerId === 'route-network' ? `route-network-${currentNetworkType}` : layerId;
+
+                    switch(effectiveLayerId) {
+                        case 'route-network-fast':
+                            paintProps = {
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_fastest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'route-network-quiet':
+                            paintProps = {
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_quietest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'cycle-network':
+                            paintProps = {
+                                'line-color': [
+                                    'match',
+                                    ['get', 'cycle_segregation'],
+                                    'Segregated Track (wide)', '#006400',
+                                    'Off Road Path', '#3cb371',
+                                    'Segregated Track (narrow)', '#90ee90',
+                                    'Shared Footway', '#ffd700',
+                                    'Painted Cycle Lane', '#ff0000',
+                                    '#cccccc' 
+                                ],
+                                'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 2, 16, 4],
+                                'line-opacity': 0.7
+                            };
+                            break;
+                        case 'coherent-network':
+                            paintProps = {
+                                'line-color': [ 'match', ['get', 'cycle_potential_category'], 'Primary', '#de3163', 'Secondary', '#ffbf00', '#cccccc' ],
+                                'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'gap-analysis':
+                            paintProps = {
+                                 'line-color': [ 'match', ['get', 'gap_priority'], 'Critical Gap', '#ff0000', 'High Priority Gap', '#ff8000', 'Medium Priority Gap', '#ffff00', 'No Gap', '#cccccc', 'rgba(0, 0, 0, 0)' ],
+                                 'line-width': [ 'case', ['==', ['get', 'gap_priority'], 'No Gap'], 1, 3 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        default:
+                            paintProps = { 'line-color': '#000000', 'line-width': 2 };
+                    }
+                    
+                    const fullLayerName = `${sourceId}-${sourceLayer}`;
+
+                    map.addLayer({
+                        id: fullLayerName,
+                        type: 'line',
+                        source: sourceId,
+                        'source-layer': sourceLayer,
+                        paint: paintProps
+                    });
+
+                    layerAdded = true;
+                    activeLayers.set(layerId, { name: fullLayerName, source: sourceId });
+                    console.log(`✅ Successfully added layer: ${fullLayerName}`);
+
+                    map.on('click', fullLayerName, (e) => {
+                        console.log('Feature clicked:', e.features[0].properties);
+                        new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<div><strong>Properties:</strong><br>${Object.entries(e.features[0].properties).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>`).addTo(map);
+                    });
+
+                    map.on('mouseenter', fullLayerName, () => { map.getCanvas().style.cursor = 'pointer'; });
+                    map.on('mouseleave', fullLayerName, () => { map.getCanvas().style.cursor = ''; });
+
+                } catch (error) {
+                    console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error.message);
+                }
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            const { type, layerId, show, networkType } = event.data;
+            if (type === 'toggleLayer' && layerId) {
+                if (show) {
+                    addLayer(layerId);
+                } else {
+                    removeLayer(layerId);
+                }
+            } else if (type === 'changeNetworkType') {
+                const routeLayerIsActive = activeLayers.has('route-network');
+                if (routeLayerIsActive) removeLayer('route-network');
+                
+                currentNetworkType = networkType;
+                
+                if (routeLayerIsActive) addLayer('route-network');
+            }
+        });
+
+        // Enhanced error handling
+        map.on('error', (e) => {
+            console.error('🚨 Map error:', e);
+        });
+
+        map.on('sourcedata', (e) => {
+            if (e.isSourceLoaded) {
+                console.log(`📊 Source loaded: ${e.sourceId}`);
+            }
+            if (e.sourceDataType === 'metadata') {
+                console.log(`📋 Source metadata loaded: ${e.sourceId}`);
+            }
+        });
+
+        map.on('data', (e) => {
+            if (e.dataType === 'source' && e.isSourceLoaded) {
+                console.log(`📁 Data loaded for source: ${e.sourceId}`);
+            }
+        });
+    </script>
+</body>
+</html> 
