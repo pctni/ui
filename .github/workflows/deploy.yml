@@ -21,8 +21,11 @@ jobs:
       - name: Download release from private repo
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: gh release download v2025-06 --repo pctni/backend
-
+        run: |
+          # list the releases in the pctni/ui repository
+          gh release list --repo pctni/ui
+          # download the specific release v2025-06 from the pctni/ui repository
+          gh release download pmtiles-data-v1.0
 
       - name: Render Quarto Project
         uses: quarto-dev/quarto-actions/render@v2
