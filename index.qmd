@@ -266,6 +266,7 @@ main,
     <div class="tab-container">
       <div class="tab-nav">
         <button class="tab-button active" onclick="switchTab(event, 'route-network')">Route network</button>
+        <button class="tab-button" onclick="switchTab(event, 'cycle-network')">Cycle Network</button>
         <button class="tab-button" onclick="switchTab(event, 'coherent-network')">Coherent network</button>
         <button class="tab-button" onclick="switchTab(event, 'gap-analysis')">Gap analysis</button>
       </div>
@@ -301,6 +302,40 @@ main,
               <span class="color-bar-label">2000-</span>
               <span class="color-bar-label">3000-</span>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cycle Network Tab -->
+      <div id="cycle-network" class="tab-content">
+        <div class="control-group">
+          <div class="layer-toggle">
+            <input type="checkbox" id="show-layer-cycle-network" data-layer-id="cycle-network">
+            <label for="show-layer-cycle-network">Show layer</label>
+          </div>
+        </div>
+        
+        <div class="legend-item">
+          <h4>Cycle Network</h4>
+           <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #006400;"></div>
+            <span>Segregated Track (wide)</span>
+          </div>
+           <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #3cb371;"></div>
+            <span>Off Road Path</span>
+          </div>
+           <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #90ee90;"></div>
+            <span>Segregated Track (narrow)</span>
+          </div>
+           <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ffd700;"></div>
+            <span>Shared Footway</span>
+          </div>
+           <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ff0000;"></div>
+            <span>Painted Cycle Lane</span>
           </div>
         </div>
       </div>

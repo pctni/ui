@@ -342,6 +342,10 @@
                         sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
                         sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
                         break;
+                    case 'cycle-network':
+                        sourceConfig = { type: 'vector', url: 'pmtiles://cycle_net_processed_2025-06.pmtiles' };
+                        sourceLayerOptions = ['cycle_net_processed_2025-06', 'cycle_net_processed'];
+                        break;
                     case 'gap-analysis':
                         sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
                         sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
@@ -375,6 +379,22 @@
                             paintProps = {
                                 'line-color': [ 'interpolate', ['linear'], ['get', 'all_quietest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
                                 'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
+                            };
+                            break;
+                        case 'cycle-network':
+                            paintProps = {
+                                'line-color': [
+                                    'match',
+                                    ['get', 'cycle_segregation'],
+                                    'Segregated Track (wide)', '#006400',
+                                    'Off Road Path', '#3cb371',
+                                    'Segregated Track (narrow)', '#90ee90',
+                                    'Shared Footway', '#ffd700',
+                                    'Painted Cycle Lane', '#ff0000',
+                                    '#cccccc' 
+                                ],
+                                'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 2, 16, 4],
+                                'line-opacity': 0.7
                             };
                             break;
                         case 'coherent-network':
