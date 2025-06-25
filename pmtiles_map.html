@@ -283,7 +283,6 @@
                 trackUserLocation: true
             }), 'top-left');
             map.addControl(new BasemapControl(), 'top-left');
-            map.addControl(new BasemapToggleControl(), 'top-left');
 
             map.fitBounds([
                 [-8.2, 53.9], // Southwest
@@ -297,7 +296,6 @@
                 }
             });
 
-            populateBasemapGallery();
             populateBasemapPanel();
         });
 
