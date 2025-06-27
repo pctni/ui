@@ -269,6 +269,7 @@ main,
         <button class="tab-button" onclick="switchTab(event, 'cycle-network')">Cycle Network</button>
         <button class="tab-button" onclick="switchTab(event, 'coherent-network')">Coherent network</button>
         <button class="tab-button" onclick="switchTab(event, 'gap-analysis')">Gap analysis</button>
+        <button class="tab-button" onclick="switchTab(event, 'other-layers')">Other Layers</button>
       </div>
       
       <!-- Route Network Tab -->
@@ -388,6 +389,16 @@ main,
           <div class="legend-color-item">
             <div class="legend-color-box" style="background-color: #cccccc;"></div>
             <span>No Gap</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Layers Tab -->
+      <div id="other-layers" class="tab-content">
+        <div class="control-group">
+          <div class="layer-toggle">
+            <input type="checkbox" id="show-layer-local-authorities" data-layer-id="local-authorities">
+            <label for="show-layer-local-authorities">Local Authorities</label>
           </div>
         </div>
       </div>

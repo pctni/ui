@@ -329,26 +329,30 @@
             if (layerId === 'route-network') {
                 sourceId = `route-network-${currentNetworkType}`;
                 if (currentNetworkType === 'fast') {
-                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_fastest_2025-06.pmtiles' };
+                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_fastest_2025-06.pmtiles` };
                     sourceLayerOptions = ['route_network_fastest_2025-06', 'route_network_fastest'];
                 } else {
-                    sourceConfig = { type: 'vector', url: 'pmtiles://route_network_quietest_2025-06.pmtiles' };
+                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_quietest_2025-06.pmtiles` };
                     sourceLayerOptions = ['route_network_quietest_2025-06', 'route_network_quietest'];
                 }
             } else {
                  sourceId = layerId;
                  switch(layerId) {
                     case 'coherent-network':
-                        sourceConfig = { type: 'vector', url: 'pmtiles://corenet_network_ni_2025-06.pmtiles' };
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}corenet_network_ni_2025-06.pmtiles` };
                         sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
                         break;
                     case 'cycle-network':
-                        sourceConfig = { type: 'vector', url: 'pmtiles://cycle_net_processed_2025-06.pmtiles' };
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}cycle_net_processed_2025-06.pmtiles` };
                         sourceLayerOptions = ['cycle_net_processed_2025-06', 'cycle_net_processed'];
                         break;
                     case 'gap-analysis':
-                        sourceConfig = { type: 'vector', url: 'pmtiles://gap_map_2025-06.pmtiles' };
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}gap_map_2025-06.pmtiles` };
                         sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
+                        break;
+                    case 'local-authorities':
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}Local_Authority_2025-06.pmtiles` };
+                        sourceLayerOptions = ['Local_Authority_2025-06', 'Local_Authority'];
                         break;
                     default:
                         console.error(`Unknown layer ID: ${layerId}`);
@@ -366,6 +370,7 @@
                 
                 try {
                     let paintProps;
+                    let layerType = 'line';
                     let effectiveLayerId = layerId === 'route-network' ? `route-network-${currentNetworkType}` : layerId;
 
                     switch(effectiveLayerId) {
@@ -409,6 +414,29 @@
                                  'line-width': [ 'case', ['==', ['get', 'gap_priority'], 'No Gap'], 1, 3 ], 'line-opacity': 0.8
                             };
                             break;
+                        case 'local-authorities':
+                            layerType = 'fill';
+                            paintProps = {
+                                'fill-color': [
+                                    'match',
+                                    ['get', 'LGDNAME'],
+                                    'ANTRIM AND NEWTOWNABBEY', '#a6cee3',
+                                    'ARMAGH CITY, BANBRIDGE AND CRAIGAVON', '#1f78b4',
+                                    'BELFAST', '#b2df8a',
+                                    'CAUSEWAY COAST AND GLENS', '#33a02c',
+                                    'DERRY CITY AND STRABANE', '#fb9a99',
+                                    'FERMANAGH AND OMAGH', '#e31a1c',
+                                    'LISBURN AND CASTLEREAGH', '#fdbf6f',
+                                    'MID AND EAST ANTRIM', '#ff7f00',
+                                    'MID ULSTER', '#cab2d6',
+                                    'NEWRY, MOURNE AND DOWN', '#6a3d9a',
+                                    'ARDS AND NORTH DOWN', '#ffff99',
+                                    '#cccccc'
+                                ],
+                                'fill-opacity': 0.5,
+                                'fill-outline-color': 'black'
+                            };
+                            break;
                         default:
                             paintProps = { 'line-color': '#000000', 'line-width': 2 };
                     }
@@ -417,7 +445,7 @@
 
                     map.addLayer({
                         id: fullLayerName,
-                        type: 'line',
+                        type: layerType,
                         source: sourceId,
                         'source-layer': sourceLayer,
                         paint: paintProps
