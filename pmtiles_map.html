@@ -376,13 +376,13 @@
                     switch(effectiveLayerId) {
                         case 'route-network-fast':
                             paintProps = {
-                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_fastest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_fastest_bicycle_go_dutch'], 1, '#808080', 50, '#ffff00', 100, '#80ff00', 250, '#00ffff', 500, '#80c0ff', 1000, '#0080ff', 2000, '#0000ff', 3000, '#ff00ff' ],
                                 'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
                             };
                             break;
                         case 'route-network-quiet':
                             paintProps = {
-                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_quietest_bicycle_go_dutch'], 1, '#cccccc', 50, '#ffff80', 100, '#80ff80', 250, '#80ffff', 500, '#8080ff', 1000, '#0000ff', 2000, '#8000ff', 3000, '#ff00ff' ],
+                                'line-color': [ 'interpolate', ['linear'], ['get', 'all_quietest_bicycle_go_dutch'], 1, '#808080', 50, '#ffff00', 100, '#80ff00', 250, '#00ffff', 500, '#80c0ff', 1000, '#0080ff', 2000, '#0000ff', 3000, '#ff00ff' ],
                                 'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
                             };
                             break;
