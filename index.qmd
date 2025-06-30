@@ -172,15 +172,14 @@ main,
 
 .cycling-bar {
   background: linear-gradient(to right, 
-    #cccccc 0%,      /* 1- (light grey) */
-    #ffff80 12.5%,   /* 50- (light yellow) */
-    #80ff80 25%,     /* 100- (light green) */
-    #80ffff 37.5%,   /* 250- (cyan) */
-    #8080ff 50%,     /* 500- (light blue) */
-    #0000ff 62.5%,   /* 1000- (blue) */
-    #8000ff 75%,     /* 2000- (purple) */
-    #ff00ff 87.5%,   /* 3000- (magenta) */
-    #ff80ff 100%     /* 3000+ (light magenta) */
+    #808080 0%, #808080 12.5%,     /* 1-49 (grey) */
+    #ffff00 12.5%, #ffff00 25%,    /* 50-99 (yellow) */
+    #80ff00 25%, #80ff00 37.5%,    /* 100-249 (lime green) */
+    #00ffff 37.5%, #00ffff 50%,    /* 250-499 (cyan) */
+    #80c0ff 50%, #80c0ff 62.5%,    /* 500-999 (light blue) */
+    #0080ff 62.5%, #0080ff 75%,    /* 1000-1999 (blue) */
+    #0000ff 75%, #0000ff 87.5%,    /* 2000-2999 (dark blue) */
+    #ff00ff 87.5%, #ff00ff 100%    /* 3000+ (magenta) */
   );
 }
 
