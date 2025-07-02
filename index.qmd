@@ -171,16 +171,7 @@ main,
 }
 
 .cycling-bar {
-  background: linear-gradient(to right, 
-    #808080 0%, #808080 12.5%,     /* 1-49 (grey) */
-    #ffff00 12.5%, #ffff00 25%,    /* 50-99 (yellow) */
-    #80ff00 25%, #80ff00 37.5%,    /* 100-249 (lime green) */
-    #00ffff 37.5%, #00ffff 50%,    /* 250-499 (cyan) */
-    #80c0ff 50%, #80c0ff 62.5%,    /* 500-999 (light blue) */
-    #0080ff 62.5%, #0080ff 75%,    /* 1000-1999 (blue) */
-    #0000ff 75%, #0000ff 87.5%,    /* 2000-2999 (dark blue) */
-    #ff00ff 87.5%, #ff00ff 100%    /* 3000+ (magenta) */
-  );
+  background: #f0f0f0; /* Fallback for no gradient support */
 }
 
 .coherent-bar {
@@ -290,18 +281,37 @@ main,
         
         <div class="legend-item">
           <h4>Cycling potential (Go Dutch)</h4>
-          <div class="color-bar-container">
-            <div class="color-bar cycling-bar"></div>
-            <div class="color-bar-labels">
-              <span class="color-bar-label">1-</span>
-              <span class="color-bar-label">50-</span>
-              <span class="color-bar-label">100-</span>
-              <span class="color-bar-label">250-</span>
-              <span class="color-bar-label">500-</span>
-              <span class="color-bar-label">1000-</span>
-              <span class="color-bar-label">2000-</span>
-              <span class="color-bar-label">3000-</span>
-            </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #808080;"></div>
+            <span>1-49</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ffff00;"></div>
+            <span>50-99</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #80ff00;"></div>
+            <span>100-249</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #00ffff;"></div>
+            <span>250-499</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #80c0ff;"></div>
+            <span>500-999</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #0080ff;"></div>
+            <span>1000-1999</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #0000ff;"></div>
+            <span>2000-2999</span>
+          </div>
+          <div class="legend-color-item">
+            <div class="legend-color-box" style="background-color: #ff00ff;"></div>
+            <span>3000+</span>
           </div>
         </div>
       </div>
