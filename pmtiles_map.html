@@ -404,7 +404,12 @@
                             break;
                         case 'coherent-network':
                             paintProps = {
-                                'line-color': [ 'match', ['get', 'cycle_potential_category'], 'Primary', '#de3163', 'Secondary', '#ffbf00', '#cccccc' ],
+                                'line-color': [
+                                    'step',
+                                    ['to-number', ['get', 'all_fastest_bicycle_go_dutch'], 0],
+                                    '#ffbf00',
+                                    1000, '#de3163'
+                                ],
                                 'line-width': [ 'interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8 ], 'line-opacity': 0.8
                             };
                             break;
@@ -455,8 +460,27 @@
                     activeLayers.set(layerId, { name: fullLayerName, source: sourceId });
                     console.log(`✅ Successfully added layer: ${fullLayerName}`);
 
+                    // Debug coherent network properties
+                    if (effectiveLayerId === 'coherent-network') {
+                        console.log('🔍 Debugging coherent network layer...');
+                        map.on('sourcedata', (e) => {
+                            if (e.sourceId === sourceId && e.isSourceLoaded) {
+                                console.log('📊 Coherent network source loaded, querying features...');
+                                map.querySourceFeatures(sourceId, {
+                                    sourceLayer: sourceLayer,
+                                    limit: 5
+                                }).forEach((feature, index) => {
+                                    console.log(`🔬 Feature ${index + 1} properties:`, feature.properties);
+                                });
+                            }
+                        });
+                    }
+
                     map.on('click', fullLayerName, (e) => {
                         console.log('Feature clicked:', e.features[0].properties);
+                        if (effectiveLayerId === 'coherent-network') {
+                            console.log('Coherent network feature properties:', e.features[0].properties);
+                        }
                         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<div><strong>Properties:</strong><br>${Object.entries(e.features[0].properties).map(([k,v])=>`${k}: ${v}`).join('<br>')}</div>`).addTo(map);
                     });
 
