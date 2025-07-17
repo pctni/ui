@@ -329,30 +329,30 @@
             if (layerId === 'route-network') {
                 sourceId = `route-network-${currentNetworkType}`;
                 if (currentNetworkType === 'fast') {
-                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_fastest_2025-06.pmtiles` };
-                    sourceLayerOptions = ['route_network_fastest_2025-06', 'route_network_fastest'];
+                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_fastest.pmtiles` };
+                    sourceLayerOptions = ['route_network_fastest', 'route_network_fastest'];
                 } else {
-                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_quietest_2025-06.pmtiles` };
-                    sourceLayerOptions = ['route_network_quietest_2025-06', 'route_network_quietest'];
+                    sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}route_network_quietest.pmtiles` };
+                    sourceLayerOptions = ['route_network_quietest', 'route_network_quietest'];
                 }
             } else {
                  sourceId = layerId;
                  switch(layerId) {
                     case 'coherent-network':
-                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}corenet_network_ni_2025-06.pmtiles` };
-                        sourceLayerOptions = ['corenet_network_ni_2025-06', 'corenet_network_ni'];
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}corenet_network_ni.pmtiles` };
+                        sourceLayerOptions = ['corenet_network_ni', 'corenet_network_ni'];
                         break;
                     case 'cycle-network':
-                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}cycle_net_processed_2025-06.pmtiles` };
-                        sourceLayerOptions = ['cycle_net_processed_2025-06', 'cycle_net_processed'];
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}cycle_net_processed.pmtiles` };
+                        sourceLayerOptions = ['cycle_net_processed', 'cycle_net_processed'];
                         break;
                     case 'gap-analysis':
-                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}gap_map_2025-06.pmtiles` };
-                        sourceLayerOptions = ['gap_map_2025-06', 'gap_map'];
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}gap_map.pmtiles` };
+                        sourceLayerOptions = ['gap_map', 'gap_map'];
                         break;
                     case 'local-authorities':
-                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}Local_Authority_2025-06.pmtiles` };
-                        sourceLayerOptions = ['Local_Authority_2025-06', 'Local_Authority'];
+                        sourceConfig = { type: 'vector', url: `pmtiles://${baseUrl}Local_Authority.pmtiles` };
+                        sourceLayerOptions = ['Local_Authority', 'Local_Authority'];
                         break;
                     default:
                         console.error(`Unknown layer ID: ${layerId}`);
