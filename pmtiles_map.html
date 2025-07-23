@@ -288,13 +288,8 @@
                 [-8.2, 53.9], // Southwest
                 [-5.4, 55.3]  // Northeast
             ]);
-            // Show initially checked layers
-            ['route', 'coherent', 'gap'].forEach(type => {
-                const checkbox = window.parent.document.getElementById(`show-layer-${type}`);
-                if (checkbox && checkbox.checked) {
-                    addLayer(checkbox.dataset.layerId);
-                }
-            });
+            // Listen for layer toggle messages from parent window
+            console.log('Map ready to receive layer toggle messages');
 
             populateBasemapPanel();
         });
@@ -361,7 +356,28 @@
             }
 
             if (!map.getSource(sourceId)) {
+                console.log(`🔧 Adding source: ${sourceId} with config:`, sourceConfig);
                 map.addSource(sourceId, sourceConfig);
+                
+                // Debug: Check what source layers are available after the source is loaded
+                map.on('sourcedata', (e) => {
+                    if (e.sourceId === sourceId && e.isSourceLoaded) {
+                        console.log(`📊 Source ${sourceId} loaded successfully`);
+                        // Try to get source layers by querying features
+                        setTimeout(() => {
+                            try {
+                                const features = map.querySourceFeatures(sourceId, { limit: 1 });
+                                if (features.length > 0) {
+                                    console.log(`🔍 Available source layer for ${sourceId}:`, features[0].sourceLayer);
+                                } else {
+                                    console.log(`⚠️ No features found in source ${sourceId}`);
+                                }
+                            } catch (e) {
+                                console.log(`🔍 Could not query features for ${sourceId}:`, e.message);
+                            }
+                        }, 100);
+                    }
+                });
             }
 
             let layerAdded = false;
@@ -492,7 +508,8 @@
                     map.on('mouseleave', fullLayerName, () => { map.getCanvas().style.cursor = ''; });
 
                 } catch (error) {
-                    console.warn(`Failed to add layer with source-layer ${sourceLayer}:`, error.message);
+                    console.error(`❌ Failed to add layer with source-layer ${sourceLayer}:`, error.message);
+                    console.error('Full error:', error);
                 }
             }
         }
