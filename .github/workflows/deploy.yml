@@ -24,7 +24,25 @@ jobs:
         run: |
           # list the releases in the pctni/ui repository
           gh release list --repo pctni/ui
-          gh release download pmtiles-data-v1.0
+          # Check if the release exists
+          if ! gh release list --repo pctni/ui | grep -q "pmtiles-data-v1.0"; then
+            echo "❌ Release pmtiles-data-v1.0 not found in pctni/ui repository"
+            exit 1
+          fi
+          # Download the release with explicit repo specification
+          gh release download pmtiles-data-v1.0 --repo pctni/ui
+          # Verify all required pmtiles files are present
+          echo "📋 Verifying PMTiles files..."
+          required_files=("route_network_fastest.pmtiles" "route_network_quietest.pmtiles" "corenet_network_ni.pmtiles" "cycle_net_processed.pmtiles" "gap_map.pmtiles" "Local_Authority.pmtiles")
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            else
+              echo "✅ Found: $file ($(du -h "$file" | cut -f1))"
+            fi
+          done
+          echo "🎉 All PMTiles files verified successfully"
 
       - name: Render Quarto Project
         uses: quarto-dev/quarto-actions/render@v2
