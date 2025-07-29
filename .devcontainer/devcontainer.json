@@ -1,0 +1,47 @@
+{
+	"name": "Deno & Svelte",
+	"image": "denoland/deno:debian",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"denoland.vscode-deno",
+				"svelte.svelte-vscode",
+				"bradlc.vscode-tailwindcss",
+				"esbenp.prettier-vscode",
+				"github.copilot",
+				"github.copilot-chat"
+			],
+			"settings": {
+				"deno.enable": true,
+				"deno.lint": true,
+				"deno.unstable": ["npm"],
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "denoland.vscode-deno",
+				"[svelte]": {
+					"editor.defaultFormatter": "svelte.svelte-vscode"
+				}
+			}
+		}
+	},
+	"forwardPorts": [5173, 4173],
+	"portsAttributes": {
+		"5173": {
+			"label": "Vite Dev Server",
+			"onAutoForward": "notify"
+		},
+		"4173": {
+			"label": "Vite Preview Server", 
+			"onAutoForward": "notify"
+		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"username": "deno",
+			"userUid": "1000",
+			"userGid": "1000"
+		}
+	},
+	"remoteUser": "deno",
+	"postCreateCommand": "deno --version"
+}
