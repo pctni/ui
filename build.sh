@@ -14,26 +14,36 @@ is_windows() {
     [[ "$(uname)" == "MINGW"* ]] || [[ "$(uname)" == "MSYS"* ]] || [[ "$(uname)" == "CYGWIN"* ]]
 }
 
-# --- Download PMTiles file if it doesn't exist ---
+# --- Download PMTiles files if they don't exist ---
 DEST_DIR="static"
-FILENAME="route_network_fastest.pmtiles"
-DEST_FILE="$DEST_DIR/$FILENAME"
-URL="https://github.com/pctni/uitest/releases/download/v0.0.1/$FILENAME"
+BASE_URL="https://github.com/pctni/uitest/releases/download/v0.0.1"
 
-# Check if the file already exists
-if [ ! -f "$DEST_FILE" ]; then
-  echo "File $DEST_FILE not found. Downloading..."
+# Array of pmtiles files to download
+PMTILES_FILES=(
+  "route_network_fastest.pmtiles"
+  "route_network_quietest.pmtiles"
+)
+
+# Create the destination directory if it doesn't exist
+mkdir -p "$DEST_DIR"
+
+# Download each pmtiles file using a for loop
+for FILENAME in "${PMTILES_FILES[@]}"; do
+  DEST_FILE="$DEST_DIR/$FILENAME"
+  URL="$BASE_URL/$FILENAME"
   
-  # Create the destination directory if it doesn't exist
-  mkdir -p "$DEST_DIR"
-  
-  # Download the file using curl
-  curl -L -o "$DEST_FILE" "$URL"
-  
-  echo "Download complete."
-else
-  echo "File $DEST_FILE already exists. Skipping download."
-fi
+  # Check if the file already exists
+  if [ ! -f "$DEST_FILE" ]; then
+    echo "File $DEST_FILE not found. Downloading..."
+    
+    # Download the file using curl
+    curl -L -o "$DEST_FILE" "$URL"
+    
+    echo "Download of $FILENAME complete."
+  else
+    echo "File $DEST_FILE already exists. Skipping download."
+  fi
+done
 
 # --- Run the rest of the original build command from netlify.toml ---
 echo "Running the main build process..."
@@ -50,7 +60,7 @@ if [ -d "node_modules" ]; then
 fi
 
 echo "Running npm install..."
-npm install
+npm install --force
 
 echo "Running npm run build..."
 npm run build
