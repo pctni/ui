@@ -110,7 +110,7 @@
       name: 'Coherent Network',
       id: 'coherent-network',
       url: 'pmtiles:///corenet_network_ni.pmtiles',
-      sourceLayer: 'corenet_network_ni',
+      sourceLayer: 'corenet_network_ni_2025-06',
       type: 'line',
       paint: {
         'line-color': [
@@ -143,7 +143,7 @@
       name: 'Gap Analysis',
       id: 'gap-analysis',
       url: 'pmtiles:///gap_map.pmtiles',
-      sourceLayer: 'gap_map',
+      sourceLayer: 'gap_map_2025-06',
       type: 'line',
       paint: {
         'line-color': [
@@ -163,7 +163,7 @@
       name: 'Local Authorities',
       id: 'local-authorities',
       url: 'pmtiles:///Local_Authority.pmtiles',
-      sourceLayer: 'Local_Authority',
+      sourceLayer: 'Local_Authority_2025-06',
       type: 'fill',
       paint: {
         'fill-color': [
