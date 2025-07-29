@@ -25,5 +25,11 @@ export default defineConfig({
 				});
 			}
 		}
-	]
+	],
+	optimizeDeps: {
+		exclude: ['maplibre-gl', 'pmtiles']
+	},
+	build: {
+		chunkSizeWarningLimit: 1000
+	}
 });

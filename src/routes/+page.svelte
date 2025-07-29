@@ -285,8 +285,6 @@
           });
         }
       }
-      
-      console.log(`Loaded from URL: zoom=${zoom}, center=[${center[0]}, ${center[1]}], basemap=${currentBasemap}, networkType=${currentNetworkType}, layers=${Object.entries(layerStates).filter(([k,v]) => v).map(([k,v]) => k).join(',')}`);
     } catch (error) {
       console.warn('Failed to parse URL hash:', error);
     }
@@ -310,7 +308,6 @@
       // Only update if hash actually changed
       if (window.location.hash !== newHash) {
         window.history.replaceState(null, '', newHash);
-        console.log(`Updated URL: ${newHash}`);
       }
     } catch (error) {
       console.warn('Failed to update URL hash:', error);
@@ -320,10 +317,7 @@
   // Debounce URL updates to avoid too frequent updates during pan/zoom
   function debouncedUpdateURL() {
     clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      console.log('Updating URL with center:', center, 'zoom:', zoom);
-      updateURLHash();
-    }, 100);
+    updateTimeout = setTimeout(updateURLHash, 100);
   }
   
   // Handle map move events
@@ -337,25 +331,21 @@
 
   // Reactive statement to update URL when any state changes
   $: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
-    console.log('Reactive statement triggered: center =', center, 'zoom =', zoom, 'basemap =', currentBasemap, 'networkType =', currentNetworkType, 'layers =', Object.entries(layerStates).filter(([k,v]) => v).map(([k,v]) => k).join(','));
     debouncedUpdateURL();
   }
   
   // Watch for changes in layer states
   $: if (browser && layerStates) {
-    console.log('Layer states changed:', layerStates);
     debouncedUpdateURL();
   }
   
   // Watch for changes in basemap
   $: if (browser && currentBasemap) {
-    console.log('Basemap changed:', currentBasemap);
     debouncedUpdateURL();
   }
   
   // Watch for changes in network type
   $: if (browser && currentNetworkType) {
-    console.log('Network type changed:', currentNetworkType);
     debouncedUpdateURL();
   }
 
@@ -401,7 +391,8 @@
     <button 
       class="control-button large" 
       title="Change basemap"
-      on:click={() => togglePanel('basemap')}
+      aria-label="Change basemap"
+      onclick={() => togglePanel('basemap')}
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
         <path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/>
@@ -415,7 +406,8 @@
     <button 
       class="control-button wide" 
       title="Toggle layers"
-      on:click={() => togglePanel('layers')}
+      aria-label="Toggle map layers panel"
+      onclick={() => togglePanel('layers')}
     >
       <span>Map Layers</span>
       <svg 
@@ -439,13 +431,14 @@
         <h3>Basemap</h3>
         <div class="options">
           {#each Object.entries(BASEMAPS) as [key, basemap]}
-            <div 
+            <button 
               class="option"
               class:selected={currentBasemap === key}
-              on:click={() => selectBasemap(key)}
+              onclick={() => selectBasemap(key)}
+              aria-label={`Select ${basemap.name} basemap`}
             >
               {basemap.name}
-            </div>
+            </button>
           {/each}
         </div>
       </div>
@@ -599,6 +592,11 @@
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 14px;
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.2s ease;
   }
 
   .option:hover {
