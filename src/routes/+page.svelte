@@ -207,7 +207,7 @@
   };
 
   // URL state management functions
-  let updateTimeout: NodeJS.Timeout;
+  let updateTimeout: ReturnType<typeof setTimeout>;
 
   // Initialize from URL hash on mount
   onMount(() => {
@@ -378,8 +378,8 @@
   style={currentBasemapStyle}
   bind:center
   bind:zoom
-  on:moveend={handleMoveEnd}
-  on:zoomend={handleZoomEnd}
+  onmoveend={handleMoveEnd}
+  onzoomend={handleZoomEnd}
 >
   <NavigationControl position="top-left" />
   <FullScreenControl position="top-left" />
