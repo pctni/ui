@@ -81,7 +81,7 @@
       name: 'Route Network',
       id: 'route-network',
       url: 'pmtiles:///route_network_fastest.pmtiles',
-      sourceLayer: 'route_network_fastest_2025-06',
+      sourceLayer: 'route_network_fastest',
       type: 'line',
       hasNetworkTypes: true,
       paint: {},
@@ -89,7 +89,7 @@
         name: 'Route Network',
         id: `route-network-${networkType}`,
         url: `pmtiles:///route_network_${networkType}est.pmtiles`,
-        sourceLayer: `route_network_${networkType}est_2025-06`,
+        sourceLayer: `route_network_${networkType}est`,
         type: 'line' as const,
         paint: {
           'line-color': [
