@@ -11,7 +11,7 @@ npx sv create .
 Run it with:
 
 ```sh
-deno task dev --open
+npm run dev -- --open
 ```
 
 

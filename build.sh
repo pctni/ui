@@ -21,7 +21,6 @@ BASE_URL="https://github.com/pctni/uitest/releases/download/v0.0.1"
 # Array of pmtiles files to download
 PMTILES_FILES=(
   "corenet_network_ni.pmtiles"
-  "cycle_net_processed.pmtiles"
   "gap_map.pmtiles"
   "Local_Authority.pmtiles"
   "route_network_fastest.pmtiles"
@@ -51,20 +50,22 @@ done
 
 # --- Run the rest of the original build command from netlify.toml ---
 echo "Running the main build process..."
-# Handle the rollup issue by removing package-lock.json and node_modules
-if [ -f "package-lock.json" ]; then
-  echo "Removing package-lock.json..."
-  echo "Removing package-lock.json..."
-  rm package-lock.json
+
+# Only remove and reinstall if needed
+if [ "$1" = "--clean" ]; then
+  echo "Clean build requested..."
+  [ -f "package-lock.json" ] && rm package-lock.json
+  [ -d "node_modules" ] && rm -rf node_modules
+  npm install --force
 fi
 
-if [ -d "node_modules" ]; then
-  echo "Removing node_modules..."
-  rm -rf node_modules
+# Check if this is a dev command
+if [ "$1" = "dev" ] || [[ "$0" == *"vite dev"* ]]; then
+  # Skip build for dev mode, just ensure dependencies
+  if [ ! -d "node_modules" ]; then
+    npm install --force
+  fi
+else
+  # For production builds, just download pmtiles - vite build will be called separately
+  echo "PMTiles files ready for build."
 fi
-
-echo "Running npm install..."
-npm install --force
-
-echo "Running npm run build..."
-npm run build

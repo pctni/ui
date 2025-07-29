@@ -25,5 +25,12 @@ export default defineConfig({
 				});
 			}
 		}
-	]
+	],
+	optimizeDeps: {
+		exclude: ['pmtiles'],
+		include: ['maplibre-gl', 'svelte-maplibre-gl', '@svelte-maplibre-gl/pmtiles']
+	},
+	build: {
+		chunkSizeWarningLimit: 1500
+	}
 });

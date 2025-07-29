@@ -1,10 +1,9 @@
 {
-	"name": "Deno & Svelte",
-	"image": "denoland/deno:debian",
+	"name": "Node.js & Svelte",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:20-bookworm",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"denoland.vscode-deno",
 				"svelte.svelte-vscode",
 				"bradlc.vscode-tailwindcss",
 				"esbenp.prettier-vscode",
@@ -12,11 +11,7 @@
 				"github.copilot-chat"
 			],
 			"settings": {
-				"deno.enable": true,
-				"deno.lint": true,
-				"deno.unstable": ["npm"],
 				"editor.formatOnSave": true,
-				"editor.defaultFormatter": "denoland.vscode-deno",
 				"[svelte]": {
 					"editor.defaultFormatter": "svelte.svelte-vscode"
 				}
@@ -37,11 +32,11 @@
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
 			"installZsh": true,
-			"username": "deno",
+			"username": "node",
 			"userUid": "1000",
 			"userGid": "1000"
 		}
 	},
-	"remoteUser": "deno",
-	"postCreateCommand": "deno --version"
+	"remoteUser": "node",
+	"postCreateCommand": "npm install"
 }
