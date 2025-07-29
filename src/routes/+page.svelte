@@ -189,22 +189,22 @@
   };
 
   // State
-  let showBasemapPanel = $state(false);
-  let showLayersPanel = $state(false);
-  let currentBasemap = $state('gray');
-  let currentNetworkType = $state('fast');
+  let showBasemapPanel = false;
+  let showLayersPanel = false;
+  let currentBasemap = 'gray';
+  let currentNetworkType = 'fast';
   
   // URL state management for map position
-  let center: [number, number] = $state([-6.6, 54.6]); // Default center for Northern Ireland
-  let zoom: number = $state(8); // Default zoom
+  let center: [number, number] = [-6.6, 54.6]; // Default center for Northern Ireland
+  let zoom: number = 8; // Default zoom
   
-  const layerStates: Record<string, boolean> = $state({
+  const layerStates: Record<string, boolean> = {
     routeNetwork: false,
     coherentNetwork: false,
     cycleNetwork: false,
     gapAnalysis: false,
     localAuthorities: false
-  });
+  };
 
   // URL state management functions
   let updateTimeout: NodeJS.Timeout;
@@ -274,7 +274,10 @@
   // Debounce URL updates to avoid too frequent updates during pan/zoom
   function debouncedUpdateURL() {
     clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(updateURLHash, 100);
+    updateTimeout = setTimeout(() => {
+      console.log('Updating URL with center:', center, 'zoom:', zoom);
+      updateURLHash();
+    }, 100);
   }
   
   // Handle map move events
@@ -286,8 +289,14 @@
     debouncedUpdateURL();
   }
 
+  // Reactive statement to update URL when center or zoom changes
+  $: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
+    console.log('Reactive statement triggered: center =', center, 'zoom =', zoom);
+    debouncedUpdateURL();
+  }
+
   // Computed values
-  const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
+  $: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
 
   // Functions
   function togglePanel(panel: 'basemap' | 'layers') {
