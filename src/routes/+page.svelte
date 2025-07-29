@@ -12,6 +12,7 @@
   } from 'svelte-maplibre-gl';
   import { PMTilesProtocol } from '@svelte-maplibre-gl/pmtiles';
   import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
   import type { StyleSpecification } from 'maplibre-gl';
   
   // Types
@@ -188,21 +189,178 @@
   };
 
   // State
-  let showBasemapPanel = $state(false);
-  let showLayersPanel = $state(false);
-  let currentBasemap = $state('gray');
-  let currentNetworkType = $state('fast');
+  let showBasemapPanel = false;
+  let showLayersPanel = false;
+  let currentBasemap = 'gray';
+  let currentNetworkType = 'fast';
   
-  const layerStates: Record<string, boolean> = $state({
+  // URL state management for map position
+  let center: [number, number] = [-6.6, 54.6]; // Default center for Northern Ireland
+  let zoom: number = 8; // Default zoom
+  
+  const layerStates: Record<string, boolean> = {
     routeNetwork: false,
     coherentNetwork: false,
     cycleNetwork: false,
     gapAnalysis: false,
     localAuthorities: false
+  };
+
+  // URL state management functions
+  let updateTimeout: NodeJS.Timeout;
+
+  // Initialize from URL hash on mount
+  onMount(() => {
+    if (browser) {
+      parseURLHash();
+      // Listen for hash changes (back/forward navigation)
+      window.addEventListener('hashchange', parseURLHash);
+      
+      return () => {
+        window.removeEventListener('hashchange', parseURLHash);
+      };
+    }
   });
+  
+  // Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
+  function parseURLHash() {
+    if (!browser) return;
+    
+    try {
+      const hash = window.location.hash.slice(1); // Remove #
+      if (!hash) return;
+      
+      const parts = hash.split('/');
+      
+      // Parse basic map position (zoom/lat/lng)
+      if (parts.length >= 3) {
+        const [zoomStr, latStr, lngStr] = parts;
+        const newZoom = parseFloat(zoomStr);
+        const newLat = parseFloat(latStr);
+        const newLng = parseFloat(lngStr);
+        
+        // Validate ranges
+        const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
+        const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
+        const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
+        
+        if (isValidZoom && isValidLat && isValidLng) {
+          zoom = newZoom;
+          center = [newLng, newLat]; // MapLibre uses [lng, lat] format
+        }
+      }
+      
+      // Parse basemap (4th part)
+      if (parts.length >= 4 && parts[3]) {
+        const basemapName = parts[3];
+        if (BASEMAPS[basemapName]) {
+          currentBasemap = basemapName;
+        }
+      }
+      
+      // Parse network type (5th part)
+      if (parts.length >= 5 && parts[4]) {
+        const networkType = parts[4];
+        if (networkType === 'fast' || networkType === 'quiet') {
+          currentNetworkType = networkType;
+        }
+      }
+      
+      // Parse active layers (6th part)
+      if (parts.length >= 6 && parts[5]) {
+        const layersStr = parts[5];
+        
+        // Reset all layers to false first
+        Object.keys(layerStates).forEach(key => {
+          layerStates[key] = false;
+        });
+        
+        // Enable specified layers
+        if (layersStr !== 'none') {
+          const activeLayers = layersStr.split(',');
+          activeLayers.forEach(layerName => {
+            if (layerStates.hasOwnProperty(layerName)) {
+              layerStates[layerName] = true;
+            }
+          });
+        }
+      }
+      
+      console.log(`Loaded from URL: zoom=${zoom}, center=[${center[0]}, ${center[1]}], basemap=${currentBasemap}, networkType=${currentNetworkType}, layers=${Object.entries(layerStates).filter(([k,v]) => v).map(([k,v]) => k).join(',')}`);
+    } catch (error) {
+      console.warn('Failed to parse URL hash:', error);
+    }
+  }
+  
+  // Update URL with current map state
+  function updateURLHash() {
+    if (!browser || !center || typeof zoom !== 'number') return;
+    
+    try {
+      // Get active layers
+      const activeLayers = Object.entries(layerStates)
+        .filter(([key, value]) => value)
+        .map(([key, value]) => key);
+      
+      const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
+      
+      // Format: #zoom/lat/lng/basemap/networkType/layers
+      const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
+      
+      // Only update if hash actually changed
+      if (window.location.hash !== newHash) {
+        window.history.replaceState(null, '', newHash);
+        console.log(`Updated URL: ${newHash}`);
+      }
+    } catch (error) {
+      console.warn('Failed to update URL hash:', error);
+    }
+  }
+  
+  // Debounce URL updates to avoid too frequent updates during pan/zoom
+  function debouncedUpdateURL() {
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      console.log('Updating URL with center:', center, 'zoom:', zoom);
+      updateURLHash();
+    }, 100);
+  }
+  
+  // Handle map move events
+  function handleMoveEnd() {
+    debouncedUpdateURL();
+  }
+  
+  function handleZoomEnd() {
+    debouncedUpdateURL();
+  }
+
+  // Reactive statement to update URL when any state changes
+  $: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
+    console.log('Reactive statement triggered: center =', center, 'zoom =', zoom, 'basemap =', currentBasemap, 'networkType =', currentNetworkType, 'layers =', Object.entries(layerStates).filter(([k,v]) => v).map(([k,v]) => k).join(','));
+    debouncedUpdateURL();
+  }
+  
+  // Watch for changes in layer states
+  $: if (browser && layerStates) {
+    console.log('Layer states changed:', layerStates);
+    debouncedUpdateURL();
+  }
+  
+  // Watch for changes in basemap
+  $: if (browser && currentBasemap) {
+    console.log('Basemap changed:', currentBasemap);
+    debouncedUpdateURL();
+  }
+  
+  // Watch for changes in network type
+  $: if (browser && currentNetworkType) {
+    console.log('Network type changed:', currentNetworkType);
+    debouncedUpdateURL();
+  }
 
   // Computed values
-  const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
+  $: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
 
   // Functions
   function togglePanel(panel: 'basemap' | 'layers') {
@@ -228,8 +386,10 @@
 <MapLibre
   class="h-[calc(100vh-100px)]"
   style={currentBasemapStyle}
-  bounds={MAP_BOUNDS}
-  fitBoundsOptions={{ padding: 20 }}
+  bind:center
+  bind:zoom
+  on:moveend={handleMoveEnd}
+  on:zoomend={handleZoomEnd}
 >
   <NavigationControl position="top-left" />
   <FullScreenControl position="top-left" />
