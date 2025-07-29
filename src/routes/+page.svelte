@@ -14,6 +14,7 @@
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
   import type { StyleSpecification } from 'maplibre-gl';
+  import { snippet } from 'svelte';
   
   // Types
   interface LayerConfig {
@@ -188,169 +189,155 @@
     }
   };
 
-  // State
-  let showBasemapPanel = false;
-  let showLayersPanel = false;
-  let currentBasemap = 'gray';
-  let currentNetworkType = 'fast';
+  // Svelte 5 State Management using Runes
+  let showBasemapPanel = $state(false);
+  let showLayersPanel = $state(false);
+  let currentBasemap = $state('gray');
+  let currentNetworkType = $state('fast');
+  let center = $state<[number, number]>([-6.6, 54.6]); // Default center
+  let zoom = $state(8); // Default zoom
   
-  // URL state management for map position
-  let center: [number, number] = [-6.6, 54.6]; // Default center for Northern Ireland
-  let zoom: number = 8; // Default zoom
-  
-  const layerStates: Record<string, boolean> = {
+  let layerStates = $state<Record<string, boolean>>({
     routeNetwork: false,
     coherentNetwork: false,
     cycleNetwork: false,
     gapAnalysis: false,
     localAuthorities: false
-  };
-
-  // URL state management functions
-  let updateTimeout: ReturnType<typeof setTimeout>;
-
-  // Initialize from URL hash on mount
-  onMount(() => {
-    if (browser) {
-      parseURLHash();
-      // Listen for hash changes (back/forward navigation)
-      window.addEventListener('hashchange', parseURLHash);
-      
-      return () => {
-        window.removeEventListener('hashchange', parseURLHash);
-      };
-    }
   });
-  
-  // Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
-  function parseURLHash() {
+
+  // Derived state for the current basemap style
+  const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
+
+  // Unified effect for URL hash synchronization
+  $effect(() => {
     if (!browser) return;
-    
-    try {
-      const hash = window.location.hash.slice(1); // Remove #
-      if (!hash) return;
-      
-      const parts = hash.split('/');
-      
-      // Parse basic map position (zoom/lat/lng)
-      if (parts.length >= 3) {
-        const [zoomStr, latStr, lngStr] = parts;
-        const newZoom = parseFloat(zoomStr);
-        const newLat = parseFloat(latStr);
-        const newLng = parseFloat(lngStr);
+
+    let isInitialLoad = true;
+    let debounceTimeout: ReturnType<typeof setTimeout>;
+
+    // Function to parse the URL hash and update state
+    const parseURLHash = () => {
+      try {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return;
+
+        const parts = hash.split('/');
         
-        // Validate ranges
-        const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
-        const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
-        const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
+        if (parts.length >= 3) {
+          const [zoomStr, latStr, lngStr] = parts;
+          const newZoom = parseFloat(zoomStr);
+          const newLat = parseFloat(latStr);
+          const newLng = parseFloat(lngStr);
+
+          if (!isNaN(newZoom) && !isNaN(newLat) && !isNaN(newLng)) {
+            zoom = newZoom;
+            center = [newLng, newLat];
+          }
+        }
         
-        if (isValidZoom && isValidLat && isValidLng) {
-          zoom = newZoom;
-          center = [newLng, newLat]; // MapLibre uses [lng, lat] format
+        if (parts.length >= 4 && BASEMAPS[parts[3]]) {
+          currentBasemap = parts[3];
         }
-      }
-      
-      // Parse basemap (4th part)
-      if (parts.length >= 4 && parts[3]) {
-        const basemapName = parts[3];
-        if (BASEMAPS[basemapName]) {
-          currentBasemap = basemapName;
-        }
-      }
-      
-      // Parse network type (5th part)
-      if (parts.length >= 5 && parts[4]) {
-        const networkType = parts[4];
-        if (networkType === 'fast' || networkType === 'quiet') {
-          currentNetworkType = networkType;
-        }
-      }
-      
-      // Parse active layers (6th part)
-      if (parts.length >= 6 && parts[5]) {
-        const layersStr = parts[5];
         
-        // Reset all layers to false first
-        Object.keys(layerStates).forEach(key => {
-          layerStates[key] = false;
-        });
-        
-        // Enable specified layers
-        if (layersStr !== 'none') {
-          const activeLayers = layersStr.split(',');
-          activeLayers.forEach(layerName => {
-            if (layerStates.hasOwnProperty(layerName)) {
-              layerStates[layerName] = true;
-            }
-          });
+        if (parts.length >= 5 && (parts[4] === 'fast' || parts[4] === 'quiet')) {
+          currentNetworkType = parts[4];
         }
+        
+        if (parts.length >= 6) {
+          Object.keys(layerStates).forEach(key => layerStates[key] = false);
+          if (parts[5] !== 'none') {
+            parts[5].split(',').forEach(layerName => {
+              if (layerStates.hasOwnProperty(layerName)) {
+                layerStates[layerName] = true;
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to parse URL hash", e);
       }
-    } catch (error) {
-      console.warn('Failed to parse URL hash:', error);
-    }
-  }
-  
-  // Update URL with current map state
-  function updateURLHash() {
-    if (!browser || !center || typeof zoom !== 'number') return;
-    
-    try {
-      // Get active layers
+    };
+
+    // Function to update the URL hash from state
+    const updateURLHash = () => {
       const activeLayers = Object.entries(layerStates)
-        .filter(([key, value]) => value)
-        .map(([key, value]) => key);
-      
+        .filter(([, value]) => value)
+        .map(([key]) => key);
       const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
-      
-      // Format: #zoom/lat/lng/basemap/networkType/layers
       const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
       
-      // Only update if hash actually changed
       if (window.location.hash !== newHash) {
         window.history.replaceState(null, '', newHash);
       }
-    } catch (error) {
-      console.warn('Failed to update URL hash:', error);
+    };
+
+    // Debounced version of the update function
+    const debouncedUpdate = () => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(updateURLHash, 100);
+    };
+
+    // Initial load: parse the hash
+    parseURLHash();
+    isInitialLoad = false;
+
+    // Listen for hash changes (back/forward buttons)
+    window.addEventListener('hashchange', parseURLHash);
+
+    // Effect dependencies: automatically re-run when these change
+    // This replaces all the old `$: ...` blocks
+    if (!isInitialLoad) {
+      const dependencyTracker = {
+        zoom,
+        center,
+        currentBasemap,
+        currentNetworkType,
+        layerStates: { ...layerStates } // Shallow clone to track property changes
+      };
+      // Use the tracker to trigger the effect
+      JSON.stringify(dependencyTracker);
+      debouncedUpdate();
     }
-  }
-  
-  // Debounce URL updates to avoid too frequent updates during pan/zoom
-  function debouncedUpdateURL() {
-    clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(updateURLHash, 100);
-  }
-  
-  // Handle map move events
-  function handleMoveEnd() {
-    debouncedUpdateURL();
-  }
-  
-  function handleZoomEnd() {
-    debouncedUpdateURL();
-  }
 
-  // Reactive statement to update URL when any state changes
-  $: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in layer states
-  $: if (browser && layerStates) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in basemap
-  $: if (browser && currentBasemap) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in network type
-  $: if (browser && currentNetworkType) {
-    debouncedUpdateURL();
-  }
+    // Cleanup
+    return () => {
+      window.removeEventListener('hashchange', parseURLHash);
+      clearTimeout(debounceTimeout);
+    };
+  });
 
-  // Computed values
-  $: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+  // UI Snippets for DRY code
+  const basemapButton = snippet<{ key: string; config: BasemapConfig }>(({ key, config }) => `
+    <button 
+      class="option"
+      class:selected={currentBasemap === key}
+      onclick={() => { currentBasemap = key; showBasemapPanel = false; }}
+      aria-label={`Select ${config.name} basemap`}
+    >
+      ${config.name}
+    </button>
+  `);
+
+  const layerToggle = snippet<{ layerKey: string; config: LayerConfig }>(({ layerKey, config }) => `
+    <div class="option">
+      <label>
+        <input type="checkbox" bind:checked={layerStates[layerKey]} />
+        ${config.name}
+      </label>
+      {#if layerKey === 'routeNetwork' && layerStates[layerKey]}
+        <div class="network-types">
+          <label>
+            <input type="radio" name="networkType" value="fast" bind:group={currentNetworkType} />
+            Fastest
+          </label>
+          <label>
+            <input type="radio" name="networkType" value="quiet" bind:group={currentNetworkType} />
+            Quietest
+          </label>
+        </div>
+      {/if}
+    </div>
+  `);
 
   // Functions
   function togglePanel(panel: 'basemap' | 'layers') {
@@ -361,11 +348,6 @@
       showLayersPanel = !showLayersPanel;
       if (showLayersPanel) showBasemapPanel = false;
     }
-  }
-
-  function selectBasemap(key: string) {
-    currentBasemap = key;
-    showBasemapPanel = false;
   }
 </script>
 
@@ -378,8 +360,6 @@
   style={currentBasemapStyle}
   bind:center
   bind:zoom
-  onmoveend={handleMoveEnd}
-  onzoomend={handleZoomEnd}
 >
   <NavigationControl position="top-left" />
   <FullScreenControl position="top-left" />
@@ -430,15 +410,8 @@
       <div class="panel left">
         <h3>Basemap</h3>
         <div class="options">
-          {#each Object.entries(BASEMAPS) as [key, basemap]}
-            <button 
-              class="option"
-              class:selected={currentBasemap === key}
-              onclick={() => selectBasemap(key)}
-              aria-label={`Select ${basemap.name} basemap`}
-            >
-              {basemap.name}
-            </button>
+          {#each Object.entries(BASEMAPS) as [key, config]}
+            {@render basemapButton({ key, config })}
           {/each}
         </div>
       </div>
@@ -451,25 +424,8 @@
       <div class="panel right">
         <h3>Map Layers</h3>
         <div class="options">
-          {#each Object.entries(LAYERS) as [key, layer]}
-            <div class="option">
-              <label>
-                <input type="checkbox" bind:checked={layerStates[key]} />
-                {layer.name}
-              </label>
-              {#if key === 'routeNetwork' && layerStates[key]}
-                <div class="network-types">
-                  <label>
-                    <input type="radio" name="networkType" value="fast" bind:group={currentNetworkType} />
-                    Fastest
-                  </label>
-                  <label>
-                    <input type="radio" name="networkType" value="quiet" bind:group={currentNetworkType} />
-                    Quietest
-                  </label>
-                </div>
-              {/if}
-            </div>
+          {#each Object.entries(LAYERS) as [key, config]}
+            {@render layerToggle({ layerKey: key, config })}
           {/each}
         </div>
       </div>
