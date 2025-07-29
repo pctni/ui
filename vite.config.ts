@@ -27,9 +27,10 @@ export default defineConfig({
 		}
 	],
 	optimizeDeps: {
-		exclude: ['maplibre-gl', 'pmtiles']
+		exclude: ['pmtiles'],
+		include: ['maplibre-gl', 'svelte-maplibre-gl', '@svelte-maplibre-gl/pmtiles']
 	},
 	build: {
-		chunkSizeWarningLimit: 1000
+		chunkSizeWarningLimit: 1500
 	}
 });
