@@ -1,17 +1,27 @@
-# Quarto outputs
-/_site/
-/_freeze/
-*.html
-*.pdf
-*.docx
+test-results
+node_modules
 
-# R specific
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
 
-# VS Code
-.vscode/
+# OS
+.DS_Store
+Thumbs.db
 
-/.quarto/
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Data
+*.pmtiles

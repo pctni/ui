@@ -1,0 +1,46 @@
+[build]
+  publish = "build"
+  command = "chmod +x build.sh && ./build.sh"
+
+# PMTiles and static file headers for Firefox compatibility
+[[headers]]
+  for = "/static/*.pmtiles"
+  [headers.values]
+    Content-Type = "application/octet-stream"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, HEAD, OPTIONS"
+    Access-Control-Allow-Headers = "Range, Content-Range, Accept-Ranges"
+    Accept-Ranges = "bytes"
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, HEAD, OPTIONS"
+    Cache-Control = "public, max-age=31536000"
+
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Ensure proper MIME types
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
