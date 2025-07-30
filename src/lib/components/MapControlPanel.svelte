@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { STYLES } from '$lib/config/basemaps.js';
 	import { LAYERS } from '$lib/config/layers.js';
 	import { LEGEND_CONFIGS } from '$lib/config/legends.js';
 	import Legend from '$lib/components/Legend.svelte';
 	import type { LegendConfig } from '$lib/config/legends.js';
 
-	type ControlType = 'layers';
+	type ControlType = 'basemap' | 'layers';
 	type Position = 'left' | 'right';
 
 	interface Props {
@@ -13,6 +14,10 @@
 		onToggle: () => void;
 		title: string;
 		position: Position;
+		
+		// Basemap props
+		currentBasemap?: string;
+		onBasemapSelect?: (key: string) => void;
 		
 		// Layers props
 		layerStates?: Record<string, boolean>;
@@ -29,6 +34,8 @@
 		onToggle,
 		title,
 		position,
+		currentBasemap,
+		onBasemapSelect,
 		layerStates,
 		currentNetworkType,
 		currentNetworkColor,
@@ -36,6 +43,11 @@
 		onNetworkTypeChange,
 		onNetworkColorChange
 	}: Props = $props();
+
+	function handleBasemapSelect(key: string) {
+		onBasemapSelect?.(key);
+		onToggle(); // Close panel after selection
+	}
 
 	function handleLayerToggle(key: string) {
 		onToggleLayer?.(key);
@@ -89,7 +101,19 @@
 
 	{#if showPanel}
 		<div class="panel-content">
-			{#if controlType === 'layers'}
+			{#if controlType === 'basemap'}
+				<!-- Basemap options -->
+				{#each STYLES as [name] (name)}
+					<button
+						class="option"
+						class:selected={currentBasemap === name}
+						onclick={() => handleBasemapSelect(name)}
+						aria-label="Select {name} basemap"
+					>
+						{name}
+					</button>
+				{/each}
+			{:else if controlType === 'layers'}
 			<!-- Layer options -->
 			{#each Object.entries(LAYERS) as [key, layer]}
 					{#if key === 'routeNetwork'}

@@ -21,15 +21,16 @@
 	import MapLayers from '$lib/components/MapLayers.svelte';
 
 	// State - using reactive state like svelte-maplibre-gl example
-	let showLayersPanel = false;
+	let showLayersPanel = $state(false);
+	let showBasemapPanel = $state(false);
 	let basemapName = $state('Positron');
-	let currentNetworkType = 'fast';
-	let currentNetworkColor = 'bicycle';
+	let currentNetworkType = $state('fast');
+	let currentNetworkColor = $state('bicycle');
 	let style = $derived(STYLES.get(basemapName)!);
 	
 	// Map state
-	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
-	let zoom: number = MAP_CONFIG.DEFAULT_ZOOM;
+	let center = $state<[number, number]>([...MAP_CONFIG.DEFAULT_CENTER]);
+	let zoom = $state<number>(MAP_CONFIG.DEFAULT_ZOOM);
 	
 	// Layer states
 	const layerStates: Record<string, boolean> = {
@@ -188,8 +189,19 @@
 	});
 
 	// Event handlers
-	function togglePanel(panel: 'layers') {
-		showLayersPanel = !showLayersPanel;
+	function togglePanel(panel: 'basemap' | 'layers') {
+		if (panel === 'basemap') {
+			showBasemapPanel = !showBasemapPanel;
+			if (showBasemapPanel) showLayersPanel = false;
+		} else {
+			showLayersPanel = !showLayersPanel;
+			if (showLayersPanel) showBasemapPanel = false;
+		}
+	}
+
+	function selectBasemap(key: string) {
+		basemapName = key;
+		showBasemapPanel = false;
 	}
 
 	function toggleLayer(key: string) {
@@ -207,27 +219,10 @@
 
 {#if browser}
 	<PMTilesProtocol />
-	
-	<!-- Basemap selector -->
-	<div class="mb-3 flex items-center justify-between">
-		<div class="flex flex-row gap-x-3">
-			{#each STYLES as [name] (name)}
-				<div class="flex items-center space-x-1">
-					<input
-						type="radio"
-						id={name}
-						name="basemap"
-						value={name}
-						bind:group={basemapName}
-					/>
-					<label class="cursor-pointer" for={name}>{name}</label>
-				</div>
-			{/each}
-		</div>
-	</div>
+{/if}
 
-	<MapLibre
-	class="h-[calc(100vh-130px)]"
+<MapLibre
+	class="h-[calc(100vh-90px)]"
 	{style}
 	bind:center
 	bind:zoom
@@ -238,6 +233,19 @@
 	<FullScreenControl position="top-left" />
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+
+	<!-- Basemap Control -->
+	<CustomControl position="top-left">
+		<MapControlPanel
+			controlType="basemap"
+			showPanel={showBasemapPanel}
+			onToggle={() => togglePanel('basemap')}
+			title="Change basemap"
+			position="left"
+			currentBasemap={basemapName}
+			onBasemapSelect={selectBasemap}
+		/>
+	</CustomControl>
 
 	<!-- Layers Control -->
 	<CustomControl position="top-right">
@@ -259,5 +267,4 @@
 	<!-- Dynamic Layers -->
 	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
-{/if}
 
