@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS } from '$lib/config/layers.js';
+	import { LEGEND_CONFIGS } from '$lib/config/legends.js';
+	import Legend from '$lib/components/Legend.svelte';
+	import type { LegendConfig } from '$lib/config/legends.js';
 
 	type ControlType = 'basemap' | 'layers';
 	type Position = 'left' | 'right';
@@ -50,6 +53,20 @@
 		onToggleLayer?.(key);
 		// Note: We don't auto-close the panel for layer selections
 		// to allow users to toggle multiple layers
+	}
+
+	// Get legend config for a layer
+	function getLegendConfig(layerKey: string): LegendConfig | null {
+		if (!LEGEND_CONFIGS[layerKey]) return null;
+		
+		const legendConfig = LEGEND_CONFIGS[layerKey];
+		if (typeof legendConfig === 'function') {
+			// Route network legend that depends on network type and color
+			return legendConfig(currentNetworkType, currentNetworkColor);
+		} else {
+			// Static legend config
+			return legendConfig;
+		}
 	}
 </script>
 
@@ -149,6 +166,13 @@
 										<option value="bicycle_go_dutch">Go Dutch</option>
 									</select>
 								</div>
+								<!-- Route Network Legend -->
+								{@const legendConfig = getLegendConfig(key)}
+								{#if legendConfig}
+									<div class="legend-container">
+										<Legend config={legendConfig} />
+									</div>
+								{/if}
 							{/if}
 						</div>
 					{:else}
@@ -162,6 +186,15 @@
 								/>
 								{layer.name}
 							</label>
+							<!-- Layer Legend -->
+							{#if layerStates?.[key]}
+								{@const legendConfig = getLegendConfig(key)}
+								{#if legendConfig}
+									<div class="legend-container">
+										<Legend config={legendConfig} />
+									</div>
+								{/if}
+							{/if}
 						</div>
 					{/if}
 				{/each}
@@ -220,6 +253,8 @@
 		padding: 15px;
 		z-index: 100;
 		width: 250px;
+		max-height: 70vh;
+		overflow-y: auto;
 	}
 
 	.panel.left {
@@ -353,5 +388,26 @@
 		outline: none;
 		border-color: #007acc;
 		box-shadow: 0 0 0 1px #007acc;
+	}
+
+	.legend-container {
+		margin-top: 12px;
+		margin-left: 24px;
+		padding: 8px 0;
+	}
+
+	.legend-container :global(.legend) {
+		position: static !important;
+		box-shadow: none !important;
+		border: 1px solid #e0e0e0;
+		border-radius: 4px;
+		background-color: #f9f9f9;
+		font-size: 11px;
+	}
+
+	.legend-container :global(.legend h4) {
+		font-size: 12px;
+		margin-bottom: 6px;
+		color: #555;
 	}
 </style>
