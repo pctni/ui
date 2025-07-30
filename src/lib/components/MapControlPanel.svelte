@@ -204,27 +204,24 @@
 
 <style>
 	.control-panel {
-		position: absolute;
+		position: relative;
 		background-color: #fff;
 		border-radius: 6px;
 		box-shadow: 0 2px 8px rgba(0,0,0,.15);
-		margin: 10px;
 		z-index: 100;
 		transition: all 0.2s ease;
 	}
 
 	.control-panel.left {
-		left: 0;
-		width: 40px;
+		width: 30px;
 	}
 
 	.control-panel.right {
-		right: 0;
 		min-width: 120px;
 	}
 
 	.control-panel.expanded.left {
-		width: 200px;
+		width: 180px;
 	}
 
 	.control-panel.expanded.right {
@@ -248,8 +245,8 @@
 	}
 
 	.control-panel.left .panel-header {
-		width: 40px;
-		height: 40px;
+		width: 30px;
+		height: 30px;
 		padding: 0;
 		justify-content: center;
 	}
