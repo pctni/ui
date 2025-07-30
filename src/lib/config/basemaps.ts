@@ -8,18 +8,7 @@ export interface BasemapConfig {
 export const BASEMAPS: Record<string, BasemapConfig> = {
 	gray: {
 		name: 'Gray',
-		style: {
-			version: 8 as const,
-			sources: { 
-				'esri-gray': { 
-					type: 'raster' as const, 
-					tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'], 
-					tileSize: 256, 
-					attribution: '© Esri' 
-				} 
-			},
-			layers: [{ id: 'esri-gray', type: 'raster' as const, source: 'esri-gray' }]
-		}
+		style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 	},
 	streets: {
 		name: 'Streets',
@@ -43,5 +32,9 @@ export const BASEMAPS: Record<string, BasemapConfig> = {
 			},
 			layers: [{ id: 'cyclosm-raster', type: 'raster' as const, source: 'cyclosm-raster' }]
 		}
+	},
+	dark: {
+		name: 'Dark',
+		style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 	}
 } as const;
