@@ -96,40 +96,57 @@
 			{:else if controlType === 'layers'}
 				<!-- Layer options -->
 				{#each Object.entries(LAYERS) as [key, layer]}
-					<div class="option">
-						<label>
-							<input 
-								type="checkbox" 
-								checked={layerStates?.[key] || false}
-								onchange={() => handleLayerToggle(key)}
-							/>
-							{layer.name}
-						</label>
-						{#if key === 'routeNetwork' && layerStates?.[key]}
-							<div class="network-types">
-								<label>
+					{#if key === 'routeNetwork'}
+						<!-- Route Network as heading with visibility toggle and network type options -->
+						<div class="layer-section">
+							<div class="layer-header">
+								<label class="layer-toggle">
 									<input 
-										type="radio" 
-										name="networkType" 
-										value="fast" 
-										checked={currentNetworkType === 'fast'}
-										onchange={() => onNetworkTypeChange?.('fast')}
+										type="checkbox" 
+										checked={layerStates?.[key] || false}
+										onchange={() => handleLayerToggle(key)}
 									/>
-									Fastest
-								</label>
-								<label>
-									<input 
-										type="radio" 
-										name="networkType" 
-										value="quiet" 
-										checked={currentNetworkType === 'quiet'}
-										onchange={() => onNetworkTypeChange?.('quiet')}
-									/>
-									Quietest
+									<h4 class="layer-heading">{layer.name}</h4>
 								</label>
 							</div>
-						{/if}
-					</div>
+							{#if layerStates?.[key]}
+								<div class="network-types">
+									<label>
+										<input 
+											type="radio" 
+											name="networkType" 
+											value="fast" 
+											checked={currentNetworkType === 'fast'}
+											onchange={() => onNetworkTypeChange?.('fast')}
+										/>
+										Fastest
+									</label>
+									<label>
+										<input 
+											type="radio" 
+											name="networkType" 
+											value="quiet" 
+											checked={currentNetworkType === 'quiet'}
+											onchange={() => onNetworkTypeChange?.('quiet')}
+										/>
+										Quietest
+									</label>
+								</div>
+							{/if}
+						</div>
+					{:else}
+						<!-- Regular layer checkbox -->
+						<div class="option">
+							<label>
+								<input 
+									type="checkbox" 
+									checked={layerStates?.[key] || false}
+									onchange={() => handleLayerToggle(key)}
+								/>
+								{layer.name}
+							</label>
+						</div>
+					{/if}
 				{/each}
 			{/if}
 		</div>
@@ -242,11 +259,40 @@
 		margin-right: 8px;
 	}
 
+	.layer-section {
+		margin-bottom: 15px;
+	}
+
+	.layer-header {
+		margin-bottom: 8px;
+	}
+
+	.layer-toggle {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		width: 100%;
+	}
+
+	.layer-toggle input[type="checkbox"] {
+		margin-right: 8px;
+	}
+
+	.layer-heading {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: #333;
+		border-bottom: 1px solid #e0e0e0;
+		padding-bottom: 4px;
+		flex: 1;
+	}
+
 	.network-types {
 		display: flex;
 		gap: 10px;
-		margin-top: 5px;
-		margin-left: 20px;
+		margin-top: 8px;
+		margin-left: 24px;
 	}
 
 	.network-types label {
