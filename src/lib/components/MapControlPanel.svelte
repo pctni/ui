@@ -70,53 +70,52 @@
 	}
 </script>
 
-<button 
-	class="control-button {position === 'left' ? 'large' : 'wide'}" 
-	{title}
-	aria-label={title}
-	onclick={onToggle}
->
-	{#if position === 'left'}
-		<!-- Basemap icon -->
-		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-			<path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/>
-			<path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/>
-		</svg>
-	{:else}
-		<span>{title}</span>
-		<svg 
-			xmlns="http://www.w3.org/2000/svg" 
-			width="12" 
-			height="12" 
-			fill="currentColor" 
-			viewBox="0 0 16 16"
-			class="arrow-icon"
-			class:rotated={showPanel}
-		>
-			<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-		</svg>
-	{/if}
-</button>
+<div class="control-panel {position}" class:expanded={showPanel}>
+	<button 
+		class="panel-header" 
+		{title}
+		aria-label={title}
+		onclick={onToggle}
+	>
+		{#if position === 'left'}
+			<!-- Basemap icon -->
+			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+				<path d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882z"/>
+				<path d="m2.125 8.567-1.86.992a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882l-1.86-.992-5.17 2.756a1.5 1.5 0 0 1-1.41 0z"/>
+			</svg>
+		{:else}
+			<span>{title}</span>
+			<svg 
+				xmlns="http://www.w3.org/2000/svg" 
+				width="12" 
+				height="12" 
+				fill="currentColor" 
+				viewBox="0 0 16 16"
+				class="arrow-icon"
+				class:rotated={showPanel}
+			>
+				<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+			</svg>
+		{/if}
+	</button>
 
-{#if showPanel}
-	<div class="panel {position}">
-		<h3>{controlType === 'basemap' ? 'Basemap' : 'Map Layers'}</h3>
-		<div class="options">
+	{#if showPanel}
+		<div class="panel-content">
 			{#if controlType === 'basemap'}
 				<!-- Basemap options -->
-				{#each Object.entries(BASEMAPS) as [key, basemap]}
-					<button 
-						class="option"
-						class:selected={currentBasemap === key}
-						onclick={() => handleBasemapSelect(key)}
-						aria-label="Select {basemap.name} basemap"
-					>
-						{basemap.name}
-					</button>
-				{/each}
-			{:else if controlType === 'layers'}
-				<!-- Layer options -->
-				{#each Object.entries(LAYERS) as [key, layer]}
+			{#each Object.entries(BASEMAPS) as [key, basemap]}
+				<button 
+					class="option"
+					class:selected={currentBasemap === key}
+					onclick={() => handleBasemapSelect(key)}
+					aria-label="Select {basemap.name} basemap"
+				>
+					{basemap.name}
+				</button>
+			{/each}
+		{:else if controlType === 'layers'}
+			<!-- Layer options -->
+			{#each Object.entries(LAYERS) as [key, layer]}
 					{#if key === 'routeNetwork'}
 						<!-- Route Network as heading with visibility toggle and network type options -->
 						<div class="layer-section">
@@ -200,40 +199,77 @@
 				{/each}
 			{/if}
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>
 
 <style>
-	.control-button {
+	.control-panel {
+		position: absolute;
 		background-color: #fff;
+		border-radius: 6px;
+		box-shadow: 0 2px 8px rgba(0,0,0,.15);
+		margin: 10px;
+		z-index: 100;
+		transition: all 0.2s ease;
+	}
+
+	.control-panel.left {
+		left: 0;
+		width: 40px;
+	}
+
+	.control-panel.right {
+		right: 0;
+		min-width: 120px;
+	}
+
+	.control-panel.expanded.left {
+		width: 200px;
+	}
+
+	.control-panel.expanded.right {
+		width: 250px;
+	}
+
+	.panel-header {
+		background: none;
 		border: 0;
-		border-radius: 4px;
+		border-radius: 6px;
 		cursor: pointer;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		box-shadow: 0 0 0 2px rgba(0,0,0,.1);
-		margin: 10px;
-	}
-
-	.control-button:hover {
-		background-color: #f0f0f0;
-	}
-
-	.control-button.large {
-		width: 40px;
-		height: 40px;
-		padding: 0;
-	}
-
-	.control-button.wide {
+		width: 100%;
 		padding: 8px 12px;
-		gap: 8px;
 		font-size: 14px;
 		font-weight: 500;
 		color: #333;
-		min-width: 120px;
+		transition: background-color 0.2s ease;
+	}
+
+	.control-panel.left .panel-header {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		justify-content: center;
+	}
+
+	.control-panel.right .panel-header {
 		justify-content: space-between;
+		gap: 8px;
+	}
+
+	.panel-header:hover {
+		background-color: #f0f0f0;
+	}
+
+	.panel-content {
+		padding: 0 15px 15px 15px;
+		max-height: 60vh;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 
 	.arrow-icon {
@@ -242,40 +278,6 @@
 
 	.arrow-icon.rotated {
 		transform: rotate(180deg);
-	}
-
-	.panel {
-		position: absolute;
-		top: 50px;
-		background-color: #fff;
-		border-radius: 6px;
-		box-shadow: 0 2px 8px rgba(0,0,0,.15);
-		padding: 15px;
-		z-index: 100;
-		width: 250px;
-		max-height: 70vh;
-		overflow-y: auto;
-	}
-
-	.panel.left {
-		left: 10px;
-		width: 200px;
-	}
-
-	.panel.right {
-		right: 10px;
-	}
-
-	h3 {
-		margin: 0 0 10px 0;
-		font-size: 16px;
-		color: #333;
-	}
-
-	.options {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
 	}
 
 	.option {
