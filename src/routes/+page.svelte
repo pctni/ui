@@ -211,7 +211,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-100px)]"
+	class="h-[calc(100vh-90px)]"
 	style={currentBasemapStyle}
 	bind:center
 	bind:zoom

@@ -32,26 +32,17 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		padding: 1rem;
+		padding: 0;
 		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
+		margin: 0;
 		box-sizing: border-box;
 	}
 
 	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
+		display: none;
 	}
 
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
+	/* Footer hidden since it's empty */
 	
 	/* Override default background */
 	:global(body) {
