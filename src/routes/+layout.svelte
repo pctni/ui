@@ -1,14 +1,17 @@
 <script lang="ts">
 	import Header from './Header.svelte';
 	import FirefoxWarning from '$lib/FirefoxWarning.svelte';
+	import AlphaModal from '$lib/AlphaModal.svelte';
 	import '../app.css';
 
 	let { children } = $props();
+	let showAlphaModal = $state(false);
 </script>
 
 <div class="app">
 	<FirefoxWarning />
-	<Header />
+	<Header {showAlphaModal} />
+	<AlphaModal bind:showAlphaModal />
 
 	<main>
 		{@render children()}
