@@ -53,10 +53,7 @@
 			</div>
 			<div class="popup-body">
 				<p>
-					<strong>This is a new service - your feedback will help us to improve it.</strong>
-				</p>
-				<p>
-					The Propensity to Cycle Tool for Northern Ireland (PCTNI) is a planning support system that builds on the
+					The Propensity to Cycle Tool for Northern Ireland (PCTNI) is an <a href="https://github.com/pctni" target="_blank" rel="noopener noreferrer">open-source</a> planning support system that builds on the
                     <a href="https://www.pct.bike" target="_blank" rel="noopener noreferrer">Propensity to Cycle Tool for England and Wales (PCT)</a>
                     and the
                     <a href="https://www.npt.scot" target="_blank" rel="noopener noreferrer">Network Planning Tool for Scotland (NPT)</a>.
