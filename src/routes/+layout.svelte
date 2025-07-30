@@ -6,11 +6,15 @@
 
 	let { children } = $props();
 	let showAlphaModal = $state(false);
+
+	function handleAlphaModalClick() {
+		showAlphaModal = true;
+	}
 </script>
 
 <div class="app">
 	<FirefoxWarning />
-	<Header {showAlphaModal} />
+	<Header onAlphaModalClick={handleAlphaModalClick} />
 	<AlphaModal bind:showAlphaModal />
 
 	<main>

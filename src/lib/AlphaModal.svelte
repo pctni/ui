@@ -1,29 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	
-	let showModal = $state(false);
 	let popupElement = $state<HTMLDivElement>();
 
 	let { showAlphaModal = $bindable(false) } = $props();
 
-	// Sync the internal state with the prop
-	$effect(() => {
-		showModal = showAlphaModal;
-	});
-
-	$effect(() => {
-		showAlphaModal = showModal;
-	});
-
 	onMount(() => {
 		// Only show modal if user hasn't dismissed it before
 		if (!localStorage.getItem('alpha-modal-dismissed')) {
-			showModal = true;
+			showAlphaModal = true;
 		}
 	});
 
 	function dismissModal() {
-		showModal = false;
+		showAlphaModal = false;
 		// Remember that user dismissed the modal
 		localStorage.setItem('alpha-modal-dismissed', 'true');
 	}
@@ -42,7 +32,7 @@
 	}
 </script>
 
-{#if showModal}
+{#if showAlphaModal}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div 
 		class="popup-overlay" 

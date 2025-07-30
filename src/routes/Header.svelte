@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { showAlphaModal = $bindable(false) } = $props();
+	let { onAlphaModalClick } = $props();
 </script>
 
 <header>
@@ -8,8 +8,8 @@
 		<div class="header-right">
 			<button
 				class="alpha-box"
-				onclick={() => showAlphaModal = true}
-				onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') showAlphaModal = true; }}
+				onclick={onAlphaModalClick}
+				onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAlphaModalClick(); }}
 				aria-label="Show alpha information"
 				type="button"
 			>
