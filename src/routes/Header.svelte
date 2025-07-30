@@ -1,20 +1,31 @@
 <script lang="ts">
-	// Modern Svelte 5 component - no props needed, fully static
+	let { onAlphaModalClick } = $props();
 </script>
 
 <header>
 	<div class="header-content">
 		<h1>Propensity to Cycle Tool for Northern Ireland</h1>
-		<div class="logos-right">
-			<a href="https://www.infrastructure-ni.gov.uk/" target="_blank" rel="noopener noreferrer" aria-label="Visit Infrastructure NI website">
-				<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
-			</a>
-			<a href="https://aecom.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit AECOM website">
-				<img src="/aecom-logo.png" alt="AECOM" class="logo aecom-logo" />
-			</a>
-			<a href="https://environment.leeds.ac.uk/transport" target="_blank" rel="noopener noreferrer" aria-label="Visit University of Leeds Transport Studies website">
-				<img src="/leeds-logo.png" alt="University of Leeds" class="logo leeds-logo" />
-			</a>
+		<div class="header-right">
+			<button
+				class="alpha-box"
+				onclick={onAlphaModalClick}
+				onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAlphaModalClick(); }}
+				aria-label="Show alpha information"
+				type="button"
+			>
+				<span class="alpha-text">ALPHA</span>
+			</button>
+			<div class="logos-right">
+				<a href="https://www.infrastructure-ni.gov.uk/" target="_blank" rel="noopener noreferrer" aria-label="Visit Infrastructure NI website">
+					<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
+				</a>
+				<a href="https://aecom.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit AECOM website">
+					<img src="/aecom-logo.png" alt="AECOM" class="logo aecom-logo" />
+				</a>
+				<a href="https://environment.leeds.ac.uk/transport" target="_blank" rel="noopener noreferrer" aria-label="Visit University of Leeds Transport Studies website">
+					<img src="/leeds-logo.png" alt="University of Leeds" class="logo leeds-logo" />
+				</a>
+			</div>
 		</div>
 	</div>
 </header>
@@ -33,6 +44,36 @@
 		gap: 1.5rem;
 		max-width: 1200px;
 		margin: 0 auto;
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.alpha-box {
+		background-color: #00703c;
+		color: white;
+		padding: 0.3rem 0.6rem;
+		border-radius: 4px;
+		font-weight: bold;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		border: none;
+		font-family: inherit;
+	}
+
+	.alpha-box:hover {
+		background-color: #005a30;
+	}
+
+	.alpha-box:focus {
+		outline: 2px solid #ffdd00;
+		outline-offset: 2px;
 	}
 
 	.logos-right {
@@ -76,6 +117,10 @@
 			gap: 1rem;
 		}
 
+		.header-right {
+			order: 2;
+		}
+
 		.logos-right {
 			order: 2;
 		}
@@ -88,6 +133,11 @@
 		
 		.logo {
 			height: 35px;
+		}
+
+		.alpha-box {
+			font-size: 0.8rem;
+			padding: 0.25rem 0.5rem;
 		}
 	}
 
