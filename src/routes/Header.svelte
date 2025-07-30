@@ -9,6 +9,9 @@
 			<a href="https://www.infrastructure-ni.gov.uk/" target="_blank" rel="noopener noreferrer" aria-label="Visit Infrastructure NI website">
 				<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
 			</a>
+			<a href="https://aecom.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit AECOM website">
+				<img src="/aecom-logo.png" alt="AECOM" class="logo aecom-logo" />
+			</a>
 			<a href="https://environment.leeds.ac.uk/transport" target="_blank" rel="noopener noreferrer" aria-label="Visit University of Leeds Transport Studies website">
 				<img src="/leeds-logo.png" alt="University of Leeds" class="logo leeds-logo" />
 			</a>
