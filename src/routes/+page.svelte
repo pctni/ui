@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { 
     MapLibre, 
     FullScreenControl, 
@@ -13,43 +13,25 @@
   import { PMTilesProtocol } from '@svelte-maplibre-gl/pmtiles';
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
-  import type { StyleSpecification } from 'maplibre-gl';
   
-  // Types
-  interface LayerConfig {
-    name: string;
-    id: string;
-    url: string;
-    sourceLayer: string;
-    type: 'line' | 'fill';
-    paint: any;
-    hasNetworkTypes?: boolean;
-    getConfig?: (networkType: string) => LayerConfig;
-  }
-
-  interface BasemapConfig {
-    name: string;
-    style: string | StyleSpecification;
-  }
-
   // Configuration constants
-  const MAP_BOUNDS: [number, number, number, number] = [-7.815460, 54.049760, -5.447300, 55.220990];
+  const MAP_BOUNDS = [-7.815460, 54.049760, -5.447300, 55.220990];
   const MAP_ZOOM = { min: 6, max: 18 };
   
-  const BASEMAPS: Record<string, BasemapConfig> = {
+  const BASEMAPS = {
     gray: {
       name: 'Gray',
       style: {
-        version: 8 as const,
+        version: 8,
         sources: { 
           'esri-gray': { 
-            type: 'raster' as const, 
+            type: 'raster', 
             tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'], 
             tileSize: 256, 
             attribution: '© Esri' 
           } 
         },
-        layers: [{ id: 'esri-gray', type: 'raster' as const, source: 'esri-gray' }]
+        layers: [{ id: 'esri-gray', type: 'raster', source: 'esri-gray' }]
       }
     },
     streets: {
@@ -59,10 +41,10 @@
     cycling: {
       name: 'Cycling',
       style: {
-        version: 8 as const,
+        version: 8,
         sources: { 
           'cyclosm-raster': { 
-            type: 'raster' as const, 
+            type: 'raster', 
             tiles: [
               'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 
               'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 
@@ -72,12 +54,12 @@
             attribution: '© CyclOSM | Map data: © OpenStreetMap contributors' 
           } 
         },
-        layers: [{ id: 'cyclosm-raster', type: 'raster' as const, source: 'cyclosm-raster' }]
+        layers: [{ id: 'cyclosm-raster', type: 'raster', source: 'cyclosm-raster' }]
       }
     }
   };
 
-  const LAYERS: Record<string, LayerConfig> = {
+  const LAYERS = {
     routeNetwork: {
       name: 'Route Network',
       id: 'route-network',
@@ -86,12 +68,12 @@
       type: 'line',
       hasNetworkTypes: true,
       paint: {},
-      getConfig: (networkType: string) => ({
+      getConfig: (networkType) => ({
         name: 'Route Network',
         id: `route-network-${networkType}`,
         url: `pmtiles:///route_network_${networkType}est.pmtiles`,
         sourceLayer: `route_network_${networkType}est`,
-        type: 'line' as const,
+        type: 'line',
         paint: {
           'line-color': [
             'interpolate', ['linear'], ['get', `all_${networkType}est_bicycle_go_dutch`],
@@ -195,10 +177,10 @@
   let currentNetworkType = 'fast';
   
   // URL state management for map position
-  let center: [number, number] = [-6.6, 54.6]; // Default center for Northern Ireland
-  let zoom: number = 8; // Default zoom
+  let center = [-6.6, 54.6]; // Default center for Northern Ireland
+  let zoom = 8; // Default zoom
   
-  const layerStates: Record<string, boolean> = {
+  let layerStates = {
     routeNetwork: false,
     coherentNetwork: false,
     cycleNetwork: false,
@@ -207,7 +189,7 @@
   };
 
   // URL state management functions
-  let updateTimeout: ReturnType<typeof setTimeout>;
+  let updateTimeout;
 
   // Initialize from URL hash on mount
   onMount(() => {
@@ -271,9 +253,9 @@
         const layersStr = parts[5];
         
         // Reset all layers to false first
-        Object.keys(layerStates).forEach(key => {
+        for (const key in layerStates) {
           layerStates[key] = false;
-        });
+        }
         
         // Enable specified layers
         if (layersStr !== 'none') {
@@ -329,31 +311,20 @@
     debouncedUpdateURL();
   }
 
-  // Reactive statement to update URL when any state changes
-  $: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in layer states
-  $: if (browser && layerStates) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in basemap
-  $: if (browser && currentBasemap) {
-    debouncedUpdateURL();
-  }
-  
-  // Watch for changes in network type
-  $: if (browser && currentNetworkType) {
-    debouncedUpdateURL();
+  // Functions to update URL when state changes
+  function updateStateAndURL() {
+    if (browser) {
+      debouncedUpdateURL();
+    }
   }
 
   // Computed values
-  $: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+  function getCurrentBasemapStyle() {
+    return BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+  }
 
   // Functions
-  function togglePanel(panel: 'basemap' | 'layers') {
+  function togglePanel(panel) {
     if (panel === 'basemap') {
       showBasemapPanel = !showBasemapPanel;
       if (showBasemapPanel) showLayersPanel = false;
@@ -361,11 +332,18 @@
       showLayersPanel = !showLayersPanel;
       if (showLayersPanel) showBasemapPanel = false;
     }
+    updateStateAndURL();
   }
 
-  function selectBasemap(key: string) {
+  function selectBasemap(key) {
     currentBasemap = key;
     showBasemapPanel = false;
+    updateStateAndURL();
+  }
+  
+  function toggleLayer(key) {
+    layerStates[key] = !layerStates[key];
+    updateStateAndURL();
   }
 </script>
 
@@ -375,7 +353,7 @@
 
 <MapLibre
   class="h-[calc(100vh-100px)]"
-  style={currentBasemapStyle}
+  style={getCurrentBasemapStyle()}
   bind:center
   bind:zoom
   onmoveend={handleMoveEnd}
