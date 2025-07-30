@@ -25,6 +25,7 @@
 	let showLayersPanel = false;
 	let currentBasemap = 'gray';
 	let currentNetworkType = 'fast';
+	let currentNetworkColor = 'bicycle';
 	
 	// Map state
 	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
@@ -204,6 +205,10 @@
 	function setNetworkType(type: string) {
 		currentNetworkType = type;
 	}
+
+	function setNetworkColor(color: string) {
+		currentNetworkColor = color;
+	}
 </script>
 
 {#if browser}
@@ -246,12 +251,14 @@
 			position="right"
 			layerStates={layerStates}
 			currentNetworkType={currentNetworkType}
+			currentNetworkColor={currentNetworkColor}
 			onToggleLayer={toggleLayer}
 			onNetworkTypeChange={setNetworkType}
+			onNetworkColorChange={setNetworkColor}
 		/>
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} />
+	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
 

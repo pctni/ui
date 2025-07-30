@@ -6,7 +6,7 @@ export interface LayerConfig {
 	type: 'line' | 'fill';
 	paint: any;
 	hasNetworkTypes?: boolean;
-	getConfig?: (networkType: string) => LayerConfig;
+	getConfig?: (networkType: string, networkColor?: string) => LayerConfig;
 }
 
 export const LAYERS: Record<string, LayerConfig> = {
