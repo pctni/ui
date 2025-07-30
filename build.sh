@@ -22,6 +22,7 @@ BASE_URL="https://github.com/pctni/ui/releases/download/v0.0.1"
 PMTILES_FILES=(
   "corenet_network_ni.pmtiles"
   "gap_map.pmtiles"
+  "cycle_net_processed.pmtiles"
   "Local_Authority.pmtiles"
   "route_network_fastest.pmtiles"
   "route_network_quietest.pmtiles"
