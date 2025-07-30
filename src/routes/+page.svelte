@@ -19,6 +19,7 @@
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
+	import Geocoder from '$lib/components/Geocoder.svelte';
 
 	// State - using simple reactive variables
 	let showBasemapPanel = false;
@@ -30,6 +31,7 @@
 	// Map state
 	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
 	let zoom: number = MAP_CONFIG.DEFAULT_ZOOM;
+	let mapInstance: import('maplibre-gl').Map | undefined;
 	
 	// Layer states
 	const layerStates: Record<string, boolean> = {
@@ -220,6 +222,7 @@
 	style={currentBasemapStyle}
 	bind:center
 	bind:zoom
+	bind:map={mapInstance}
 	onmoveend={handleMoveEnd}
 	onzoomend={handleZoomEnd}
 >
@@ -227,6 +230,11 @@
 	<FullScreenControl position="top-left" />
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+
+	<!-- Search/Geocoder Control -->
+	<CustomControl position="top-right">
+		<Geocoder map={mapInstance || null} />
+	</CustomControl>
 
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
