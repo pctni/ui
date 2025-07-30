@@ -3,20 +3,111 @@
 </script>
 
 <header>
-	<h1>Propensity to Cycle Tool for Northern Ireland</h1>
+	<div class="header-content">
+		<h1>Propensity to Cycle Tool for Northern Ireland</h1>
+		<div class="logos-right">
+			<a href="https://www.infrastructure-ni.gov.uk/" target="_blank" rel="noopener noreferrer" aria-label="Visit Infrastructure NI website">
+				<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
+			</a>
+			<a href="https://environment.leeds.ac.uk/transport" target="_blank" rel="noopener noreferrer" aria-label="Visit University of Leeds Transport Studies website">
+				<img src="/leeds-logo.png" alt="University of Leeds" class="logo leeds-logo" />
+			</a>
+		</div>
+	</div>
 </header>
 
 <style>
 	header {
-		text-align: center;
 		padding: 1em;
 		background-color: #f0f0f0;
 		border-bottom: 1px solid #ccc;
+	}
+
+	.header-content {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.logos-right {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.logos-right a {
+		display: inline-block;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+		text-decoration: none;
+	}
+
+	.logos-right a:hover {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+
+	.logo {
+		height: 40px;
+		width: auto;
+		object-fit: contain;
+		display: block;
 	}
 
 	h1 {
 		margin: 0;
 		font-size: 1.5em;
 		color: #333;
+		text-align: left;
+		flex: 1;
+	}
+
+	/* Mobile responsiveness */
+	@media (max-width: 768px) {
+		.header-content {
+			flex-direction: column;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		.logos-right {
+			order: 2;
+		}
+
+		h1 {
+			order: 1;
+			font-size: 1.3em;
+			text-align: center;
+		}
+		
+		.logo {
+			height: 35px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		header {
+			padding: 0.8em;
+		}
+
+		.header-content {
+			gap: 0.8rem;
+		}
+
+		.logos-right {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+		
+		.logo {
+			height: 30px;
+		}
+		
+		h1 {
+			font-size: 1.2em;
+		}
 	}
 </style>
