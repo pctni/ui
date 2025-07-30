@@ -15,17 +15,17 @@
 	import { onMount } from 'svelte';
 	
 	// Import configuration
-	import { BASEMAPS } from '$lib/config/basemaps.js';
+	import { STYLES } from '$lib/config/basemaps.js';
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
 
-	// State - using simple reactive variables
-	let showBasemapPanel = false;
+	// State - using reactive state like svelte-maplibre-gl example
 	let showLayersPanel = false;
-	let currentBasemap = 'gray';
+	let basemapName = $state('Positron');
 	let currentNetworkType = 'fast';
 	let currentNetworkColor = 'bicycle';
+	let style = $derived(STYLES.get(basemapName)!);
 	
 	// Map state
 	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
@@ -85,9 +85,9 @@
 			
 			// Parse basemap
 			if (parts.length >= 4 && parts[3]) {
-				const basemapName = parts[3];
-				if (BASEMAPS[basemapName]) {
-					currentBasemap = basemapName;
+				const urlBasemapName = parts[3];
+				if (STYLES.has(urlBasemapName)) {
+					basemapName = urlBasemapName;
 				}
 			}
 			
@@ -136,7 +136,7 @@
 			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
 			
 			// Format: #zoom/lat/lng/basemap/networkType/layers
-			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
+			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${basemapName}/${currentNetworkType}/${layersStr}`;
 			
 			// Only update if hash actually changed
 			if (window.location.hash !== newHash) {
@@ -162,40 +162,34 @@
 		debouncedUpdateURL();
 	}
 
-	// Reactive statements to update URL when state changes
-	$: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
-		debouncedUpdateURL();
-	}
+	// Effects to update URL when state changes
+	$effect(() => {
+		if (center && center.length === 2 && typeof zoom === 'number' && browser) {
+			debouncedUpdateURL();
+		}
+	});
 	
-	$: if (browser && layerStates) {
-		debouncedUpdateURL();
-	}
+	$effect(() => {
+		if (browser && layerStates) {
+			debouncedUpdateURL();
+		}
+	});
 	
-	$: if (browser && currentBasemap) {
-		debouncedUpdateURL();
-	}
+	$effect(() => {
+		if (browser && basemapName) {
+			debouncedUpdateURL();
+		}
+	});
 	
-	$: if (browser && currentNetworkType) {
-		debouncedUpdateURL();
-	}
-
-	// Computed values
-	$: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+	$effect(() => {
+		if (browser && currentNetworkType) {
+			debouncedUpdateURL();
+		}
+	});
 
 	// Event handlers
-	function togglePanel(panel: 'basemap' | 'layers') {
-		if (panel === 'basemap') {
-			showBasemapPanel = !showBasemapPanel;
-			if (showBasemapPanel) showLayersPanel = false;
-		} else {
-			showLayersPanel = !showLayersPanel;
-			if (showLayersPanel) showBasemapPanel = false;
-		}
-	}
-
-	function selectBasemap(key: string) {
-		currentBasemap = key;
-		showBasemapPanel = false;
+	function togglePanel(panel: 'layers') {
+		showLayersPanel = !showLayersPanel;
 	}
 
 	function toggleLayer(key: string) {
@@ -213,11 +207,28 @@
 
 {#if browser}
 	<PMTilesProtocol />
-{/if}
+	
+	<!-- Basemap selector -->
+	<div class="mb-3 flex items-center justify-between">
+		<div class="flex flex-row gap-x-3">
+			{#each STYLES as [name] (name)}
+				<div class="flex items-center space-x-1">
+					<input
+						type="radio"
+						id={name}
+						name="basemap"
+						value={name}
+						bind:group={basemapName}
+					/>
+					<label class="cursor-pointer" for={name}>{name}</label>
+				</div>
+			{/each}
+		</div>
+	</div>
 
-<MapLibre
-	class="h-[calc(100vh-90px)]"
-	style={currentBasemapStyle}
+	<MapLibre
+	class="h-[calc(100vh-130px)]"
+	{style}
 	bind:center
 	bind:zoom
 	onmoveend={handleMoveEnd}
@@ -228,22 +239,9 @@
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
 
-	<!-- Basemap Control -->
-	<CustomControl position="top-left">
-		<MapControlPanel 
-			controlType="basemap"
-			showPanel={showBasemapPanel}
-			onToggle={() => togglePanel('basemap')}
-			title="Change basemap"
-			position="left"
-			currentBasemap={currentBasemap}
-			onBasemapSelect={selectBasemap}
-		/>
-	</CustomControl>
-
 	<!-- Layers Control -->
 	<CustomControl position="top-right">
-		<MapControlPanel 
+		<MapControlPanel
 			controlType="layers"
 			showPanel={showLayersPanel}
 			onToggle={() => togglePanel('layers')}
@@ -261,4 +259,5 @@
 	<!-- Dynamic Layers -->
 	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
+{/if}
 

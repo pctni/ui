@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS } from '$lib/config/layers.js';
 	import { LEGEND_CONFIGS } from '$lib/config/legends.js';
 	import Legend from '$lib/components/Legend.svelte';
 	import type { LegendConfig } from '$lib/config/legends.js';
 
-	type ControlType = 'basemap' | 'layers';
+	type ControlType = 'layers';
 	type Position = 'left' | 'right';
 
 	interface Props {
@@ -14,10 +13,6 @@
 		onToggle: () => void;
 		title: string;
 		position: Position;
-		
-		// Basemap props
-		currentBasemap?: string;
-		onBasemapSelect?: (key: string) => void;
 		
 		// Layers props
 		layerStates?: Record<string, boolean>;
@@ -28,14 +23,12 @@
 		onNetworkColorChange?: (color: string) => void;
 	}
 
-	let { 
+	let {
 		controlType,
-		showPanel, 
-		onToggle, 
-		title, 
+		showPanel,
+		onToggle,
+		title,
 		position,
-		currentBasemap,
-		onBasemapSelect,
 		layerStates,
 		currentNetworkType,
 		currentNetworkColor,
@@ -43,11 +36,6 @@
 		onNetworkTypeChange,
 		onNetworkColorChange
 	}: Props = $props();
-
-	function handleBasemapSelect(key: string) {
-		onBasemapSelect?.(key);
-		onToggle(); // Close panel after selection
-	}
 
 	function handleLayerToggle(key: string) {
 		onToggleLayer?.(key);
@@ -101,19 +89,7 @@
 
 	{#if showPanel}
 		<div class="panel-content">
-			{#if controlType === 'basemap'}
-				<!-- Basemap options -->
-			{#each Object.entries(BASEMAPS) as [key, basemap]}
-				<button 
-					class="option"
-					class:selected={currentBasemap === key}
-					onclick={() => handleBasemapSelect(key)}
-					aria-label="Select {basemap.name} basemap"
-				>
-					{basemap.name}
-				</button>
-			{/each}
-		{:else if controlType === 'layers'}
+			{#if controlType === 'layers'}
 			<!-- Layer options -->
 			{#each Object.entries(LAYERS) as [key, layer]}
 					{#if key === 'routeNetwork'}
@@ -154,11 +130,11 @@
 								</div>
 								<div class="color-section">
 									<label class="color-label" for="network-color-select">Colour:</label>
-									<select 
+									<select
 										id="network-color-select"
 										class="color-dropdown"
 										value={currentNetworkColor || 'bicycle'}
-										onchange={(e) => onNetworkColorChange?.(e.target.value)}
+										onchange={(e) => onNetworkColorChange?.((e.target as HTMLSelectElement).value)}
 									>
 										<option value="bicycle">Baseline cycling</option>
 										<option value="bicycle_govtarget">Government target</option>
