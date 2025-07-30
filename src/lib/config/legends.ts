@@ -5,7 +5,6 @@ export interface LegendItem {
 }
 
 export interface LegendConfig {
-	title: string;
 	type: 'gradient' | 'categorical';
 	items: LegendItem[];
 	description?: string;
@@ -21,7 +20,6 @@ export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: strin
 		};
 
 		return {
-			title: `Route Network (${networkType === 'fast' ? 'Fastest' : 'Quietest'})`,
 			type: 'gradient' as const,
 			description: `${colorFieldLabels[networkColor] || 'Cycling levels'} - trips per day`,
 			items: [
@@ -38,7 +36,6 @@ export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: strin
 	},
 
 	coherentNetwork: {
-		title: 'Coherent Network',
 		type: 'gradient' as const,
 		description: 'Go Dutch cycling potential - trips per day',
 		items: [
@@ -48,7 +45,6 @@ export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: strin
 	},
 
 	cycleNetwork: {
-		title: 'Cycle Network',
 		type: 'categorical' as const,
 		description: 'Existing cycle infrastructure types',
 		items: [
@@ -62,7 +58,6 @@ export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: strin
 	},
 
 	gapAnalysis: {
-		title: 'Gap Analysis',
 		type: 'categorical' as const,
 		description: 'Priority gaps in cycle network',
 		items: [
@@ -70,25 +65,6 @@ export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: strin
 			{ color: '#ff8000', label: 'High Priority Gap' },
 			{ color: '#ffff00', label: 'Medium Priority Gap' },
 			{ color: '#cccccc', label: 'No Gap' }
-		]
-	},
-
-	localAuthorities: {
-		title: 'Local Authorities',
-		type: 'categorical' as const,
-		description: 'Northern Ireland council areas',
-		items: [
-			{ color: '#a6cee3', label: 'Antrim and Newtownabbey' },
-			{ color: '#1f78b4', label: 'Armagh, Banbridge and Craigavon' },
-			{ color: '#b2df8a', label: 'Belfast' },
-			{ color: '#33a02c', label: 'Causeway Coast and Glens' },
-			{ color: '#fb9a99', label: 'Derry and Strabane' },
-			{ color: '#e31a1c', label: 'Fermanagh and Omagh' },
-			{ color: '#fdbf6f', label: 'Lisburn and Castlereagh' },
-			{ color: '#ff7f00', label: 'Mid and East Antrim' },
-			{ color: '#cab2d6', label: 'Mid Ulster' },
-			{ color: '#6a3d9a', label: 'Newry, Mourne and Down' },
-			{ color: '#ffff99', label: 'Ards and North Down' }
 		]
 	}
 };

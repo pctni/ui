@@ -280,7 +280,6 @@
 
 	.option {
 		cursor: pointer;
-		padding: 8px 12px;
 		border-radius: 4px;
 		font-size: 14px;
 		background: none;
@@ -312,11 +311,11 @@
 	}
 
 	.layer-section {
-		margin-bottom: 15px;
+		margin-bottom: 1px;
 	}
 
 	.layer-header {
-		margin-bottom: 8px;
+		margin-bottom: 0;
 	}
 
 	.layer-toggle {
@@ -333,10 +332,8 @@
 	.layer-heading {
 		margin: 0;
 		font-size: 14px;
-		font-weight: 600;
+		font-weight: 500;
 		color: #333;
-		border-bottom: 1px solid #e0e0e0;
-		padding-bottom: 4px;
 		flex: 1;
 	}
 

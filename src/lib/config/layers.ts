@@ -93,29 +93,14 @@ export const LAYERS: Record<string, LayerConfig> = {
 		}
 	},
 	localAuthorities: {
-		name: 'Local Authorities',
+		name: 'Local Authority Boundaries',
 		id: 'local-authorities',
 		url: 'pmtiles:///Local_Authority.pmtiles',
 		sourceLayer: 'Local_Authority_2025-06',
-		type: 'fill',
+		type: 'line',
 		paint: {
-			'fill-color': [
-				'match', ['get', 'LGDNAME'],
-				'ANTRIM AND NEWTOWNABBEY', '#a6cee3',
-				'ARMAGH CITY, BANBRIDGE AND CRAIGAVON', '#1f78b4',
-				'BELFAST', '#b2df8a',
-				'CAUSEWAY COAST AND GLENS', '#33a02c',
-				'DERRY CITY AND STRABANE', '#fb9a99',
-				'FERMANAGH AND OMAGH', '#e31a1c',
-				'LISBURN AND CASTLEREAGH', '#fdbf6f',
-				'MID AND EAST ANTRIM', '#ff7f00',
-				'MID ULSTER', '#cab2d6',
-				'NEWRY, MOURNE AND DOWN', '#6a3d9a',
-				'ARDS AND NORTH DOWN', '#ffff99',
-				'#cccccc'
-			],
-			'fill-opacity': 0.5,
-			'fill-outline-color': 'black'
+			'line-color': '#333333',
+			'line-width': 2
 		}
 	}
 } as const;
