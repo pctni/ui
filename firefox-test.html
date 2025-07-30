@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firefox Detection Test</title>
+</head>
+<body>
+    <h1>Browser Detection Test</h1>
+    <p id="browser-info"></p>
+    
+    <script>
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isFirefox = userAgent.includes('firefox');
+        
+        document.getElementById('browser-info').innerHTML = `
+            <strong>User Agent:</strong> ${navigator.userAgent}<br>
+            <strong>Is Firefox:</strong> ${isFirefox ? 'Yes' : 'No'}
+        `;
+        
+        if (isFirefox) {
+            document.body.style.backgroundColor = '#ffcccc';
+            document.getElementById('browser-info').innerHTML += '<br><strong>Firefox detected! The warning popup should appear on the main site.</strong>';
+        }
+    </script>
+</body>
+</html>
