@@ -3,7 +3,7 @@
 	
 	let showWarning = $state(false);
 	let isFirefox = $state(false);
-	let popupElement: HTMLDivElement;
+	let popupElement = $state<HTMLDivElement>();
 
 	onMount(() => {
 		// Check if the user is using Firefox
@@ -36,10 +36,20 @@
 </script>
 
 {#if showWarning}
-	<div class="popup-overlay">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div 
+		class="popup-overlay" 
+		onclick={handleOverlayClick}
+		onkeydown={handleKeydown}
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="popup-title"
+		tabindex="-1"
+		bind:this={popupElement}
+	>
 		<div class="popup-content">
 			<div class="popup-header">
-				<h3>Browser Compatibility Notice</h3>
+				<h3 id="popup-title">Browser Compatibility Notice</h3>
 				<button class="close-button" onclick={dismissWarning} aria-label="Close warning">
 					×
 				</button>
