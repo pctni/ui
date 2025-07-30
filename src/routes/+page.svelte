@@ -18,6 +18,7 @@
 	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
+	import MapLayers from '$lib/components/MapLayers.svelte';
 
 	// State - using simple reactive variables
 	let showBasemapPanel = false;
@@ -33,6 +34,7 @@
 	const layerStates: Record<string, boolean> = {
 		routeNetwork: false,
 		coherentNetwork: false,
+		cycleNetwork: false,
 		gapAnalysis: false,
 		localAuthorities: false
 	};
@@ -250,40 +252,6 @@
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	{#each Object.entries(LAYERS) as [key, layer]}
-		{#if layerStates[key]}
-			{#if key === 'routeNetwork' && layer.getConfig}
-				{#key currentNetworkType}
-					{@const config = layer.getConfig(currentNetworkType)}
-					<VectorTileSource id={config.id} url={config.url} attribution="PCTNI">
-						<LineLayer
-							sourceLayer={config.sourceLayer}
-							paint={config.paint}
-							minzoom={MAP_CONFIG.ZOOM.min}
-							maxzoom={MAP_CONFIG.ZOOM.max}
-						/>
-					</VectorTileSource>
-				{/key}
-			{:else}
-				<VectorTileSource id={layer.id} url={layer.url} attribution="PCTNI">
-					{#if layer.type === 'fill'}
-						<FillLayer
-							sourceLayer={layer.sourceLayer}
-							paint={layer.paint}
-							minzoom={MAP_CONFIG.ZOOM.min}
-							maxzoom={MAP_CONFIG.ZOOM.max}
-						/>
-					{:else}
-						<LineLayer
-							sourceLayer={layer.sourceLayer}
-							paint={layer.paint}
-							minzoom={MAP_CONFIG.ZOOM.min}
-							maxzoom={MAP_CONFIG.ZOOM.max}
-						/>
-					{/if}
-				</VectorTileSource>
-			{/if}
-		{/if}
-	{/each}
+	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} />
 </MapLibre>
 

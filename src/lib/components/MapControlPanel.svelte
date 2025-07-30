@@ -41,6 +41,12 @@
 		onBasemapSelect?.(key);
 		onToggle(); // Close panel after selection
 	}
+
+	function handleLayerToggle(key: string) {
+		onToggleLayer?.(key);
+		// Note: We don't auto-close the panel for layer selections
+		// to allow users to toggle multiple layers
+	}
 </script>
 
 <button 
@@ -95,7 +101,7 @@
 							<input 
 								type="checkbox" 
 								checked={layerStates?.[key] || false}
-								onchange={() => onToggleLayer?.(key)}
+								onchange={() => handleLayerToggle(key)}
 							/>
 							{layer.name}
 						</label>

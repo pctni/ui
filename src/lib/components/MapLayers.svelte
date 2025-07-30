@@ -4,7 +4,7 @@
 	import type { LayerConfig } from '$lib/config/layers.js';
 
 	interface Props {
-		activeLayers: Set<string>;
+		activeLayers: Record<string, boolean>;
 		networkType: string;
 	}
 
@@ -20,7 +20,7 @@
 </script>
 
 {#each Object.entries(LAYERS) as [key, layer]}
-	{#if activeLayers.has(key)}
+	{#if activeLayers[key]}
 		{@const { key: layerKey, config } = renderLayer(key, layer)}
 		<VectorTileSource id={config.id} url={config.url} attribution="PCTNI">
 			{#if config.type === 'fill'}
