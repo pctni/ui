@@ -6,7 +6,7 @@ export interface LayerConfig {
 	type: 'line' | 'fill';
 	paint: any;
 	hasNetworkTypes?: boolean;
-	getConfig?: (networkType: string) => LayerConfig;
+	getConfig?: (networkType: string, networkColor?: string) => LayerConfig;
 }
 
 export const LAYERS: Record<string, LayerConfig> = {
@@ -18,26 +18,37 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		hasNetworkTypes: true,
 		paint: {},
-		getConfig: (networkType: string) => ({
-			name: 'Route Network',
-			id: `route-network-${networkType}`,
-			url: `pmtiles:///route_network_${networkType}est.pmtiles`,
-			sourceLayer: `route_network_${networkType}est`,
-			type: 'line' as const,
-			paint: {
-				'line-color': [
-					'interpolate', ['linear'], ['get', `all_${networkType}est_bicycle_go_dutch`],
-					1, '#808080', 49, '#808080', 50, '#ffff00', 99, '#ffff00',
-					100, '#80ff00', 249, '#80ff00', 250, '#00ffff', 499, '#00ffff',
-					500, '#80c0ff', 999, '#80c0ff', 1000, '#0080ff', 1999, '#0080ff',
-					2000, '#0000ff', 2999, '#0000ff', 3000, '#ff00ff'
-				],
-				'line-width': [
-					'interpolate', ['linear'], ['zoom'],
-					6, 0.4, 8, 1, 10, 2, 12, 4, 14, 8, 16, 14, 18, 24
-				]
-			}
-		})
+		getConfig: (networkType: string, networkColor: string = 'bicycle') => {
+			// Map color values to actual field names
+			const colorFieldMap: Record<string, string> = {
+				'bicycle': 'bicycle',
+				'bicycle_govtarget': 'bicycle_govtarget', 
+				'bicycle_go_dutch': `all_${networkType}est_bicycle_go_dutch`
+			};
+			
+			const colorField = colorFieldMap[networkColor] || 'bicycle';
+			
+			return {
+				name: 'Route Network',
+				id: `route-network-${networkType}-${networkColor}`,
+				url: `pmtiles:///route_network_${networkType}est.pmtiles`,
+				sourceLayer: `route_network_${networkType}est`,
+				type: 'line' as const,
+				paint: {
+					'line-color': [
+						'interpolate', ['linear'], ['get', colorField],
+						1, '#808080', 49, '#808080', 50, '#ffff00', 99, '#ffff00',
+						100, '#80ff00', 249, '#80ff00', 250, '#00ffff', 499, '#00ffff',
+						500, '#80c0ff', 999, '#80c0ff', 1000, '#0080ff', 1999, '#0080ff',
+						2000, '#0000ff', 2999, '#0000ff', 3000, '#ff00ff'
+					],
+					'line-width': [
+						'interpolate', ['linear'], ['zoom'],
+						6, 0.4, 8, 1, 10, 2, 12, 4, 14, 8, 16, 14, 18, 24
+					]
+				}
+			};
+		}
 	},
 	coherentNetwork: {
 		name: 'Coherent Network',

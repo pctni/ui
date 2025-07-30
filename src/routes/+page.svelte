@@ -25,6 +25,7 @@
 	let showLayersPanel = false;
 	let currentBasemap = 'gray';
 	let currentNetworkType = 'fast';
+	let currentNetworkColor = 'bicycle';
 	
 	// Map state
 	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
@@ -54,7 +55,7 @@
 		}
 	});
 	
-	// Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
+	// Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/networkColor/layers
 	function parseURLHash() {
 		if (!browser) return;
 		
@@ -98,9 +99,17 @@
 				}
 			}
 			
-			// Parse active layers
+			// Parse network color
 			if (parts.length >= 6 && parts[5]) {
-				const layersStr = parts[5];
+				const networkColor = parts[5];
+				if (['bicycle', 'bicycle_govtarget', 'bicycle_go_dutch'].includes(networkColor)) {
+					currentNetworkColor = networkColor;
+				}
+			}
+			
+			// Parse active layers
+			if (parts.length >= 7 && parts[6]) {
+				const layersStr = parts[6];
 				
 				// Reset all layers to false first
 				Object.keys(layerStates).forEach(key => {
@@ -134,8 +143,8 @@
 			
 			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
 			
-			// Format: #zoom/lat/lng/basemap/networkType/layers
-			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
+			// Format: #zoom/lat/lng/basemap/networkType/networkColor/layers
+			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${currentNetworkColor}/${layersStr}`;
 			
 			// Only update if hash actually changed
 			if (window.location.hash !== newHash) {
@@ -177,6 +186,10 @@
 	$: if (browser && currentNetworkType) {
 		debouncedUpdateURL();
 	}
+	
+	$: if (browser && currentNetworkColor) {
+		debouncedUpdateURL();
+	}
 
 	// Computed values
 	$: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
@@ -203,6 +216,10 @@
 
 	function setNetworkType(type: string) {
 		currentNetworkType = type;
+	}
+
+	function setNetworkColor(color: string) {
+		currentNetworkColor = color;
 	}
 </script>
 
@@ -246,12 +263,15 @@
 			position="right"
 			layerStates={layerStates}
 			currentNetworkType={currentNetworkType}
+			currentNetworkColor={currentNetworkColor}
 			onToggleLayer={toggleLayer}
 			onNetworkTypeChange={setNetworkType}
+			onNetworkColorChange={setNetworkColor}
+		/>
 		/>
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} />
+	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
 

@@ -6,14 +6,15 @@
 	interface Props {
 		activeLayers: Record<string, boolean>;
 		networkType: string;
+		networkColor: string;
 	}
 
-	let { activeLayers, networkType }: Props = $props();
+	let { activeLayers, networkType, networkColor }: Props = $props();
 
 	function renderLayer(key: string, layer: LayerConfig) {
 		if (key === 'routeNetwork' && layer.getConfig) {
-			const config = layer.getConfig(networkType);
-			return { key: `${key}-${networkType}`, config };
+			const config = layer.getConfig(networkType, networkColor);
+			return { key: `${key}-${networkType}-${networkColor}`, config };
 		}
 		return { key, config: layer };
 	}

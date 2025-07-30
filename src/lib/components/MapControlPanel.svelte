@@ -19,8 +19,10 @@
 		// Layers props
 		layerStates?: Record<string, boolean>;
 		currentNetworkType?: string;
+		currentNetworkColor?: string;
 		onToggleLayer?: (key: string) => void;
 		onNetworkTypeChange?: (type: string) => void;
+		onNetworkColorChange?: (color: string) => void;
 	}
 
 	let { 
@@ -33,8 +35,10 @@
 		onBasemapSelect,
 		layerStates,
 		currentNetworkType,
+		currentNetworkColor,
 		onToggleLayer,
-		onNetworkTypeChange
+		onNetworkTypeChange,
+		onNetworkColorChange
 	}: Props = $props();
 
 	function handleBasemapSelect(key: string) {
@@ -47,6 +51,13 @@
 		// Note: We don't auto-close the panel for layer selections
 		// to allow users to toggle multiple layers
 	}
+
+	// Color options for route networks
+	const colorOptions = [
+		{ value: 'bicycle', label: 'Baseline cycling' },
+		{ value: 'bicycle_govtarget', label: 'Government target' },
+		{ value: 'bicycle_go_dutch', label: 'Go Dutch' }
+	];
 </script>
 
 <button 
@@ -131,6 +142,19 @@
 										/>
 										Quietest
 									</label>
+								</div>
+								<div class="color-section">
+									<label class="color-label" for="network-color-select">Colour:</label>
+									<select 
+										id="network-color-select"
+										class="color-dropdown"
+										value={currentNetworkColor || 'bicycle'}
+										onchange={(e) => onNetworkColorChange?.(e.target.value)}
+									>
+										{#each colorOptions as option}
+											<option value={option.value}>{option.label}</option>
+										{/each}
+									</select>
 								</div>
 							{/if}
 						</div>
@@ -303,5 +327,38 @@
 
 	.network-types input[type="radio"] {
 		margin-right: 4px;
+	}
+
+	.color-section {
+		margin-top: 8px;
+		margin-left: 24px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.color-label {
+		font-size: 12px;
+		color: #333;
+		font-weight: 500;
+	}
+
+	.color-dropdown {
+		font-size: 12px;
+		padding: 2px 4px;
+		border: 1px solid #ccc;
+		border-radius: 3px;
+		background-color: #fff;
+		cursor: pointer;
+	}
+
+	.color-dropdown:hover {
+		border-color: #999;
+	}
+
+	.color-dropdown:focus {
+		outline: none;
+		border-color: #007acc;
+		box-shadow: 0 0 0 1px #007acc;
 	}
 </style>
