@@ -67,7 +67,8 @@
 				</p>
 				<p>
 					The estimates of cycling potential are currently based on 2011 Census data on travel to work.
-                    The results therefore underestimate overall cycling potential and tend to highlight cycling potential to major and long-standing work-places.
+                    The results should be interpreted based on the understanding that they highlight places of high cycling demand to major and long-standing work-places.
+					The tool currently omits cycling potential for travel to schools, shopping, leisure and other purposes, a limitation that we are working to address in future updates.
 				</p>
 				<p>
 					Users are solely responsible for how they interpret and use the data. If you identify any errors or have concerns about the data or tool, please let us know via the open access <a href="https://github.com/pctni/ui/issues" target="_blank" rel="noopener noreferrer">issue tracker</a> (requires a <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub account</a>).
