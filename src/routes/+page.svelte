@@ -17,9 +17,7 @@
 	// Import configuration
 	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
-	import ControlPanel from '$lib/components/ControlPanel.svelte';
-	import BasemapPanel from '$lib/components/BasemapPanel.svelte';
-	import LayersPanel from '$lib/components/LayersPanel.svelte';
+	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 
 	// State - using simple reactive variables
 	let showBasemapPanel = false;
@@ -225,34 +223,30 @@
 
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
-		<ControlPanel 
+		<MapControlPanel 
+			controlType="basemap"
 			showPanel={showBasemapPanel}
 			onToggle={() => togglePanel('basemap')}
 			title="Change basemap"
 			position="left"
-		>
-			<BasemapPanel 
-				currentBasemap={currentBasemap}
-				onSelect={selectBasemap}
-			/>
-		</ControlPanel>
+			currentBasemap={currentBasemap}
+			onBasemapSelect={selectBasemap}
+		/>
 	</CustomControl>
 
 	<!-- Layers Control -->
 	<CustomControl position="top-right">
-		<ControlPanel 
+		<MapControlPanel 
+			controlType="layers"
 			showPanel={showLayersPanel}
 			onToggle={() => togglePanel('layers')}
 			title="Map Layers"
 			position="right"
-		>
-			<LayersPanel 
-				{layerStates}
-				{currentNetworkType}
-				onToggleLayer={toggleLayer}
-				onNetworkTypeChange={setNetworkType}
-			/>
-		</ControlPanel>
+			layerStates={layerStates}
+			currentNetworkType={currentNetworkType}
+			onToggleLayer={toggleLayer}
+			onNetworkTypeChange={setNetworkType}
+		/>
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
