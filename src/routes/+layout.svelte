@@ -1,11 +1,13 @@
 <script lang="ts">
 	import Header from './Header.svelte';
+	import FirefoxWarning from '$lib/FirefoxWarning.svelte';
 	import '../app.css';
 
 	let { children } = $props();
 </script>
 
 <div class="app">
+	<FirefoxWarning />
 	<Header />
 
 	<main>
