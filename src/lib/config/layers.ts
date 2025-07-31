@@ -18,26 +18,40 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		hasNetworkTypes: true,
 		paint: {},
-		getConfig: (networkType: string) => ({
-			name: 'Route Network',
-			id: `route-network-${networkType}`,
-			url: `pmtiles:///route_network_${networkType}est.pmtiles`,
-			sourceLayer: `route_network_${networkType}est`,
-			type: 'line' as const,
-			paint: {
-				'line-color': [
-					'interpolate', ['linear'], ['get', `all_${networkType}est_bicycle_go_dutch`],
-					1, '#808080', 49, '#808080', 50, '#ffff00', 99, '#ffff00',
-					100, '#80ff00', 249, '#80ff00', 250, '#00ffff', 499, '#00ffff',
-					500, '#80c0ff', 999, '#80c0ff', 1000, '#0080ff', 1999, '#0080ff',
-					2000, '#0000ff', 2999, '#0000ff', 3000, '#ff00ff'
-				],
-				'line-width': [
-					'interpolate', ['linear'], ['zoom'],
-					6, 0.4, 8, 1, 10, 2, 12, 4, 14, 8, 16, 14, 18, 24
-				]
-			}
-		})
+	   getConfig: (networkType: string, networkColor: string = 'bicycle') => {
+		   // Ensure unique layer and source ids for each networkType and color
+		   const layerId = `route-network-${networkType}-${networkColor}`;
+		   const url = networkType === 'fast'
+			   ? 'pmtiles:///route_network_fastest.pmtiles'
+			   : 'pmtiles:///route_network_quietest.pmtiles';
+		   const sourceLayer = networkType === 'fast'
+			   ? 'route_network_fastest'
+			   : 'route_network_quietest';
+		   // Attribute for color
+		   const colorAttr = networkType === 'fast'
+			   ? (networkColor === 'all' ? 'all_fastest_bicycle_go_dutch' : networkColor)
+			   : (networkColor === 'all' ? 'all_quietest_bicycle_go_dutch' : networkColor);
+		   return {
+			   name: 'Route Network',
+			   id: layerId,
+			   url,
+			   sourceLayer,
+			   type: 'line' as const,
+			   paint: {
+				   'line-color': [
+					   'interpolate', ['linear'], ['get', colorAttr],
+					   1, '#808080', 49, '#808080', 50, '#ffff00', 99, '#ffff00',
+					   100, '#80ff00', 249, '#80ff00', 250, '#00ffff', 499, '#00ffff',
+					   500, '#80c0ff', 999, '#80c0ff', 1000, '#0080ff', 1999, '#0080ff',
+					   2000, '#0000ff', 2999, '#0000ff', 3000, '#ff00ff'
+				   ],
+				   'line-width': [
+					   'interpolate', ['linear'], ['zoom'],
+					   6, 0.4, 8, 1, 10, 2, 12, 4, 14, 8, 16, 14, 18, 24
+				   ]
+			   }
+		   };
+	   }
 	},
 	coherentNetwork: {
 		name: 'Coherent Network',
