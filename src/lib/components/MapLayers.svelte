@@ -23,22 +23,24 @@
 {#each Object.entries(LAYERS) as [key, layer]}
 	{#if activeLayers[key]}
 		{@const { key: layerKey, config } = renderLayer(key, layer)}
-		<VectorTileSource id={config.id} url={config.url} attribution="PCTNI">
-			{#if config.type === 'fill'}
-				<FillLayer
-					sourceLayer={config.sourceLayer}
-					paint={config.paint}
-					minzoom={MAP_CONFIG.ZOOM.min}
-					maxzoom={MAP_CONFIG.ZOOM.max}
-				/>
-			{:else}
-				<LineLayer
-					sourceLayer={config.sourceLayer}
-					paint={config.paint}
-					minzoom={MAP_CONFIG.ZOOM.min}
-					maxzoom={MAP_CONFIG.ZOOM.max}
-				/>
-			{/if}
-		</VectorTileSource>
+		{#key layerKey}
+			<VectorTileSource id={config.id} url={config.url} attribution="PCTNI">
+				{#if config.type === 'fill'}
+					<FillLayer
+						sourceLayer={config.sourceLayer}
+						paint={config.paint}
+						minzoom={MAP_CONFIG.ZOOM.min}
+						maxzoom={MAP_CONFIG.ZOOM.max}
+					/>
+				{:else}
+					<LineLayer
+						sourceLayer={config.sourceLayer}
+						paint={config.paint}
+						minzoom={MAP_CONFIG.ZOOM.min}
+						maxzoom={MAP_CONFIG.ZOOM.max}
+					/>
+				{/if}
+			</VectorTileSource>
+		{/key}
 	{/if}
 {/each}
