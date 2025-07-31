@@ -27,10 +27,13 @@ export const LAYERS: Record<string, LayerConfig> = {
 		   const sourceLayer = networkType === 'fast'
 			   ? 'route_network_fastest'
 			   : 'route_network_quietest';
-		   // Attribute for color
-		   const colorAttr = networkType === 'fast'
-			   ? (networkColor === 'all' ? 'all_fastest_bicycle_go_dutch' : networkColor)
-			   : (networkColor === 'all' ? 'all_quietest_bicycle_go_dutch' : networkColor);
+		   // Map dropdown value to correct attribute
+		   let colorAttr = networkColor;
+		   if (networkColor === 'bicycle_go_dutch') {
+			   colorAttr = networkType === 'fast'
+				   ? 'all_fastest_bicycle_go_dutch'
+				   : 'all_quietest_bicycle_go_dutch';
+		   }
 		   return {
 			   name: 'Route Network',
 			   id: layerId,
