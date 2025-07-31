@@ -44,6 +44,7 @@
 
 	// URL state management
 	let updateTimeout: ReturnType<typeof setTimeout>;
+	let isUpdatingFromURL = false;
 
 	// Initialize from URL hash on mount
 	onMount(() => {
@@ -62,6 +63,8 @@
 		if (!browser) return;
 		
 		try {
+			isUpdatingFromURL = true;
+
 			const hash = window.location.hash.slice(1);
 			if (!hash) return;
 			
@@ -122,6 +125,10 @@
 			}
 		} catch (error) {
 			console.warn('Failed to parse URL hash:', error);
+		} finally {
+			setTimeout(() => {
+				isUpdatingFromURL = false;
+			}, 0);
 		}
 	}
 	
@@ -164,20 +171,8 @@
 		debouncedUpdateURL();
 	}
 
-	// Reactive statements to update URL when state changes
-	$: if (center && center.length === 2 && typeof zoom === 'number' && browser) {
-		debouncedUpdateURL();
-	}
-	
-	$: if (browser && layerStates) {
-		debouncedUpdateURL();
-	}
-	
-	$: if (browser && currentBasemap) {
-		debouncedUpdateURL();
-	}
-	
-	$: if (browser && currentNetworkType) {
+	// Reactive statement to update URL when state changes
+	$: if (browser && !isUpdatingFromURL) {
 		debouncedUpdateURL();
 	}
 
