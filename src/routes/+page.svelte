@@ -56,7 +56,9 @@
 	function setLayerStates(states: Partial<typeof layerStates>) {
 		for (const [key, value] of Object.entries(states)) {
 			if (key in layerStates) {
-				layerStates[key as keyof typeof layerStates] = value as boolean;
+				if (typeof value === 'boolean') {
+					layerStates[key as keyof typeof layerStates] = value;
+				}
 			}
 		}
 	}
