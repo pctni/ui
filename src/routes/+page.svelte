@@ -232,7 +232,7 @@
 
 	function toggleLayer(key: string) {
 		if (key in layerStates) {
-			layerStates[key as keyof typeof layerStates] = !layerStates[key as keyof typeof layerStates];
+			setLayerState(key, !layerStates[key as keyof typeof layerStates]);
 		}
 		
 		// Update URL immediately when layer is toggled
