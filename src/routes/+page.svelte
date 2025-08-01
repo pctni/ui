@@ -33,31 +33,34 @@
 	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
 	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
 	
-	// Layer states - using individual $state variables for proper reactivity
-	let routeNetwork = $state(false);
-	let coherentNetwork = $state(false);
-	let cycleNetwork = $state(false);
-	let gapAnalysis = $state(false);
-	let localAuthorities = $state(false);
+	// Layer states - using a single reactive object for better maintainability
+	const layerStates = $state({
+		routeNetwork: false,
+		coherentNetwork: false,
+		cycleNetwork: false,
+		gapAnalysis: false,
+		localAuthorities: false
+	});
 	
-	// Helper to get layer states as an object
+	// Helper to update a specific layer state
+	function setLayerState(key: keyof typeof layerStates, value: boolean) {
+		layerStates[key] = value;
+	}
+	
+	// Helper to get layer states as an object (for compatibility with existing code)
 	function getLayerStates() {
-		return {
-			routeNetwork,
-			coherentNetwork,
-			cycleNetwork,
-			gapAnalysis,
-			localAuthorities
-		};
+		return { ...layerStates };
 	}
 	
 	// Helper to set layer states from an object
-	function setLayerStates(states: Record<string, boolean>) {
-		routeNetwork = states.routeNetwork ?? routeNetwork;
-		coherentNetwork = states.coherentNetwork ?? coherentNetwork;
-		cycleNetwork = states.cycleNetwork ?? cycleNetwork;
-		gapAnalysis = states.gapAnalysis ?? gapAnalysis;
-		localAuthorities = states.localAuthorities ?? localAuthorities;
+	function setLayerStates(states: Partial<typeof layerStates>) {
+		for (const [key, value] of Object.entries(states)) {
+			if (key in layerStates) {
+				if (typeof value === 'boolean') {
+					layerStates[key as keyof typeof layerStates] = value;
+				}
+			}
+		}
 	}
 
 	// URL state management
@@ -138,12 +141,20 @@
 				// Enable specified layers
 				if (layersStr !== 'none') {
 					const activeLayers = layersStr.split(',');
+					// Reset all layers to false first
+					setLayerStates({
+						routeNetwork: false,
+						coherentNetwork: false,
+						cycleNetwork: false,
+						gapAnalysis: false,
+						localAuthorities: false
+					});
+					
+					// Enable specified layers
 					activeLayers.forEach(layerName => {
-						if (layerName === 'routeNetwork') routeNetwork = true;
-						else if (layerName === 'coherentNetwork') coherentNetwork = true;
-						else if (layerName === 'cycleNetwork') cycleNetwork = true;
-						else if (layerName === 'gapAnalysis') gapAnalysis = true;
-						else if (layerName === 'localAuthorities') localAuthorities = true;
+						if (layerName in layerStates) {
+							setLayerState(layerName as keyof typeof layerStates, true);
+						}
 					});
 				}
 			}
@@ -222,22 +233,8 @@
 	}
 
 	function toggleLayer(key: string) {
-		switch (key) {
-			case 'routeNetwork':
-				routeNetwork = !routeNetwork;
-				break;
-			case 'coherentNetwork':
-				coherentNetwork = !coherentNetwork;
-				break;
-			case 'cycleNetwork':
-				cycleNetwork = !cycleNetwork;
-				break;
-			case 'gapAnalysis':
-				gapAnalysis = !gapAnalysis;
-				break;
-			case 'localAuthorities':
-				localAuthorities = !localAuthorities;
-				break;
+		if (key in layerStates) {
+			setLayerState(key, !layerStates[key as keyof typeof layerStates]);
 		}
 		
 		// Update URL immediately when layer is toggled
