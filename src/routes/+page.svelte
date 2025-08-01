@@ -200,6 +200,10 @@
 	// Computed values using $derived for Svelte 5
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 
+	// Automatically update URL when relevant state changes
+	$: if (browser && !isUpdatingFromURL) {
+		debouncedUpdateURL();
+	}
 	// Event handlers
 	function togglePanel(panel: 'basemap' | 'layers') {
 		if (panel === 'basemap') {
