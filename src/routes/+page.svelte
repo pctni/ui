@@ -196,15 +196,6 @@
 		debouncedUpdateURL();
 	}
 
-	// Use $effect instead of legacy reactive statement for Svelte 5
-	$effect(() => {
-		if (browser && !isUpdatingFromURL) {
-			// Create a dependency on specific variables to avoid infinite loops
-			// This will only trigger when these specific values change
-			const watchVars = [zoom, center?.[0], center?.[1], currentBasemap, currentNetworkType, routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities];
-			debouncedUpdateURL();
-		}
-	});
 
 	// Computed values using $derived for Svelte 5
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
@@ -223,6 +214,11 @@
 	function selectBasemap(key: string) {
 		currentBasemap = key;
 		showBasemapPanel = false;
+		
+		// Update URL immediately when basemap is changed
+		if (browser && !isUpdatingFromURL) {
+			debouncedUpdateURL();
+		}
 	}
 
 	function toggleLayer(key: string) {
@@ -243,14 +239,29 @@
 				localAuthorities = !localAuthorities;
 				break;
 		}
+		
+		// Update URL immediately when layer is toggled
+		if (browser && !isUpdatingFromURL) {
+			debouncedUpdateURL();
+		}
 	}
 
 	function setNetworkType(type: string) {
 		currentNetworkType = type;
+		
+		// Update URL immediately when network type is changed
+		if (browser && !isUpdatingFromURL) {
+			debouncedUpdateURL();
+		}
 	}
-
+	
 	function setNetworkColor(color: string) {
 		currentNetworkColor = color;
+		
+		// Update URL immediately when network color is changed
+		if (browser && !isUpdatingFromURL) {
+			debouncedUpdateURL();
+		}
 	}
 </script>
 
