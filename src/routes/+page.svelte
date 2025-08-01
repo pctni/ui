@@ -40,17 +40,16 @@
 	let gapAnalysis = $state(false);
 	let localAuthorities = $state(false);
 	
-	// Memoized layer states object using $derived
-	let layerStates = $derived(
-		[routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities],
-		([routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities]) => ({
+	// Helper to get layer states as an object
+	function getLayerStates() {
+		return {
 			routeNetwork,
 			coherentNetwork,
 			cycleNetwork,
 			gapAnalysis,
 			localAuthorities
-		})
-	);
+		};
+	}
 	
 	// Helper to set layer states from an object
 	function setLayerStates(states: Record<string, boolean>) {
@@ -201,10 +200,6 @@
 	// Computed values using $derived for Svelte 5
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 
-	// Automatically update URL when relevant state changes
-	$: if (browser && !isUpdatingFromURL) {
-		debouncedUpdateURL();
-	}
 	// Event handlers
 	function togglePanel(panel: 'basemap' | 'layers') {
 		if (panel === 'basemap') {
