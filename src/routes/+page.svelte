@@ -163,8 +163,8 @@
 		
 		try {
 			// Get active layers using the helper function
-			const layerStates = getLayerStates();
-			const activeLayers = Object.entries(layerStates)
+			const currentLayerStates = getLayerStates();
+			const activeLayers = Object.entries(currentLayerStates)
 				.filter(([key, value]) => value)
 				.map(([key, value]) => key);
 			
