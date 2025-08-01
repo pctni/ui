@@ -21,26 +21,44 @@
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 
-	// State - using simple reactive variables
-	let showBasemapPanel = false;
-	let showLayersPanel = false;
-	let currentBasemap = 'gray';
-	let currentNetworkType = 'fast';
-	let currentNetworkColor = 'bicycle';
+	// State - using $state for Svelte 5 reactivity
+	let showBasemapPanel = $state(false);
+	let showLayersPanel = $state(false);
+	let currentBasemap = $state('gray');
+	let currentNetworkType = $state('fast');
+	let currentNetworkColor = $state('bicycle');
 	
 	// Map state
-	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
-	let zoom: number = MAP_CONFIG.DEFAULT_ZOOM;
-	let mapInstance: import('maplibre-gl').Map | undefined;
+	let center: [number, number] = $state(MAP_CONFIG.DEFAULT_CENTER);
+	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
+	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
 	
-	// Layer states
-	const layerStates: Record<string, boolean> = {
-		routeNetwork: false,
-		coherentNetwork: false,
-		cycleNetwork: false,
-		gapAnalysis: false,
-		localAuthorities: false
-	};
+	// Layer states - using individual $state variables for proper reactivity
+	let routeNetwork = $state(false);
+	let coherentNetwork = $state(false);
+	let cycleNetwork = $state(false);
+	let gapAnalysis = $state(false);
+	let localAuthorities = $state(false);
+	
+	// Helper to get layer states as an object
+	function getLayerStates() {
+		return {
+			routeNetwork,
+			coherentNetwork,
+			cycleNetwork,
+			gapAnalysis,
+			localAuthorities
+		};
+	}
+	
+	// Helper to set layer states from an object
+	function setLayerStates(states: Record<string, boolean>) {
+		routeNetwork = states.routeNetwork ?? routeNetwork;
+		coherentNetwork = states.coherentNetwork ?? coherentNetwork;
+		cycleNetwork = states.cycleNetwork ?? cycleNetwork;
+		gapAnalysis = states.gapAnalysis ?? gapAnalysis;
+		localAuthorities = states.localAuthorities ?? localAuthorities;
+	}
 
 	// URL state management
 	let updateTimeout: ReturnType<typeof setTimeout>;
@@ -109,17 +127,23 @@
 				const layersStr = parts[5];
 				
 				// Reset all layers to false first
-				Object.keys(layerStates).forEach(key => {
-					layerStates[key] = false;
+				setLayerStates({
+					routeNetwork: false,
+					coherentNetwork: false,
+					cycleNetwork: false,
+					gapAnalysis: false,
+					localAuthorities: false
 				});
 				
 				// Enable specified layers
 				if (layersStr !== 'none') {
 					const activeLayers = layersStr.split(',');
 					activeLayers.forEach(layerName => {
-						if (layerStates.hasOwnProperty(layerName)) {
-							layerStates[layerName] = true;
-						}
+						if (layerName === 'routeNetwork') routeNetwork = true;
+						else if (layerName === 'coherentNetwork') coherentNetwork = true;
+						else if (layerName === 'cycleNetwork') cycleNetwork = true;
+						else if (layerName === 'gapAnalysis') gapAnalysis = true;
+						else if (layerName === 'localAuthorities') localAuthorities = true;
 					});
 				}
 			}
@@ -137,7 +161,8 @@
 		if (!browser || !center || typeof zoom !== 'number') return;
 		
 		try {
-			// Get active layers
+			// Get active layers using the helper function
+			const layerStates = getLayerStates();
 			const activeLayers = Object.entries(layerStates)
 				.filter(([key, value]) => value)
 				.map(([key, value]) => key);
@@ -171,13 +196,18 @@
 		debouncedUpdateURL();
 	}
 
-	// Reactive statement to update URL when state changes
-	$: if (browser && !isUpdatingFromURL) {
-		debouncedUpdateURL();
-	}
+	// Use $effect instead of legacy reactive statement for Svelte 5
+	$effect(() => {
+		if (browser && !isUpdatingFromURL) {
+			// Create a dependency on specific variables to avoid infinite loops
+			// This will only trigger when these specific values change
+			const watchVars = [zoom, center?.[0], center?.[1], currentBasemap, currentNetworkType, routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities];
+			debouncedUpdateURL();
+		}
+	});
 
-	// Computed values
-	$: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+	// Computed values using $derived for Svelte 5
+	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 
 	// Event handlers
 	function togglePanel(panel: 'basemap' | 'layers') {
@@ -196,7 +226,23 @@
 	}
 
 	function toggleLayer(key: string) {
-		layerStates[key] = !layerStates[key];
+		switch (key) {
+			case 'routeNetwork':
+				routeNetwork = !routeNetwork;
+				break;
+			case 'coherentNetwork':
+				coherentNetwork = !coherentNetwork;
+				break;
+			case 'cycleNetwork':
+				cycleNetwork = !cycleNetwork;
+				break;
+			case 'gapAnalysis':
+				gapAnalysis = !gapAnalysis;
+				break;
+			case 'localAuthorities':
+				localAuthorities = !localAuthorities;
+				break;
+		}
 	}
 
 	function setNetworkType(type: string) {
@@ -246,13 +292,13 @@
 
 	<!-- Layers Control -->
 	<CustomControl position="top-right">
-		<MapControlPanel 
+		<MapControlPanel
 			controlType="layers"
 			showPanel={showLayersPanel}
 			onToggle={() => togglePanel('layers')}
 			title="Map Layers"
 			position="right"
-			layerStates={layerStates}
+			layerStates={getLayerStates()}
 			currentNetworkType={currentNetworkType}
 			currentNetworkColor={currentNetworkColor}
 			onToggleLayer={toggleLayer}
@@ -262,6 +308,6 @@
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+	<MapLayers activeLayers={getLayerStates()} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
 
