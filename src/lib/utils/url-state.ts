@@ -57,7 +57,7 @@ function parseNetworkType(parts: string[]): string | null {
 	if (parts.length < 5 || !parts[4]) return null;
 	
 	const networkType = parts[4];
-	return ['fast', 'quiet'].includes(networkType) ? networkType : null;
+	return ['fast', 'quiet', 'none'].includes(networkType) ? networkType : null;
 }
 
 /**
@@ -115,6 +115,7 @@ export function generateURLHash(state: MapState): string {
 		.map(([key]) => key);
 	
 	const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
+	const networkTypeStr = state.networkType || 'none';
 	
-	return `#${state.zoom.toFixed(2)}/${state.center[1].toFixed(4)}/${state.center[0].toFixed(4)}/${state.basemap}/${state.networkType}/${layersStr}`;
+	return `#${state.zoom.toFixed(2)}/${state.center[1].toFixed(4)}/${state.center[0].toFixed(4)}/${state.basemap}/${networkTypeStr}/${layersStr}`;
 }

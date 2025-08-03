@@ -33,7 +33,7 @@
 	
 	// Layer states
 	const layerStates: LayerStates = $state({
-		routeNetwork: false,
+		routeNetwork: true,
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
@@ -145,8 +145,12 @@
 		}
 	}
 
-	function setNetworkType(type: string) {
-		currentNetworkType = type;
+	function toggleNetworkType(type: string) {
+		if (currentNetworkType === type) {
+			currentNetworkType = '';
+		} else {
+			currentNetworkType = type;
+		}
 		
 		// Update URL immediately when network type is changed
 		if (browser && !isUpdatingFromURL) {
@@ -212,7 +216,7 @@
 			currentNetworkType={currentNetworkType}
 			currentNetworkColor={currentNetworkColor}
 			onToggleLayer={toggleLayer}
-			onNetworkTypeChange={setNetworkType}
+			onNetworkTypeChange={toggleNetworkType}
 			onNetworkColorChange={setNetworkColor}
 		/>
 	</CustomControl>

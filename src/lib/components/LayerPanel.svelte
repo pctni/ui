@@ -18,60 +18,51 @@
 </script>
 
 {#each Object.entries(LAYERS) as [key, layer]}
+	{@const legendConfig = getLegendConfig(key)}
 	{#if key === 'routeNetwork'}
 		<div class="layer-section">
 			<div class="layer-header">
-				<label class="layer-toggle">
+				<h4 class="layer-heading">{layer.name}</h4>
+			</div>
+			<div class="network-types">
+				<label>
 					<input 
 						type="checkbox" 
-						checked={layerStates?.[key] || false}
-						onchange={() => onToggleLayer?.(key)}
+						name="networkType" 
+						value="fast" 
+						checked={currentNetworkType === 'fast'}
+						onchange={() => onNetworkTypeChange?.('fast')}
 					/>
-					<h4 class="layer-heading">{layer.name}</h4>
+					Fastest
+				</label>
+				<label>
+					<input 
+						type="checkbox" 
+						name="networkType" 
+						value="quiet" 
+						checked={currentNetworkType === 'quiet'}
+						onchange={() => onNetworkTypeChange?.('quiet')}
+					/>
+					Quietest
 				</label>
 			</div>
-			{#if layerStates?.[key]}
-				<div class="network-types">
-					<label>
-						<input 
-							type="radio" 
-							name="networkType" 
-							value="fast" 
-							checked={currentNetworkType === 'fast'}
-							onchange={() => onNetworkTypeChange?.('fast')}
-						/>
-						Fastest
-					</label>
-					<label>
-						<input 
-							type="radio" 
-							name="networkType" 
-							value="quiet" 
-							checked={currentNetworkType === 'quiet'}
-							onchange={() => onNetworkTypeChange?.('quiet')}
-						/>
-						Quietest
-					</label>
+			<div class="color-section">
+				<label class="color-label" for="network-color-select">Colour:</label>
+				<select 
+					id="network-color-select"
+					class="color-dropdown"
+					value={currentNetworkColor || 'bicycle'}
+					onchange={(e) => onNetworkColorChange?.(e.target.value)}
+				>
+					<option value="bicycle">Baseline cycling</option>
+					<option value="bicycle_govtarget">Government target</option>
+					<option value="bicycle_go_dutch">Go Dutch</option>
+				</select>
+			</div>
+			{#if legendConfig}
+				<div class="legend-container">
+					<Legend config={legendConfig} />
 				</div>
-				<div class="color-section">
-					<label class="color-label" for="network-color-select">Colour:</label>
-					<select 
-						id="network-color-select"
-						class="color-dropdown"
-						value={currentNetworkColor || 'bicycle'}
-						onchange={(e) => onNetworkColorChange?.(e.target.value)}
-					>
-						<option value="bicycle">Baseline cycling</option>
-						<option value="bicycle_govtarget">Government target</option>
-						<option value="bicycle_go_dutch">Go Dutch</option>
-					</select>
-				</div>
-				{@const legendConfig = getLegendConfig(key)}
-				{#if legendConfig}
-					<div class="legend-container">
-						<Legend config={legendConfig} />
-					</div>
-				{/if}
 			{/if}
 		</div>
 	{:else}
