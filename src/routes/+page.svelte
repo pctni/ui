@@ -18,22 +18,18 @@
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 	import { debounce } from '$lib/utils/debounce.js';
-	import { parseURLHash, generateURLHash, type LayerStates, type MapState } from '$lib/utils/url-state.js';
+	import { parseURLHash as parseURL, generateURLHash, type LayerStates, type MapState } from '$lib/utils/url-state.js';
 
 	// UI Panel states
-	const panelStates = $state({
-		showBasemapPanel: false,
-		showLayersPanel: false
-	});
+	let showBasemapPanel = $state(false);
+	let showLayersPanel = $state(false);
 	
 	// Map state
-	const mapState = $state({
-		center: MAP_CONFIG.DEFAULT_CENTER as [number, number],
-		zoom: MAP_CONFIG.DEFAULT_ZOOM,
-		basemap: 'gray',
-		networkType: 'fast',
-		networkColor: 'bicycle'
-	});
+	let center: [number, number] = $state(MAP_CONFIG.DEFAULT_CENTER);
+	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
+	let currentBasemap = $state('gray');
+	let currentNetworkType = $state('fast');
+	let currentNetworkColor = $state('bicycle');
 	
 	// Layer states
 	const layerStates: LayerStates = $state({
@@ -46,9 +42,67 @@
 	
 	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
 	let isUpdatingFromURL = false;
+	let updateTimeout: number;
 	
 	// Layer keys for URL parsing
 	const layerKeys = Object.keys(layerStates);
+	
+	// Debounced URL update function
+	const debouncedUpdateURL = debounce(() => {
+		if (!browser || !center || typeof zoom !== 'number') return;
+		
+		try {
+			const currentState: MapState = {
+				zoom,
+				center,
+				basemap: currentBasemap,
+				networkType: currentNetworkType,
+				networkColor: currentNetworkColor,
+				layers: layerStates
+			};
+			
+			const newHash = generateURLHash(currentState);
+			
+			if (window.location.hash !== newHash) {
+				window.history.replaceState(null, '', newHash);
+			}
+		} catch (error) {
+			console.warn('Failed to update URL hash:', error);
+		}
+	}, 100);
+	
+	// Parse URL hash and update state
+	function handleURLHashChange() {
+		if (!browser) return;
+		
+		try {
+			isUpdatingFromURL = true;
+			const updates = parseURL(window.location.hash, layerKeys);
+			
+			if (updates.zoom !== undefined) zoom = updates.zoom;
+			if (updates.center !== undefined) center = updates.center;
+			if (updates.basemap !== undefined) currentBasemap = updates.basemap;
+			if (updates.networkType !== undefined) currentNetworkType = updates.networkType;
+			if (updates.layers !== undefined) {
+				// Reset all layers to false first
+				Object.keys(layerStates).forEach(key => {
+					layerStates[key as keyof typeof layerStates] = false;
+				});
+				// Apply new layer states
+				Object.entries(updates.layers).forEach(([key, value]) => {
+					if (key in layerStates && typeof value === 'boolean') {
+						layerStates[key as keyof typeof layerStates] = value;
+					}
+				});
+			}
+		} catch (error) {
+			console.warn('Failed to parse URL hash:', error);
+		} finally {
+			setTimeout(() => {
+				isUpdatingFromURL = false;
+			}, 0);
+		}
+	}
 
 	// Initialize from URL hash on mount
 	onMount(() => {
@@ -113,30 +167,18 @@
 				const layersStr = parts[5];
 				
 				// Reset all layers to false first
-				setLayerStates({
-					routeNetwork: false,
-					coherentNetwork: false,
-					cycleNetwork: false,
-					gapAnalysis: false,
-					localAuthorities: false
+				Object.keys(layerStates).forEach(key => {
+					layerStates[key as keyof typeof layerStates] = false;
 				});
 				
 				// Enable specified layers
 				if (layersStr !== 'none') {
 					const activeLayers = layersStr.split(',');
-					// Reset all layers to false first
-					setLayerStates({
-						routeNetwork: false,
-						coherentNetwork: false,
-						cycleNetwork: false,
-						gapAnalysis: false,
-						localAuthorities: false
-					});
 					
 					// Enable specified layers
 					activeLayers.forEach(layerName => {
 						if (layerName in layerStates) {
-							setLayerState(layerName as keyof typeof layerStates, true);
+							layerStates[layerName as keyof typeof layerStates] = true;
 						}
 					});
 				}
@@ -155,9 +197,8 @@
 		if (!browser || !center || typeof zoom !== 'number') return;
 		
 		try {
-			// Get active layers using the helper function
-			const currentLayerStates = getLayerStates();
-			const activeLayers = Object.entries(currentLayerStates)
+			// Get active layers
+			const activeLayers = Object.entries(layerStates)
 				.filter(([key, value]) => value)
 				.map(([key, value]) => key);
 			
@@ -175,11 +216,6 @@
 		}
 	}
 	
-	// Debounce URL updates
-	function debouncedUpdateURL() {
-		clearTimeout(updateTimeout);
-		updateTimeout = setTimeout(updateURLHash, 100);
-	}
 	
 	// Handle map events
 	function handleMoveEnd() {
@@ -217,7 +253,7 @@
 
 	function toggleLayer(key: string) {
 		if (key in layerStates) {
-			setLayerState(key, !layerStates[key as keyof typeof layerStates]);
+			layerStates[key as keyof typeof layerStates] = !layerStates[key as keyof typeof layerStates];
 		}
 		
 		// Update URL immediately when layer is toggled
@@ -289,7 +325,7 @@
 			onToggle={() => togglePanel('layers')}
 			title="Map Layers"
 			position="right"
-			layerStates={getLayerStates()}
+			layerStates={layerStates}
 			currentNetworkType={currentNetworkType}
 			currentNetworkColor={currentNetworkColor}
 			onToggleLayer={toggleLayer}
@@ -299,6 +335,6 @@
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={getLayerStates()} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
 
