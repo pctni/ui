@@ -1,42 +1,72 @@
 #!/bin/bash
+# build.sh
 
-# Build script for PCTNI UI
-# Downloads PMTiles files and builds the application
+# Exit on any error
+set -e
 
-set -e  # Exit on any error
+# Function to detect if we're on Linux
+is_linux() {
+    [[ "$(uname)" == "Linux" ]]
+}
 
-echo "Starting PCTNI build process..."
+# Function to detect if we're on Windows/PowerShell
+is_windows() {
+    [[ "$(uname)" == "MINGW"* ]] || [[ "$(uname)" == "MSYS"* ]] || [[ "$(uname)" == "CYGWIN"* ]]
+}
 
-# Create static directory if it doesn't exist
-mkdir -p static
+# --- Download PMTiles files if they don't exist ---
+DEST_DIR="static"
+BASE_URL="https://github.com/pctni/ui/releases/download/v0.0.1"
 
-# Download PMTiles files if they don't exist
+# Array of pmtiles files to download
 PMTILES_FILES=(
-    "route_network_fastest.pmtiles"
-    "route_network_quietest.pmtiles"
-    "corenet_network_ni.pmtiles"
-    "cycle_net_processed.pmtiles"
-    "gap_map.pmtiles"
-    "Local_Authority.pmtiles"
+  "corenet_network_ni.pmtiles"
+  "gap_map.pmtiles"
+  "cycle_net_processed.pmtiles"
+  "Local_Authority.pmtiles"
+  "route_network_fastest.pmtiles"
+  "route_network_quietest.pmtiles"
 )
 
-BASE_URL="https://github.com/pctni/pctni/releases/download/v0.1.0"
+# Create the destination directory if it doesn't exist
+mkdir -p "$DEST_DIR"
 
-for file in "${PMTILES_FILES[@]}"; do
-    if [ ! -f "static/$file" ]; then
-        echo "Downloading $file..."
-        if command -v curl >/dev/null 2>&1; then
-            curl -L -o "static/$file" "$BASE_URL/$file"
-        elif command -v wget >/dev/null 2>&1; then
-            wget -O "static/$file" "$BASE_URL/$file"
-        else
-            echo "Error: Neither curl nor wget is available"
-            exit 1
-        fi
-    else
-        echo "$file already exists, skipping download"
-    fi
+# Download each pmtiles file using a for loop
+for FILENAME in "${PMTILES_FILES[@]}"; do
+  DEST_FILE="$DEST_DIR/$FILENAME"
+  URL="$BASE_URL/$FILENAME"
+  
+  # Check if the file already exists
+  if [ ! -f "$DEST_FILE" ]; then
+    echo "File $DEST_FILE not found. Downloading..."
+    
+    # Download the file using curl
+    curl -L -o "$DEST_FILE" "$URL"
+    
+    echo "Download of $FILENAME complete."
+  else
+    echo "File $DEST_FILE already exists. Skipping download."
+  fi
 done
 
-echo "PMTiles files ready"
-echo "Build script completed successfully"
+# --- Run the rest of the original build command from netlify.toml ---
+echo "Running the main build process..."
+
+# Only remove and reinstall if needed
+if [ "$1" = "--clean" ]; then
+  echo "Clean build requested..."
+  [ -f "package-lock.json" ] && rm package-lock.json
+  [ -d "node_modules" ] && rm -rf node_modules
+  npm install --force
+fi
+
+# Check if this is a dev command
+if [ "$1" = "dev" ] || [[ "$0" == *"vite dev"* ]]; then
+  # Skip build for dev mode, just ensure dependencies
+  if [ ! -d "node_modules" ]; then
+    npm install --force
+  fi
+else
+  # For production builds, just download pmtiles - vite build will be called separately
+  echo "PMTiles files ready for build."
+fi
