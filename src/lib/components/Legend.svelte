@@ -30,7 +30,7 @@
 		background: #fff;
 		padding: 10px;
 		border-radius: 4px;
-		box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
 	h4 {
 		margin: 0 0 5px 0;

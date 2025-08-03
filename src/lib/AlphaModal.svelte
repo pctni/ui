@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	
+
 	let popupElement = $state<HTMLDivElement>();
 
 	let { showAlphaModal = $bindable(false) } = $props();
@@ -34,8 +34,8 @@
 
 {#if showAlphaModal}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div 
-		class="popup-overlay" 
+	<div
+		class="popup-overlay"
 		onclick={handleOverlayClick}
 		onkeydown={handleKeydown}
 		role="dialog"
@@ -53,31 +53,51 @@
 			</div>
 			<div class="popup-body">
 				<p>
-					The Propensity to Cycle Tool for Northern Ireland (PCTNI) is an <a href="https://github.com/pctni" target="_blank" rel="noopener noreferrer">open-source</a> planning support system that builds on the
-                    <a href="https://www.pct.bike" target="_blank" rel="noopener noreferrer">Propensity to Cycle Tool for England and Wales (PCT)</a>
-                    and the
-                    <a href="https://www.npt.scot" target="_blank" rel="noopener noreferrer">Network Planning Tool for Scotland (NPT)</a>.
-                    The tool is currently under active development so results may change.
-                    This tool uses imperfect input datasets including <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>.
-                    The results are intended to support planning and investment decisions, but should not be used as the sole basis for such decisions.
-                    Users should verify outputs against local knowledge and up-to-date datasets where available before proceeding with detailed design or investment decisions.
+					The Propensity to Cycle Tool for Northern Ireland (PCTNI) is an <a
+						href="https://github.com/pctni"
+						target="_blank"
+						rel="noopener noreferrer">open-source</a
+					>
+					planning support system that builds on the
+					<a href="https://www.pct.bike" target="_blank" rel="noopener noreferrer"
+						>Propensity to Cycle Tool for England and Wales (PCT)</a
+					>
+					and the
+					<a href="https://www.npt.scot" target="_blank" rel="noopener noreferrer"
+						>Network Planning Tool for Scotland (NPT)</a
+					>. The tool is currently under active development so results may change. This tool uses
+					imperfect input datasets including
+					<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer"
+						>OpenStreetMap</a
+					>. The results are intended to support planning and investment decisions, but should not
+					be used as the sole basis for such decisions. Users should verify outputs against local
+					knowledge and up-to-date datasets where available before proceeding with detailed design
+					or investment decisions.
 				</p>
 				<p>
-					The estimates of cycling potential are currently based on 2011 Census data on travel to work.
-                    The results should be interpreted based on the understanding that they highlight places of high cycling demand to major and long-standing work-places.
-					The tool currently omits cycling potential for travel to schools, shopping, leisure and other purposes, a limitation that we are working to address in future updates.
+					The estimates of cycling potential are currently based on 2011 Census data on travel to
+					work. The results should be interpreted based on the understanding that they highlight
+					places of high cycling demand to major and long-standing work-places. The tool currently
+					omits cycling potential for travel to schools, shopping, leisure and other purposes, a
+					limitation that we are working to address in future updates.
 				</p>
 				<p>
-					Users are solely responsible for how they interpret and use the data. If you identify any errors or have concerns about the data or tool, please let us know via the open access <a href="https://github.com/pctni/ui/issues" target="_blank" rel="noopener noreferrer">issue tracker</a> (requires a <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub account</a>).
+					Users are solely responsible for how they interpret and use the data. If you identify any
+					errors or have concerns about the data or tool, please let us know via the open access <a
+						href="https://github.com/pctni/ui/issues"
+						target="_blank"
+						rel="noopener noreferrer">issue tracker</a
+					>
+					(requires a
+					<a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub account</a
+					>).
 				</p>
 				<p>
 					<strong>Mapping data:</strong> Date of OSM data on which network results are based: July 2025.
 				</p>
 			</div>
 			<div class="popup-footer">
-				<button class="dismiss-button" onclick={dismissModal}>
-					Continue
-				</button>
+				<button class="dismiss-button" onclick={dismissModal}> Continue </button>
 			</div>
 		</div>
 	</div>
@@ -149,7 +169,9 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 4px;
-		transition: background-color 0.2s, color 0.2s;
+		transition:
+			background-color 0.2s,
+			color 0.2s;
 	}
 
 	.close-button:hover {
@@ -203,14 +225,14 @@
 			width: 95%;
 			margin: 10px;
 		}
-		
+
 		.popup-header,
 		.popup-body,
 		.popup-footer {
 			padding-left: 15px;
 			padding-right: 15px;
 		}
-		
+
 		.popup-header h3 {
 			font-size: 1.1em;
 		}

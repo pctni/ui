@@ -10,7 +10,7 @@
 </script>
 
 {#each Object.entries(BASEMAPS) as [key, basemap]}
-	<button 
+	<button
 		class="option"
 		class:selected={currentBasemap === key}
 		onclick={() => handleBasemapSelect(key)}

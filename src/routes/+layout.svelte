@@ -50,7 +50,7 @@
 	}
 
 	/* Footer hidden since it's empty */
-	
+
 	/* Override default background */
 	:global(body) {
 		background: white;
