@@ -3,11 +3,18 @@
 	import { LEGEND_CONFIGS } from '$lib/config/legends.js';
 	import Legend from '$lib/components/Legend.svelte';
 
-	let { layerStates, currentNetworkType, currentNetworkColor, onToggleLayer, onNetworkTypeChange, onNetworkColorChange } = $props();
+	let {
+		layerStates,
+		currentNetworkType,
+		currentNetworkColor,
+		onToggleLayer,
+		onNetworkTypeChange,
+		onNetworkColorChange
+	} = $props();
 
-	function getLegendConfig(layerKey) {
+	function getLegendConfig(layerKey: string) {
 		if (!LEGEND_CONFIGS[layerKey]) return null;
-		
+
 		const legendConfig = LEGEND_CONFIGS[layerKey];
 		if (typeof legendConfig === 'function') {
 			return legendConfig(currentNetworkType, currentNetworkColor);
@@ -22,24 +29,31 @@
 	{#if key === 'routeNetwork'}
 		<div class="layer-section">
 			<div class="layer-header">
-				<h4 class="layer-heading">{layer.name}</h4>
+				<label>
+					<input
+						type="checkbox"
+						checked={layerStates?.['routeNetwork'] || false}
+						onchange={() => onToggleLayer?.('routeNetwork')}
+					/>
+					<h4 class="layer-heading">{layer.name}</h4>
+				</label>
 			</div>
 			<div class="network-types">
 				<label>
-					<input 
-						type="checkbox" 
-						name="networkType" 
-						value="fast" 
+					<input
+						type="radio"
+						name="networkType"
+						value="fast"
 						checked={currentNetworkType === 'fast'}
 						onchange={() => onNetworkTypeChange?.('fast')}
 					/>
 					Fastest
 				</label>
 				<label>
-					<input 
-						type="checkbox" 
-						name="networkType" 
-						value="quiet" 
+					<input
+						type="radio"
+						name="networkType"
+						value="quiet"
 						checked={currentNetworkType === 'quiet'}
 						onchange={() => onNetworkTypeChange?.('quiet')}
 					/>
@@ -48,11 +62,11 @@
 			</div>
 			<div class="color-section">
 				<label class="color-label" for="network-color-select">Colour:</label>
-				<select 
+				<select
 					id="network-color-select"
 					class="color-dropdown"
 					value={currentNetworkColor || 'bicycle'}
-					onchange={(e) => onNetworkColorChange?.(e.target.value)}
+					onchange={(e) => onNetworkColorChange?.((e.target as HTMLSelectElement).value)}
 				>
 					<option value="bicycle">Baseline cycling</option>
 					<option value="bicycle_govtarget">Government target</option>
@@ -68,8 +82,8 @@
 	{:else}
 		<div class="option">
 			<label>
-				<input 
-					type="checkbox" 
+				<input
+					type="checkbox"
 					checked={layerStates?.[key] || false}
 					onchange={() => onToggleLayer?.(key)}
 				/>

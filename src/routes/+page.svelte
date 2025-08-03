@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { 
-		MapLibre, 
-		FullScreenControl, 
-		GeolocateControl, 
+	import {
+		MapLibre,
+		FullScreenControl,
+		GeolocateControl,
 		ScaleControl,
 		CustomControl,
 		NavigationControl
@@ -10,7 +10,7 @@
 	import { PMTilesProtocol } from '@svelte-maplibre-gl/pmtiles';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	
+
 	// Import configuration and utilities
 	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
@@ -18,39 +18,44 @@
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 	import { debounce } from '$lib/utils/debounce.js';
-	import { parseURLHash as parseURL, generateURLHash, type LayerStates, type MapState } from '$lib/utils/url-state.js';
+	import {
+		parseURLHash as parseURL,
+		generateURLHash,
+		type LayerStates,
+		type MapState
+	} from '$lib/utils/url-state.js';
 
 	// UI Panel states
 	let showBasemapPanel = $state(false);
 	let showLayersPanel = $state(false);
-	
+
 	// Map state
 	let center: [number, number] = $state(MAP_CONFIG.DEFAULT_CENTER);
 	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state('fast');
 	let currentNetworkColor = $state('bicycle');
-	
+
 	// Layer states
 	const layerStates: LayerStates = $state({
-		routeNetwork: true,
+		routeNetwork: false,
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
 		localAuthorities: false
 	});
-	
+
 	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
 	let isUpdatingFromURL = false;
 	let updateTimeout: number;
-	
+
 	// Layer keys for URL parsing
 	const layerKeys = Object.keys(layerStates);
-	
+
 	// Debounced URL update function
 	const debouncedUpdateURL = debounce(() => {
 		if (!browser || !center || typeof zoom !== 'number') return;
-		
+
 		try {
 			const currentState: MapState = {
 				zoom,
@@ -60,9 +65,9 @@
 				networkColor: currentNetworkColor,
 				layers: layerStates
 			};
-			
+
 			const newHash = generateURLHash(currentState);
-			
+
 			if (window.location.hash !== newHash) {
 				window.history.replaceState(null, '', newHash);
 			}
@@ -70,7 +75,7 @@
 			console.warn('Failed to update URL hash:', error);
 		}
 	}, 100);
-	
+
 	function applyStateUpdates(updates: Partial<MapState>) {
 		isUpdatingFromURL = true;
 		try {
@@ -82,7 +87,7 @@
 				Object.assign(layerStates, updates.layers);
 			}
 		} finally {
-			setTimeout(() => isUpdatingFromURL = false, 0);
+			setTimeout(() => (isUpdatingFromURL = false), 0);
 		}
 	}
 
@@ -98,17 +103,15 @@
 			return () => window.removeEventListener('hashchange', handleHashChange);
 		}
 	});
-	
-	
+
 	// Handle map events
 	function handleMoveEnd() {
 		debouncedUpdateURL();
 	}
-	
+
 	function handleZoomEnd() {
 		debouncedUpdateURL();
 	}
-
 
 	// Computed values using $derived for Svelte 5
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
@@ -127,7 +130,7 @@
 	function selectBasemap(key: string) {
 		currentBasemap = key;
 		showBasemapPanel = false;
-		
+
 		// Update URL immediately when basemap is changed
 		if (browser && !isUpdatingFromURL) {
 			debouncedUpdateURL();
@@ -138,29 +141,29 @@
 		if (key in layerStates) {
 			layerStates[key as keyof typeof layerStates] = !layerStates[key as keyof typeof layerStates];
 		}
-		
+
 		// Update URL immediately when layer is toggled
 		if (browser && !isUpdatingFromURL) {
 			debouncedUpdateURL();
 		}
 	}
 
-	function toggleNetworkType(type: string) {
+	function setOrClearNetworkType(type: string) {
 		if (currentNetworkType === type) {
 			currentNetworkType = '';
 		} else {
 			currentNetworkType = type;
 		}
-		
+
 		// Update URL immediately when network type is changed
 		if (browser && !isUpdatingFromURL) {
 			debouncedUpdateURL();
 		}
 	}
-	
+
 	function setNetworkColor(color: string) {
 		currentNetworkColor = color;
-		
+
 		// Update URL immediately when network color is changed
 		if (browser && !isUpdatingFromURL) {
 			debouncedUpdateURL();
@@ -184,7 +187,7 @@
 	<NavigationControl position="top-left" />
 	<FullScreenControl position="top-left" />
 	<GeolocateControl position="top-left" />
-	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+	<ScaleControl position="bottom-left" unit="metric" maxWidth={200} />
 
 	<!-- Search/Geocoder Control -->
 	<CustomControl position="top-right">
@@ -193,13 +196,13 @@
 
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
-		<MapControlPanel 
+		<MapControlPanel
 			controlType="basemap"
 			showPanel={showBasemapPanel}
 			onToggle={() => togglePanel('basemap')}
 			title="Change basemap"
 			position="left"
-			currentBasemap={currentBasemap}
+			{currentBasemap}
 			onBasemapSelect={selectBasemap}
 		/>
 	</CustomControl>
@@ -212,16 +215,19 @@
 			onToggle={() => togglePanel('layers')}
 			title="Map Layers"
 			position="right"
-			layerStates={layerStates}
-			currentNetworkType={currentNetworkType}
-			currentNetworkColor={currentNetworkColor}
+			{layerStates}
+			{currentNetworkType}
+			{currentNetworkColor}
 			onToggleLayer={toggleLayer}
-			onNetworkTypeChange={toggleNetworkType}
+			onNetworkTypeChange={setOrClearNetworkType}
 			onNetworkColorChange={setNetworkColor}
 		/>
 	</CustomControl>
 
 	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+	<MapLayers
+		activeLayers={layerStates}
+		networkType={currentNetworkType}
+		networkColor={currentNetworkColor}
+	/>
 </MapLibre>
-
