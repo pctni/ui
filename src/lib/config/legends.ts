@@ -11,12 +11,15 @@ export interface LegendConfig {
 }
 
 // Color schemes based on the layer configurations
-export const LEGEND_CONFIGS: Record<string, LegendConfig | ((networkType?: string, networkColor?: string) => LegendConfig)> = {
+export const LEGEND_CONFIGS: Record<
+	string,
+	LegendConfig | ((networkType?: string, networkColor?: string) => LegendConfig)
+> = {
 	routeNetwork: (networkType: string = 'fast', networkColor: string = 'bicycle') => {
 		const colorFieldLabels: Record<string, string> = {
-			'bicycle': 'Baseline cycling',
-			'bicycle_govtarget': 'Government target',
-			'bicycle_go_dutch': 'Go Dutch'
+			bicycle: 'Baseline cycling',
+			bicycle_govtarget: 'Government target',
+			bicycle_go_dutch: 'Go Dutch'
 		};
 
 		return {

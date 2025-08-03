@@ -18,17 +18,17 @@ export const BASEMAPS: Record<string, BasemapConfig> = {
 		name: 'Cycling',
 		style: {
 			version: 8 as const,
-			sources: { 
-				'cyclosm-raster': { 
-					type: 'raster' as const, 
+			sources: {
+				'cyclosm-raster': {
+					type: 'raster' as const,
 					tiles: [
-						'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 
-						'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 
+						'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+						'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
 						'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
-					], 
-					tileSize: 256, 
-					attribution: '© CyclOSM | Map data: © OpenStreetMap contributors' 
-				} 
+					],
+					tileSize: 256,
+					attribution: '© CyclOSM | Map data: © OpenStreetMap contributors'
+				}
 			},
 			layers: [{ id: 'cyclosm-raster', type: 'raster' as const, source: 'cyclosm-raster' }]
 		}

@@ -23,10 +23,10 @@
 
 	// Northern Ireland bounding box
 	const NI_BOUNDS = {
-		minLng: -8.2,   // Western boundary
-		maxLng: -5.3,   // Eastern boundary  
-		minLat: 54.0,   // Southern boundary
-		maxLat: 55.5    // Northern boundary
+		minLng: -8.2, // Western boundary
+		maxLng: -5.3, // Eastern boundary
+		minLat: 54.0, // Southern boundary
+		maxLat: 55.5 // Northern boundary
 	};
 
 	let searchQuery = $state('');
@@ -73,15 +73,16 @@
 			const results: NominatimResult[] = await response.json();
 
 			// Further filter results to Northern Ireland bounds
-			searchResults = results.filter(result => {
+			searchResults = results.filter((result) => {
 				const lat = parseFloat(result.lat);
 				const lon = parseFloat(result.lon);
-				return lat >= NI_BOUNDS.minLat && 
-				       lat <= NI_BOUNDS.maxLat && 
-				       lon >= NI_BOUNDS.minLng && 
-				       lon <= NI_BOUNDS.maxLng;
+				return (
+					lat >= NI_BOUNDS.minLat &&
+					lat <= NI_BOUNDS.maxLat &&
+					lon >= NI_BOUNDS.minLng &&
+					lon <= NI_BOUNDS.maxLng
+				);
 			});
-
 		} catch (error) {
 			console.error('Geocoding error:', error);
 			searchResults = [];
@@ -144,8 +145,8 @@
 
 <div class="geocoder-container">
 	<div class="search-input-container">
-		<input 
-			type="text" 
+		<input
+			type="text"
 			bind:value={searchQuery}
 			oninput={handleInput}
 			onkeydown={handleKeydown}
@@ -153,16 +154,18 @@
 			class="search-input"
 			autocomplete="off"
 		/>
-		
+
 		{#if searchQuery}
-			<button 
+			<button
 				onclick={clearSearch}
 				class="clear-button"
 				title="Clear search"
 				aria-label="Clear search"
 			>
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-					<path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm3.5 10.1l-1.4 1.4L8 9.4l-2.1 2.1-1.4-1.4L6.6 8 4.5 5.9l1.4-1.4L8 6.6l2.1-2.1 1.4 1.4L9.4 8l2.1 2.1z"/>
+					<path
+						d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm3.5 10.1l-1.4 1.4L8 9.4l-2.1 2.1-1.4-1.4L6.6 8 4.5 5.9l1.4-1.4L8 6.6l2.1-2.1 1.4 1.4L9.4 8l2.1 2.1z"
+					/>
 				</svg>
 			</button>
 		{/if}
@@ -170,7 +173,9 @@
 		{#if isLoading}
 			<div class="loading-indicator">
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="spin">
-					<path d="M8 0v4l3-3 1 1-3 3h4v2h-4l3 3-1 1-3-3v4H6v-4L3 9l-1-1 3-3H1V4h4L2 1l1-1 3 3V0h2z"/>
+					<path
+						d="M8 0v4l3-3 1 1-3 3h4v2h-4l3 3-1 1-3-3v4H6v-4L3 9l-1-1 3-3H1V4h4L2 1l1-1 3 3V0h2z"
+					/>
 				</svg>
 			</div>
 		{/if}
@@ -179,10 +184,7 @@
 	{#if showResults && searchResults.length > 0}
 		<div class="results-container">
 			{#each searchResults as result}
-				<button 
-					onclick={() => selectResult(result)}
-					class="result-item"
-				>
+				<button onclick={() => selectResult(result)} class="result-item">
 					<div class="result-name">
 						{result.display_name.split(',')[0]}
 					</div>
@@ -194,9 +196,7 @@
 		</div>
 	{:else if showResults && searchResults.length === 0 && !isLoading && searchQuery.length >= 2}
 		<div class="results-container">
-			<div class="no-results">
-				No results found in Northern Ireland
-			</div>
+			<div class="no-results">No results found in Northern Ireland</div>
 		</div>
 	{/if}
 </div>
@@ -221,13 +221,13 @@
 		border-radius: 4px;
 		font-size: 14px;
 		background: white;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.search-input:focus {
 		outline: none;
 		border-color: #0066cc;
-		box-shadow: 0 2px 8px rgba(0,102,204,0.2);
+		box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
 	}
 
 	.clear-button {
@@ -260,8 +260,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.results-container {
@@ -273,7 +277,7 @@
 		border: 1px solid #ccc;
 		border-top: none;
 		border-radius: 0 0 4px 4px;
-		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 		max-height: 300px;
 		overflow-y: auto;
 		z-index: 1000;
