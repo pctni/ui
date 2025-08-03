@@ -4,9 +4,6 @@
 		FullScreenControl, 
 		GeolocateControl, 
 		ScaleControl,
-		VectorTileSource,
-		LineLayer,
-		FillLayer,
 		CustomControl,
 		NavigationControl
 	} from 'svelte-maplibre-gl';
@@ -14,27 +11,32 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	
-	// Import configuration
+	// Import configuration and utilities
 	import { BASEMAPS } from '$lib/config/basemaps.js';
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
+	import { debounce } from '$lib/utils/debounce.js';
+	import { parseURLHash, generateURLHash, type LayerStates, type MapState } from '$lib/utils/url-state.js';
 
-	// State - using $state for Svelte 5 reactivity
-	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(false);
-	let currentBasemap = $state('gray');
-	let currentNetworkType = $state('fast');
-	let currentNetworkColor = $state('bicycle');
+	// UI Panel states
+	const panelStates = $state({
+		showBasemapPanel: false,
+		showLayersPanel: false
+	});
 	
 	// Map state
-	let center: [number, number] = $state(MAP_CONFIG.DEFAULT_CENTER);
-	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
-	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
+	const mapState = $state({
+		center: MAP_CONFIG.DEFAULT_CENTER as [number, number],
+		zoom: MAP_CONFIG.DEFAULT_ZOOM,
+		basemap: 'gray',
+		networkType: 'fast',
+		networkColor: 'bicycle'
+	});
 	
-	// Layer states - using a single reactive object for better maintainability
-	const layerStates = $state({
+	// Layer states
+	const layerStates: LayerStates = $state({
 		routeNetwork: false,
 		coherentNetwork: false,
 		cycleNetwork: false,
@@ -42,30 +44,11 @@
 		localAuthorities: false
 	});
 	
-	// Helper to update a specific layer state
-	function setLayerState(key: keyof typeof layerStates, value: boolean) {
-		layerStates[key] = value;
-	}
-	
-	// Helper to get layer states as an object (for compatibility with existing code)
-	function getLayerStates() {
-		return { ...layerStates };
-	}
-	
-	// Helper to set layer states from an object
-	function setLayerStates(states: Partial<typeof layerStates>) {
-		for (const [key, value] of Object.entries(states)) {
-			if (key in layerStates) {
-				if (typeof value === 'boolean') {
-					layerStates[key as keyof typeof layerStates] = value;
-				}
-			}
-		}
-	}
-
-	// URL state management
-	let updateTimeout: ReturnType<typeof setTimeout>;
+	let mapInstance: import('maplibre-gl').Map | undefined = $state(undefined);
 	let isUpdatingFromURL = false;
+	
+	// Layer keys for URL parsing
+	const layerKeys = Object.keys(layerStates);
 
 	// Initialize from URL hash on mount
 	onMount(() => {
