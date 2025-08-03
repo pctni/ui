@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { BASEMAPS } from '$lib/config/basemaps.js';
-	import { LAYERS } from '$lib/config/layers.js';
-	import { LEGEND_CONFIGS } from '$lib/config/legends.js';
-	import Legend from '$lib/components/Legend.svelte';
-	import type { LegendConfig } from '$lib/config/legends.js';
+	import BasemapPanel from './BasemapPanel.svelte';
+	import LayerPanel from './LayerPanel.svelte';
 
 	type ControlType = 'basemap' | 'layers';
 	type Position = 'left' | 'right';
@@ -44,30 +41,6 @@
 		onNetworkColorChange
 	}: Props = $props();
 
-	function handleBasemapSelect(key: string) {
-		onBasemapSelect?.(key);
-		onToggle(); // Close panel after selection
-	}
-
-	function handleLayerToggle(key: string) {
-		onToggleLayer?.(key);
-		// Note: We don't auto-close the panel for layer selections
-		// to allow users to toggle multiple layers
-	}
-
-	// Get legend config for a layer
-	function getLegendConfig(layerKey: string): LegendConfig | null {
-		if (!LEGEND_CONFIGS[layerKey]) return null;
-		
-		const legendConfig = LEGEND_CONFIGS[layerKey];
-		if (typeof legendConfig === 'function') {
-			// Route network legend that depends on network type and color
-			return legendConfig(currentNetworkType, currentNetworkColor);
-		} else {
-			// Static legend config
-			return legendConfig;
-		}
-	}
 </script>
 
 <div class="control-panel {position}" class:expanded={showPanel}>
@@ -102,101 +75,9 @@
 	{#if showPanel}
 		<div class="panel-content">
 			{#if controlType === 'basemap'}
-				<!-- Basemap options -->
-			{#each Object.entries(BASEMAPS) as [key, basemap]}
-				<button 
-					class="option"
-					class:selected={currentBasemap === key}
-					onclick={() => handleBasemapSelect(key)}
-					aria-label="Select {basemap.name} basemap"
-				>
-					{basemap.name}
-				</button>
-			{/each}
-		{:else if controlType === 'layers'}
-			<!-- Layer options -->
-			{#each Object.entries(LAYERS) as [key, layer]}
-					{#if key === 'routeNetwork'}
-						<!-- Route Network as heading with visibility toggle and network type options -->
-						<div class="layer-section">
-							<div class="layer-header">
-								<label class="layer-toggle">
-									<input 
-										type="checkbox" 
-										checked={layerStates?.[key] || false}
-										onchange={() => handleLayerToggle(key)}
-									/>
-									<h4 class="layer-heading">{layer.name}</h4>
-								</label>
-							</div>
-							{#if layerStates?.[key]}
-								<div class="network-types">
-									<label>
-										<input 
-											type="radio" 
-											name="networkType" 
-											value="fast" 
-											checked={currentNetworkType === 'fast'}
-											onchange={() => onNetworkTypeChange?.('fast')}
-										/>
-										Fastest
-									</label>
-									<label>
-										<input 
-											type="radio" 
-											name="networkType" 
-											value="quiet" 
-											checked={currentNetworkType === 'quiet'}
-											onchange={() => onNetworkTypeChange?.('quiet')}
-										/>
-										Quietest
-									</label>
-								</div>
-								<div class="color-section">
-									<label class="color-label" for="network-color-select">Colour:</label>
-									<select 
-										id="network-color-select"
-										class="color-dropdown"
-										value={currentNetworkColor || 'bicycle'}
-										onchange={(e) => onNetworkColorChange?.(e.target.value)}
-									>
-										<option value="bicycle">Baseline cycling</option>
-										<option value="bicycle_govtarget">Government target</option>
-										<option value="bicycle_go_dutch">Go Dutch</option>
-									</select>
-								</div>
-								<!-- Route Network Legend -->
-								{@const legendConfig = getLegendConfig(key)}
-								{#if legendConfig}
-									<div class="legend-container">
-										<Legend config={legendConfig} />
-									</div>
-								{/if}
-							{/if}
-						</div>
-					{:else}
-						<!-- Regular layer checkbox -->
-						<div class="option">
-							<label>
-								<input 
-									type="checkbox" 
-									checked={layerStates?.[key] || false}
-									onchange={() => handleLayerToggle(key)}
-								/>
-								{layer.name}
-							</label>
-							<!-- Layer Legend -->
-							{#if layerStates?.[key]}
-								{@const legendConfig = getLegendConfig(key)}
-								{#if legendConfig}
-									<div class="legend-container">
-										<Legend config={legendConfig} />
-									</div>
-								{/if}
-							{/if}
-						</div>
-					{/if}
-				{/each}
+				<BasemapPanel {currentBasemap} {onBasemapSelect} {onToggle} />
+			{:else if controlType === 'layers'}
+				<LayerPanel {layerStates} {currentNetworkType} {currentNetworkColor} {onToggleLayer} {onNetworkTypeChange} {onNetworkColorChange} />
 			{/if}
 		</div>
 	{/if}
@@ -277,133 +158,4 @@
 		transform: rotate(180deg);
 	}
 
-	.option {
-		cursor: pointer;
-		border-radius: 4px;
-		font-size: 14px;
-		background: none;
-		border: none;
-		text-align: left;
-		width: 100%;
-		transition: background-color 0.2s ease;
-	}
-
-	.option:hover {
-		background-color: #f0f0f0;
-	}
-
-	.option.selected {
-		background-color: #007bff;
-		color: #fff;
-	}
-
-	.option label {
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-		width: 100%;
-	}
-
-	.option input[type="checkbox"], 
-	.option input[type="radio"] {
-		margin-right: 8px;
-	}
-
-	.layer-section {
-		margin-bottom: 1px;
-	}
-
-	.layer-header {
-		margin-bottom: 0;
-	}
-
-	.layer-toggle {
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-		width: 100%;
-	}
-
-	.layer-toggle input[type="checkbox"] {
-		margin-right: 8px;
-	}
-
-	.layer-heading {
-		margin: 0;
-		font-size: 14px;
-		font-weight: 500;
-		color: #333;
-		flex: 1;
-	}
-
-	.network-types {
-		display: flex;
-		gap: 10px;
-		margin-top: 8px;
-		margin-left: 24px;
-	}
-
-	.network-types label {
-		display: flex;
-		align-items: center;
-		font-size: 12px;
-	}
-
-	.network-types input[type="radio"] {
-		margin-right: 4px;
-	}
-
-	.color-section {
-		margin-top: 8px;
-		margin-left: 24px;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-
-	.color-label {
-		font-size: 12px;
-		color: #333;
-		font-weight: 500;
-	}
-
-	.color-dropdown {
-		font-size: 12px;
-		padding: 2px 4px;
-		border: 1px solid #ccc;
-		border-radius: 3px;
-		background-color: #fff;
-		cursor: pointer;
-	}
-
-	.color-dropdown:hover {
-		border-color: #999;
-	}
-
-	.color-dropdown:focus {
-		outline: none;
-		border-color: #007acc;
-		box-shadow: 0 0 0 1px #007acc;
-	}
-
-	.legend-container {
-		margin-top: 12px;
-		margin-left: 24px;
-		padding: 8px 0;
-	}
-
-	.legend-container :global(.legend) {
-		position: static !important;
-		box-shadow: none !important;
-		border: 1px solid #e0e0e0;
-		border-radius: 4px;
-		background-color: #f9f9f9;
-		font-size: 11px;
-	}
-
-	.legend-container :global(.legend h4) {
-		font-size: 12px;
-		margin-bottom: 6px;
-		color: #555;
-	}
 </style>

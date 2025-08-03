@@ -71,150 +71,33 @@
 		}
 	}, 100);
 	
-	// Parse URL hash and update state
-	function handleURLHashChange() {
-		if (!browser) return;
-		
+	function applyStateUpdates(updates: Partial<MapState>) {
+		isUpdatingFromURL = true;
 		try {
-			isUpdatingFromURL = true;
-			const updates = parseURL(window.location.hash, layerKeys);
-			
 			if (updates.zoom !== undefined) zoom = updates.zoom;
 			if (updates.center !== undefined) center = updates.center;
 			if (updates.basemap !== undefined) currentBasemap = updates.basemap;
 			if (updates.networkType !== undefined) currentNetworkType = updates.networkType;
-			if (updates.layers !== undefined) {
-				// Reset all layers to false first
-				Object.keys(layerStates).forEach(key => {
-					layerStates[key as keyof typeof layerStates] = false;
-				});
-				// Apply new layer states
-				Object.entries(updates.layers).forEach(([key, value]) => {
-					if (key in layerStates && typeof value === 'boolean') {
-						layerStates[key as keyof typeof layerStates] = value;
-					}
-				});
+			if (updates.layers) {
+				Object.assign(layerStates, updates.layers);
 			}
-		} catch (error) {
-			console.warn('Failed to parse URL hash:', error);
 		} finally {
-			setTimeout(() => {
-				isUpdatingFromURL = false;
-			}, 0);
+			setTimeout(() => isUpdatingFromURL = false, 0);
 		}
 	}
 
-	// Initialize from URL hash on mount
 	onMount(() => {
 		if (browser) {
-			parseURLHash();
-			window.addEventListener('hashchange', parseURLHash);
-			
-			return () => {
-				window.removeEventListener('hashchange', parseURLHash);
+			const handleHashChange = () => {
+				const updates = parseURL(window.location.hash, layerKeys);
+				applyStateUpdates(updates);
 			};
+
+			handleHashChange();
+			window.addEventListener('hashchange', handleHashChange);
+			return () => window.removeEventListener('hashchange', handleHashChange);
 		}
 	});
-	
-	// Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
-	function parseURLHash() {
-		if (!browser) return;
-		
-		try {
-			isUpdatingFromURL = true;
-
-			const hash = window.location.hash.slice(1);
-			if (!hash) return;
-			
-			const parts = hash.split('/');
-			
-			// Parse basic map position (zoom/lat/lng)
-			if (parts.length >= 3) {
-				const [zoomStr, latStr, lngStr] = parts;
-				const newZoom = parseFloat(zoomStr);
-				const newLat = parseFloat(latStr);
-				const newLng = parseFloat(lngStr);
-				
-				// Validate ranges
-				const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
-				const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
-				const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
-				
-				if (isValidZoom && isValidLat && isValidLng) {
-					zoom = newZoom;
-					center = [newLng, newLat];
-				}
-			}
-			
-			// Parse basemap
-			if (parts.length >= 4 && parts[3]) {
-				const basemapName = parts[3];
-				if (BASEMAPS[basemapName]) {
-					currentBasemap = basemapName;
-				}
-			}
-			
-			// Parse network type
-			if (parts.length >= 5 && parts[4]) {
-				const networkType = parts[4];
-				if (networkType === 'fast' || networkType === 'quiet') {
-					currentNetworkType = networkType;
-				}
-			}
-			
-			// Parse active layers
-			if (parts.length >= 6 && parts[5]) {
-				const layersStr = parts[5];
-				
-				// Reset all layers to false first
-				Object.keys(layerStates).forEach(key => {
-					layerStates[key as keyof typeof layerStates] = false;
-				});
-				
-				// Enable specified layers
-				if (layersStr !== 'none') {
-					const activeLayers = layersStr.split(',');
-					
-					// Enable specified layers
-					activeLayers.forEach(layerName => {
-						if (layerName in layerStates) {
-							layerStates[layerName as keyof typeof layerStates] = true;
-						}
-					});
-				}
-			}
-		} catch (error) {
-			console.warn('Failed to parse URL hash:', error);
-		} finally {
-			setTimeout(() => {
-				isUpdatingFromURL = false;
-			}, 0);
-		}
-	}
-	
-	// Update URL with current map state
-	function updateURLHash() {
-		if (!browser || !center || typeof zoom !== 'number') return;
-		
-		try {
-			// Get active layers
-			const activeLayers = Object.entries(layerStates)
-				.filter(([key, value]) => value)
-				.map(([key, value]) => key);
-			
-			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
-			
-			// Format: #zoom/lat/lng/basemap/networkType/layers
-			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
-			
-			// Only update if hash actually changed
-			if (window.location.hash !== newHash) {
-				window.history.replaceState(null, '', newHash);
-			}
-		} catch (error) {
-			console.warn('Failed to update URL hash:', error);
-		}
-	}
 	
 	
 	// Handle map events
