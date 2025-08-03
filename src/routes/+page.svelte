@@ -33,7 +33,7 @@
 	let center: [number, number] = $state(MAP_CONFIG.DEFAULT_CENTER);
 	let zoom: number = $state(MAP_CONFIG.DEFAULT_ZOOM);
 	let currentBasemap = $state('gray');
-	let currentNetworkType = $state('fast');
+	let currentNetworkType = $state('');
 	let currentNetworkColor = $state('bicycle');
 
 	// Layer states
@@ -143,10 +143,12 @@
 	}
 
 	function setOrClearNetworkType(type: string) {
-		if (currentNetworkType === type) {
+		if (type === '' || currentNetworkType === type) {
 			currentNetworkType = '';
+			layerStates.routeNetwork = false;
 		} else {
 			currentNetworkType = type;
+			layerStates.routeNetwork = true;
 		}
 		updateURL();
 	}

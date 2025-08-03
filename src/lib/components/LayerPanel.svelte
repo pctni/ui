@@ -28,34 +28,21 @@
 	{@const legendConfig = getLegendConfig(key)}
 	{#if key === 'routeNetwork'}
 		<div class="layer-section">
-			<div class="layer-header">
-				<label>
-					<input
-						type="checkbox"
-						checked={layerStates?.['routeNetwork'] || false}
-						onchange={() => onToggleLayer?.('routeNetwork')}
-					/>
-					<h4 class="layer-heading">{layer.name}</h4>
-				</label>
-			</div>
+			<h4 class="layer-heading">{layer.name}</h4>
 			<div class="network-types">
 				<label>
 					<input
-						type="radio"
-						name="networkType"
-						value="fast"
+						type="checkbox"
 						checked={currentNetworkType === 'fast'}
-						onchange={() => onNetworkTypeChange?.('fast')}
+						onchange={() => onNetworkTypeChange?.(currentNetworkType === 'fast' ? '' : 'fast')}
 					/>
 					Fastest
 				</label>
 				<label>
 					<input
-						type="radio"
-						name="networkType"
-						value="quiet"
+						type="checkbox"
 						checked={currentNetworkType === 'quiet'}
-						onchange={() => onNetworkTypeChange?.('quiet')}
+						onchange={() => onNetworkTypeChange?.(currentNetworkType === 'quiet' ? '' : 'quiet')}
 					/>
 					Quietest
 				</label>
