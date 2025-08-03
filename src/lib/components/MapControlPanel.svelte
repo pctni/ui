@@ -98,7 +98,7 @@
 	}
 
 	.control-panel.right {
-		min-width: 120px;
+		min-width: 200px;
 	}
 
 	.control-panel.expanded.left {
@@ -106,7 +106,7 @@
 	}
 
 	.control-panel.expanded.right {
-		width: 250px;
+		width: 300px;
 	}
 
 	.panel-header {
@@ -118,8 +118,8 @@
 		justify-content: center;
 		align-items: center;
 		width: 100%;
-		padding: 8px 12px;
-		font-size: 14px;
+		padding: 10px 15px;
+		font-size: 16px;
 		font-weight: 500;
 		color: #333;
 		transition: background-color 0.2s ease;
