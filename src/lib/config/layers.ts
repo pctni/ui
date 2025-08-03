@@ -18,43 +18,85 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		hasNetworkTypes: true,
 		paint: {},
-	   getConfig: (networkType: string, networkColor: string = 'bicycle') => {
-		   // Ensure unique layer and source ids for each networkType and color
-		   const layerId = `route-network-${networkType}-${networkColor}`;
-		   const url = networkType === 'fast'
-			   ? 'pmtiles:///route_network_fastest.pmtiles'
-			   : 'pmtiles:///route_network_quietest.pmtiles';
-		   const sourceLayer = networkType === 'fast'
-			   ? 'route_network_fastest'
-			   : 'route_network_quietest';
-		   // Map dropdown value to correct attribute
-		   let colorAttr = networkColor;
-		   if (networkColor === 'bicycle_go_dutch') {
-			   colorAttr = networkType === 'fast'
-				   ? 'all_fastest_bicycle_go_dutch'
-				   : 'all_quietest_bicycle_go_dutch';
-		   }
-		   return {
-			   name: 'Route Network',
-			   id: layerId,
-			   url,
-			   sourceLayer,
-			   type: 'line' as const,
-			   paint: {
-				   'line-color': [
-					   'interpolate', ['linear'], ['get', colorAttr],
-					   1, '#808080', 49, '#808080', 50, '#ffff00', 99, '#ffff00',
-					   100, '#80ff00', 249, '#80ff00', 250, '#00ffff', 499, '#00ffff',
-					   500, '#80c0ff', 999, '#80c0ff', 1000, '#0080ff', 1999, '#0080ff',
-					   2000, '#0000ff', 2999, '#0000ff', 3000, '#ff00ff'
-				   ],
-				   'line-width': [
-					   'interpolate', ['linear'], ['zoom'],
-					   6, 0.4, 8, 1, 10, 2, 12, 4, 14, 8, 16, 14, 18, 24
-				   ]
-			   }
-		   };
-	   }
+		getConfig: (networkType: string, networkColor: string = 'bicycle') => {
+			// Ensure unique layer and source ids for each networkType and color
+			const layerId = `route-network-${networkType}-${networkColor}`;
+			const url =
+				networkType === 'fast'
+					? 'pmtiles:///route_network_fastest.pmtiles'
+					: 'pmtiles:///route_network_quietest.pmtiles';
+			const sourceLayer =
+				networkType === 'fast' ? 'route_network_fastest' : 'route_network_quietest';
+			// Map dropdown value to correct attribute
+			let colorAttr = networkColor;
+			if (networkColor === 'bicycle_go_dutch') {
+				colorAttr =
+					networkType === 'fast' ? 'all_fastest_bicycle_go_dutch' : 'all_quietest_bicycle_go_dutch';
+			}
+			return {
+				name: 'Route Network',
+				id: layerId,
+				url,
+				sourceLayer,
+				type: 'line' as const,
+				paint: {
+					'line-color': [
+						'interpolate',
+						['linear'],
+						['get', colorAttr],
+						1,
+						'#808080',
+						49,
+						'#808080',
+						50,
+						'#ffff00',
+						99,
+						'#ffff00',
+						100,
+						'#80ff00',
+						249,
+						'#80ff00',
+						250,
+						'#00ffff',
+						499,
+						'#00ffff',
+						500,
+						'#80c0ff',
+						999,
+						'#80c0ff',
+						1000,
+						'#0080ff',
+						1999,
+						'#0080ff',
+						2000,
+						'#0000ff',
+						2999,
+						'#0000ff',
+						3000,
+						'#ff00ff'
+					],
+					'line-width': [
+						'interpolate',
+						['linear'],
+						['zoom'],
+						6,
+						0.4,
+						8,
+						1,
+						10,
+						2,
+						12,
+						4,
+						14,
+						8,
+						16,
+						14,
+						18,
+						24
+					]
+				}
+			};
+		}
 	},
 	coherentNetwork: {
 		name: 'Coherent Network',
@@ -64,8 +106,11 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		paint: {
 			'line-color': [
-				'step', ['to-number', ['get', 'all_fastest_bicycle_go_dutch'], 0],
-				'#ffbf00', 1000, '#de3163'
+				'step',
+				['to-number', ['get', 'all_fastest_bicycle_go_dutch'], 0],
+				'#ffbf00',
+				1000,
+				'#de3163'
 			],
 			'line-width': ['interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8]
 		}
@@ -78,12 +123,18 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		paint: {
 			'line-color': [
-				'match', ['get', 'cycle_segregation'],
-				'Segregated Track (wide)', '#006400',
-				'Off Road Path', '#3cb371',
-				'Segregated Track (narrow)', '#90ee90',
-				'Shared Footway', '#ffd700',
-				'Painted Cycle Lane', '#ff0000',
+				'match',
+				['get', 'cycle_segregation'],
+				'Segregated Track (wide)',
+				'#006400',
+				'Off Road Path',
+				'#3cb371',
+				'Segregated Track (narrow)',
+				'#90ee90',
+				'Shared Footway',
+				'#ffd700',
+				'Painted Cycle Lane',
+				'#ff0000',
 				'#cccccc'
 			],
 			'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 2, 16, 4]
@@ -97,16 +148,19 @@ export const LAYERS: Record<string, LayerConfig> = {
 		type: 'line',
 		paint: {
 			'line-color': [
-				'match', ['get', 'gap_priority'],
-				'Critical Gap', '#ff0000',
-				'High Priority Gap', '#ff8000',
-				'Medium Priority Gap', '#ffff00',
-				'No Gap', '#cccccc',
+				'match',
+				['get', 'gap_priority'],
+				'Critical Gap',
+				'#ff0000',
+				'High Priority Gap',
+				'#ff8000',
+				'Medium Priority Gap',
+				'#ffff00',
+				'No Gap',
+				'#cccccc',
 				'rgba(0, 0, 0, 0)'
 			],
-			'line-width': [
-				'case', ['==', ['get', 'gap_priority'], 'No Gap'], 1, 3
-			]
+			'line-width': ['case', ['==', ['get', 'gap_priority'], 'No Gap'], 1, 3]
 		}
 	},
 	localAuthorities: {
@@ -123,7 +177,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 } as const;
 
 export const MAP_CONFIG = {
-	BOUNDS: [-7.815460, 54.049760, -5.447300, 55.220990] as [number, number, number, number],
+	BOUNDS: [-7.81546, 54.04976, -5.4473, 55.22099] as [number, number, number, number],
 	ZOOM: { min: 6, max: 18 },
 	DEFAULT_CENTER: [-6.6, 54.6] as [number, number],
 	DEFAULT_ZOOM: 8

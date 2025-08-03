@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	
+
 	let showWarning = $state(false);
 	let isFirefox = $state(false);
 	let popupElement = $state<HTMLDivElement>();
@@ -8,7 +8,7 @@
 	onMount(() => {
 		// Check if the user is using Firefox
 		isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-		
+
 		// Only show warning if it's Firefox and user hasn't dismissed it before
 		if (isFirefox && !localStorage.getItem('firefox-warning-dismissed')) {
 			showWarning = true;
@@ -37,8 +37,8 @@
 
 {#if showWarning}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div 
-		class="popup-overlay" 
+	<div
+		class="popup-overlay"
 		onclick={handleOverlayClick}
 		onkeydown={handleKeydown}
 		role="dialog"
@@ -56,15 +56,16 @@
 			</div>
 			<div class="popup-body">
 				<p>
-					<strong>Note:</strong> Layers may not work in your current browser, due to an 
-					<a href="https://github.com/protomaps/PMTiles/issues/272" target="_blank" rel="noopener">issue</a> 
-					with viewing the PMTiles file format on Firefox. Please re-open in a different browser such as Chrome.
+					<strong>Note:</strong> Layers may not work in your current browser, due to an
+					<a href="https://github.com/protomaps/PMTiles/issues/272" target="_blank" rel="noopener"
+						>issue</a
+					>
+					with viewing the PMTiles file format on Firefox. Please re-open in a different browser such
+					as Chrome.
 				</p>
 			</div>
 			<div class="popup-footer">
-				<button class="dismiss-button" onclick={dismissWarning}>
-					Got it
-				</button>
+				<button class="dismiss-button" onclick={dismissWarning}> Got it </button>
 			</div>
 		</div>
 	</div>
@@ -136,7 +137,9 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 4px;
-		transition: background-color 0.2s, color 0.2s;
+		transition:
+			background-color 0.2s,
+			color 0.2s;
 	}
 
 	.close-button:hover {
@@ -191,14 +194,14 @@
 			width: 95%;
 			margin: 10px;
 		}
-		
+
 		.popup-header,
 		.popup-body,
 		.popup-footer {
 			padding-left: 15px;
 			padding-right: 15px;
 		}
-		
+
 		.popup-header h3 {
 			font-size: 1.1em;
 		}

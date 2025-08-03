@@ -1,146 +1,183 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced PCTNI Map URL State Test</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .test-url { 
-            background: #f5f5f5; 
-            padding: 10px; 
-            margin: 5px 0; 
-            border-radius: 4px; 
-            word-break: break-all;
-        }
-        .section { margin: 20px 0; }
-        h3 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
-    </style>
-</head>
-<body>
-    <h1>🗺️ Enhanced PCTNI Map URL State Management</h1>
-    
-    <div class="section">
-        <h3>🔗 New Enhanced URL Pattern</h3>
-        <p><strong>Format:</strong> <code>#zoom/lat/lng/basemap/networkType/layers</code></p>
-        <p><strong>Example:</strong> <code>#11.48/55.8977/-3.2594/gray/fast/routeNetwork,cycleNetwork</code></p>
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Enhanced PCTNI Map URL State Test</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 20px;
+			}
+			.test-url {
+				background: #f5f5f5;
+				padding: 10px;
+				margin: 5px 0;
+				border-radius: 4px;
+				word-break: break-all;
+			}
+			.section {
+				margin: 20px 0;
+			}
+			h3 {
+				color: #333;
+				border-bottom: 2px solid #007bff;
+				padding-bottom: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>🗺️ Enhanced PCTNI Map URL State Management</h1>
 
-    <div class="section">
-        <h3>🎯 Test URLs with Full State</h3>
-        
-        <h4>Basic Map Views:</h4>
-        <div class="test-url">
-            <a href="http://localhost:5173/#8.00/54.6000/-6.6000/gray/fast/none" target="_blank">
-                Northern Ireland Overview - Gray basemap, no layers
-            </a>
-        </div>
-        
-        <div class="test-url">
-            <a href="http://localhost:5173/#12.00/54.5973/-5.9301/streets/fast/routeNetwork" target="_blank">
-                Belfast - Streets basemap, Route Network enabled
-            </a>
-        </div>
-        
-        <h4>With Multiple Layers:</h4>
-        <div class="test-url">
-            <a href="http://localhost:5173/#11.48/55.8977/-3.2594/cycling/fast/routeNetwork,cycleNetwork,localAuthorities" target="_blank">
-                Multiple layers - Cycling basemap, Route + Cycle + Authorities
-            </a>
-        </div>
-        
-        <div class="test-url">
-            <a href="http://localhost:5173/#10.25/54.7500/-6.5000/gray/quiet/coherentNetwork,gapAnalysis" target="_blank">
-                Analysis view - Coherent Network + Gap Analysis, Quietest route type
-            </a>
-        </div>
-        
-        <h4>Different Network Types:</h4>
-        <div class="test-url">
-            <a href="http://localhost:5173/#13.50/54.5973/-5.9301/streets/fast/routeNetwork" target="_blank">
-                Belfast Zoom - Fast Route Network
-            </a>
-        </div>
-        
-        <div class="test-url">
-            <a href="http://localhost:5173/#13.50/54.5973/-5.9301/streets/quiet/routeNetwork" target="_blank">
-                Belfast Zoom - Quiet Route Network
-            </a>
-        </div>
-        
-        <h4>All Layers Enabled:</h4>
-        <div class="test-url">
-            <a href="http://localhost:5173/#9.75/54.6500/-6.2500/cycling/fast/routeNetwork,coherentNetwork,cycleNetwork,gapAnalysis,localAuthorities" target="_blank">
-                Full Analysis - All data layers enabled
-            </a>
-        </div>
-    </div>
+		<div class="section">
+			<h3>🔗 New Enhanced URL Pattern</h3>
+			<p><strong>Format:</strong> <code>#zoom/lat/lng/basemap/networkType/layers</code></p>
+			<p>
+				<strong>Example:</strong>
+				<code>#11.48/55.8977/-3.2594/gray/fast/routeNetwork,cycleNetwork</code>
+			</p>
+		</div>
 
-    <div class="section">
-        <h3>✅ Expected Behavior</h3>
-        <ul>
-            <li><strong>Map Position:</strong> Loads at specified zoom level and coordinates</li>
-            <li><strong>Basemap:</strong> Loads the correct basemap (gray/streets/cycling)</li>
-            <li><strong>Network Type:</strong> Sets route network to fast/quiet</li>
-            <li><strong>Layer States:</strong> Enables only the specified layers</li>
-            <li><strong>URL Updates:</strong> URL changes when you:
-                <ul>
-                    <li>Pan or zoom the map</li>
-                    <li>Change basemap</li>
-                    <li>Toggle layers on/off</li>
-                    <li>Switch between fast/quiet routes</li>
-                </ul>
-            </li>
-            <li><strong>Browser History:</strong> Back/forward buttons preserve all state</li>
-            <li><strong>Shareable:</strong> URLs preserve complete app state</li>
-        </ul>
-    </div>
+		<div class="section">
+			<h3>🎯 Test URLs with Full State</h3>
 
-    <div class="section">
-        <h3>🧪 State Components</h3>
-        <table border="1" cellpadding="8">
-            <tr>
-                <th>Component</th>
-                <th>Values</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>Zoom</td>
-                <td>6-18</td>
-                <td>Map zoom level</td>
-            </tr>
-            <tr>
-                <td>Latitude</td>
-                <td>54-56</td>
-                <td>Northern Ireland region</td>
-            </tr>
-            <tr>
-                <td>Longitude</td>
-                <td>-8 to -5</td>
-                <td>Northern Ireland region</td>
-            </tr>
-            <tr>
-                <td>Basemap</td>
-                <td>gray, streets, cycling</td>
-                <td>Background map style</td>
-            </tr>
-            <tr>
-                <td>Network Type</td>
-                <td>fast, quiet</td>
-                <td>Route network preference</td>
-            </tr>
-            <tr>
-                <td>Layers</td>
-                <td>routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities</td>
-                <td>Comma-separated active layers</td>
-            </tr>
-        </table>
-    </div>
+			<h4>Basic Map Views:</h4>
+			<div class="test-url">
+				<a href="http://localhost:5173/#8.00/54.6000/-6.6000/gray/fast/none" target="_blank">
+					Northern Ireland Overview - Gray basemap, no layers
+				</a>
+			</div>
 
-    <div class="section">
-        <h3>🚀 Start Testing</h3>
-        <p><strong>Current App:</strong> <a href="http://localhost:5173/" target="_blank">http://localhost:5173/</a></p>
-        <p>Try the test URLs above, then interact with the map controls and watch the URL update in real-time!</p>
-    </div>
-</body>
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#12.00/54.5973/-5.9301/streets/fast/routeNetwork"
+					target="_blank"
+				>
+					Belfast - Streets basemap, Route Network enabled
+				</a>
+			</div>
+
+			<h4>With Multiple Layers:</h4>
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#11.48/55.8977/-3.2594/cycling/fast/routeNetwork,cycleNetwork,localAuthorities"
+					target="_blank"
+				>
+					Multiple layers - Cycling basemap, Route + Cycle + Authorities
+				</a>
+			</div>
+
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#10.25/54.7500/-6.5000/gray/quiet/coherentNetwork,gapAnalysis"
+					target="_blank"
+				>
+					Analysis view - Coherent Network + Gap Analysis, Quietest route type
+				</a>
+			</div>
+
+			<h4>Different Network Types:</h4>
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#13.50/54.5973/-5.9301/streets/fast/routeNetwork"
+					target="_blank"
+				>
+					Belfast Zoom - Fast Route Network
+				</a>
+			</div>
+
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#13.50/54.5973/-5.9301/streets/quiet/routeNetwork"
+					target="_blank"
+				>
+					Belfast Zoom - Quiet Route Network
+				</a>
+			</div>
+
+			<h4>All Layers Enabled:</h4>
+			<div class="test-url">
+				<a
+					href="http://localhost:5173/#9.75/54.6500/-6.2500/cycling/fast/routeNetwork,coherentNetwork,cycleNetwork,gapAnalysis,localAuthorities"
+					target="_blank"
+				>
+					Full Analysis - All data layers enabled
+				</a>
+			</div>
+		</div>
+
+		<div class="section">
+			<h3>✅ Expected Behavior</h3>
+			<ul>
+				<li><strong>Map Position:</strong> Loads at specified zoom level and coordinates</li>
+				<li><strong>Basemap:</strong> Loads the correct basemap (gray/streets/cycling)</li>
+				<li><strong>Network Type:</strong> Sets route network to fast/quiet</li>
+				<li><strong>Layer States:</strong> Enables only the specified layers</li>
+				<li>
+					<strong>URL Updates:</strong> URL changes when you:
+					<ul>
+						<li>Pan or zoom the map</li>
+						<li>Change basemap</li>
+						<li>Toggle layers on/off</li>
+						<li>Switch between fast/quiet routes</li>
+					</ul>
+				</li>
+				<li><strong>Browser History:</strong> Back/forward buttons preserve all state</li>
+				<li><strong>Shareable:</strong> URLs preserve complete app state</li>
+			</ul>
+		</div>
+
+		<div class="section">
+			<h3>🧪 State Components</h3>
+			<table border="1" cellpadding="8">
+				<tr>
+					<th>Component</th>
+					<th>Values</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td>Zoom</td>
+					<td>6-18</td>
+					<td>Map zoom level</td>
+				</tr>
+				<tr>
+					<td>Latitude</td>
+					<td>54-56</td>
+					<td>Northern Ireland region</td>
+				</tr>
+				<tr>
+					<td>Longitude</td>
+					<td>-8 to -5</td>
+					<td>Northern Ireland region</td>
+				</tr>
+				<tr>
+					<td>Basemap</td>
+					<td>gray, streets, cycling</td>
+					<td>Background map style</td>
+				</tr>
+				<tr>
+					<td>Network Type</td>
+					<td>fast, quiet</td>
+					<td>Route network preference</td>
+				</tr>
+				<tr>
+					<td>Layers</td>
+					<td>routeNetwork, coherentNetwork, cycleNetwork, gapAnalysis, localAuthorities</td>
+					<td>Comma-separated active layers</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="section">
+			<h3>🚀 Start Testing</h3>
+			<p>
+				<strong>Current App:</strong>
+				<a href="http://localhost:5173/" target="_blank">http://localhost:5173/</a>
+			</p>
+			<p>
+				Try the test URLs above, then interact with the map controls and watch the URL update in
+				real-time!
+			</p>
+		</div>
+	</body>
 </html>

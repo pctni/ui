@@ -9,20 +9,37 @@
 			<button
 				class="alpha-box"
 				onclick={onAlphaModalClick}
-				onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAlphaModalClick(); }}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') onAlphaModalClick();
+				}}
 				aria-label="Show alpha information"
 				type="button"
 			>
 				<span class="alpha-text">ALPHA</span>
 			</button>
 			<div class="logos-right">
-				<a href="https://www.infrastructure-ni.gov.uk/" target="_blank" rel="noopener noreferrer" aria-label="Visit Infrastructure NI website">
+				<a
+					href="https://www.infrastructure-ni.gov.uk/"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Visit Infrastructure NI website"
+				>
 					<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
 				</a>
-				<a href="https://aecom.com/" target="_blank" rel="noopener noreferrer" aria-label="Visit AECOM website">
+				<a
+					href="https://aecom.com/"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Visit AECOM website"
+				>
 					<img src="/aecom-logo.png" alt="AECOM" class="logo aecom-logo" />
 				</a>
-				<a href="https://environment.leeds.ac.uk/transport" target="_blank" rel="noopener noreferrer" aria-label="Visit University of Leeds Transport Studies website">
+				<a
+					href="https://environment.leeds.ac.uk/transport"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Visit University of Leeds Transport Studies website"
+				>
 					<img src="/leeds-logo.png" alt="University of Leeds" class="logo leeds-logo" />
 				</a>
 			</div>
@@ -85,7 +102,9 @@
 
 	.logos-right a {
 		display: inline-block;
-		transition: opacity 0.2s ease, transform 0.2s ease;
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease;
 		text-decoration: none;
 	}
 
@@ -130,7 +149,7 @@
 			font-size: 1.3em;
 			text-align: center;
 		}
-		
+
 		.logo {
 			height: 35px;
 		}
@@ -154,11 +173,11 @@
 			flex-direction: column;
 			gap: 0.5rem;
 		}
-		
+
 		.logo {
 			height: 30px;
 		}
-		
+
 		h1 {
 			font-size: 1.2em;
 		}
