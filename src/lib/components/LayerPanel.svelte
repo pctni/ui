@@ -89,13 +89,10 @@
 				/>
 				{layer.name}
 			</label>
-			{#if layerStates?.[key]}
-				{@const legendConfig = getLegendConfig(key)}
-				{#if legendConfig}
-					<div class="legend-container">
-						<Legend config={legendConfig} />
-					</div>
-				{/if}
+			{#if layerStates?.[key] && legendConfig}
+				<div class="legend-container">
+					<Legend config={legendConfig} />
+				</div>
 			{/if}
 		</div>
 	{/if}

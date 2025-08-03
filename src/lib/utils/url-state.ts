@@ -72,14 +72,11 @@ function parseNetworkType(parts: string[]): string {
  * Parses active layers from URL parts
  */
 function parseActiveLayers(parts: string[], layerKeys: string[]): Partial<LayerStates> {
-	if (parts.length < 6 || !parts[5]) return {};
+	if (parts.length < 6 || !parts[5] || parts[5] === 'none') return {};
 
-	const layersStr = parts[5];
-	if (layersStr === 'none') return {};
-
-	const activeLayers = layersStr.split(',');
+	const activeLayers = new Set(parts[5].split(','));
 	return Object.fromEntries(
-		layerKeys.map((key) => [key, activeLayers.includes(key)])
+		layerKeys.map((key) => [key, activeLayers.has(key)])
 	) as Partial<LayerStates>;
 }
 
@@ -104,8 +101,7 @@ export function parseURLHash(hash: string, layerKeys: string[]): Partial<MapStat
 	if (basemap) updates.basemap = basemap;
 
 	// Parse network type
-	const networkType = parseNetworkType(parts);
-	if (networkType) updates.networkType = networkType;
+	updates.networkType = parseNetworkType(parts);
 
 	// Parse layers
 	const layers = parseActiveLayers(parts, layerKeys);

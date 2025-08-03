@@ -52,9 +52,11 @@
 	// Layer keys for URL parsing
 	const layerKeys = Object.keys(layerStates);
 
-	// Debounced URL update function
-	const debouncedUpdateURL = debounce(() => {
-		if (!browser || !center || typeof zoom !== 'number') return;
+	// URL update functions
+	const debouncedUpdateURL = debounce(updateURL, 100);
+	
+	function updateURL() {
+		if (!browser || !center || typeof zoom !== 'number' || isUpdatingFromURL) return;
 
 		try {
 			const currentState: MapState = {
@@ -74,7 +76,7 @@
 		} catch (error) {
 			console.warn('Failed to update URL hash:', error);
 		}
-	}, 100);
+	}
 
 	function applyStateUpdates(updates: Partial<MapState>) {
 		isUpdatingFromURL = true;
@@ -130,22 +132,14 @@
 	function selectBasemap(key: string) {
 		currentBasemap = key;
 		showBasemapPanel = false;
-
-		// Update URL immediately when basemap is changed
-		if (browser && !isUpdatingFromURL) {
-			debouncedUpdateURL();
-		}
+		updateURL();
 	}
 
 	function toggleLayer(key: string) {
 		if (key in layerStates) {
-			layerStates[key as keyof typeof layerStates] = !layerStates[key as keyof typeof layerStates];
+			layerStates[key as keyof LayerStates] = !layerStates[key as keyof LayerStates];
 		}
-
-		// Update URL immediately when layer is toggled
-		if (browser && !isUpdatingFromURL) {
-			debouncedUpdateURL();
-		}
+		updateURL();
 	}
 
 	function setOrClearNetworkType(type: string) {
@@ -154,20 +148,12 @@
 		} else {
 			currentNetworkType = type;
 		}
-
-		// Update URL immediately when network type is changed
-		if (browser && !isUpdatingFromURL) {
-			debouncedUpdateURL();
-		}
+		updateURL();
 	}
 
 	function setNetworkColor(color: string) {
 		currentNetworkColor = color;
-
-		// Update URL immediately when network color is changed
-		if (browser && !isUpdatingFromURL) {
-			debouncedUpdateURL();
-		}
+		updateURL();
 	}
 </script>
 
