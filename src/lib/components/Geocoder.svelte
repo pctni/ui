@@ -85,7 +85,7 @@
 			bind:this={inputElement}
 			bind:value={query}
 			oninput={search}
-			placeholder="Search for places..."
+			placeholder="Search..."
 			class="search-input"
 			type="text"
 		/>
@@ -125,7 +125,7 @@
 <style>
 	.geocoder-container {
 		position: relative;
-		width: 280px;
+		width: 150px;
 		font-family: inherit;
 	}
 

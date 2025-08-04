@@ -286,7 +286,7 @@
 	.custom-geocoder-position {
 		position: absolute;
 		top: 10px;
-		left: 80px;
+		left: 50px;
 		z-index: 1000;
 	}
 </style>
