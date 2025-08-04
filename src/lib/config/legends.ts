@@ -1,12 +1,10 @@
-export interface LegendItem {
-	color: string;
-	label: string;
-	value?: number | string;
-}
-
 export interface LegendConfig {
 	type: 'gradient' | 'categorical';
-	items: LegendItem[];
+	items: {
+		color: string;
+		label: string;
+		value?: number | string;
+	}[];
 	description?: string;
 }
 
