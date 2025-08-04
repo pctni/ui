@@ -245,7 +245,7 @@
 
 	<!-- Search/Geocoder Control -->
 	<CustomControl position="top-right">
-		<Geocoder map={mapInstance || null} />
+		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
 	</CustomControl>
 
 	<!-- Basemap Control -->

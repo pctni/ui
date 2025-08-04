@@ -3,321 +3,142 @@
 
 	interface Props {
 		map: Map | null | undefined;
+		apiKey?: string;
 	}
 
-	let { map }: Props = $props();
+	let { map, apiKey = "" }: Props = $props();
 
-	interface NominatimResult {
-		place_id: number;
-		licence: string;
-		osm_type: string;
-		osm_id: number;
-		lat: string;
-		lon: string;
-		display_name: string;
-		class: string;
-		type: string;
-		importance: number;
-		boundingbox: [string, string, string, string]; // [lat_min, lat_max, lon_min, lon_max]
-	}
+	let query = $state('');
+	let results = $state<any[]>([]);
+	let show = $state(false);
 
-	// Northern Ireland bounding box
-	const NI_BOUNDS = {
-		minLng: -8.2, // Western boundary
-		maxLng: -5.3, // Eastern boundary
-		minLat: 54.0, // Southern boundary
-		maxLat: 55.5 // Northern boundary
-	};
-
-	let searchQuery = $state('');
-	let searchResults: NominatimResult[] = $state([]);
-	let showResults = $state(false);
-	let isLoading = $state(false);
-	let searchTimeout: ReturnType<typeof setTimeout>;
-
-	// Debounced search function
-	function debouncedSearch(query: string) {
-		clearTimeout(searchTimeout);
-		if (query.length < 2) {
-			searchResults = [];
-			showResults = false;
+	async function search() {
+		if (!query.trim() || !apiKey) {
+			results = [];
+			show = false;
 			return;
 		}
 
-		searchTimeout = setTimeout(() => {
-			performSearch(query);
-		}, 300);
-	}
-
-	// Perform the actual search
-	async function performSearch(query: string) {
-		if (!query.trim()) return;
-
-		isLoading = true;
-		showResults = true;
-
 		try {
-			// Build Nominatim query with Northern Ireland constraints
-			const params = new URLSearchParams({
-				q: query,
-				format: 'json',
-				addressdetails: '1',
-				limit: '8',
-				bounded: '1',
-				viewbox: `${NI_BOUNDS.minLng},${NI_BOUNDS.maxLat},${NI_BOUNDS.maxLng},${NI_BOUNDS.minLat}`,
-				countrycodes: 'gb', // Limit to Great Britain (includes Northern Ireland)
-				'accept-language': 'en'
-			});
-
-			const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
-			const results: NominatimResult[] = await response.json();
-
-			// Further filter results to Northern Ireland bounds
-			searchResults = results.filter((result) => {
-				const lat = parseFloat(result.lat);
-				const lon = parseFloat(result.lon);
-				return (
-					lat >= NI_BOUNDS.minLat &&
-					lat <= NI_BOUNDS.maxLat &&
-					lon >= NI_BOUNDS.minLng &&
-					lon <= NI_BOUNDS.maxLng
-				);
-			});
+			const response = await fetch(
+				`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${apiKey}&country=gb&bbox=-8.2,54.0,-5.3,55.5&limit=5`
+			);
+			const data = await response.json();
+			results = data.features || [];
+			show = true;
 		} catch (error) {
 			console.error('Geocoding error:', error);
-			searchResults = [];
-		} finally {
-			isLoading = false;
+			results = [];
 		}
 	}
 
-	// Handle result selection
-	function selectResult(result: NominatimResult) {
-		if (!map) return;
-
-		const lat = parseFloat(result.lat);
-		const lng = parseFloat(result.lon);
-
-		// Fly to the selected location
-		map.flyTo({
-			center: [lng, lat],
-			zoom: 14,
-			duration: 1000
-		});
-
-		// Clear search
-		searchQuery = result.display_name;
-		searchResults = [];
-		showResults = false;
-	}
-
-	// Handle input changes
-	function handleInput(event: Event) {
-		const target = event.target as HTMLInputElement;
-		searchQuery = target.value;
-		debouncedSearch(searchQuery);
-	}
-
-	// Handle clearing search
-	function clearSearch() {
-		searchQuery = '';
-		searchResults = [];
-		showResults = false;
-	}
-
-	// Handle keyboard navigation
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			showResults = false;
+	function select(feature: any) {
+		if (map && feature.center) {
+			map.flyTo({ center: feature.center, zoom: 14 });
 		}
-	}
-
-	// Close results when clicking outside
-	function handleClickOutside(event: Event) {
-		const target = event.target as HTMLElement;
-		if (!target.closest('.geocoder-container')) {
-			showResults = false;
-		}
+		query = feature.place_name;
+		show = false;
 	}
 </script>
 
-<svelte:window onclick={handleClickOutside} />
-
-<div class="geocoder-container">
-	<div class="search-input-container">
+{#if apiKey}
+	<div class="geocoder">
 		<input
-			type="text"
-			bind:value={searchQuery}
-			oninput={handleInput}
-			onkeydown={handleKeydown}
+			bind:value={query}
+			oninput={search}
+			onblur={() => setTimeout(() => show = false, 200)}
 			placeholder="Search places in Northern Ireland..."
-			class="search-input"
-			autocomplete="off"
 		/>
-
-		{#if searchQuery}
-			<button
-				onclick={clearSearch}
-				class="clear-button"
-				title="Clear search"
-				aria-label="Clear search"
-			>
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-					<path
-						d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm3.5 10.1l-1.4 1.4L8 9.4l-2.1 2.1-1.4-1.4L6.6 8 4.5 5.9l1.4-1.4L8 6.6l2.1-2.1 1.4 1.4L9.4 8l2.1 2.1z"
-					/>
-				</svg>
-			</button>
-		{/if}
-
-		{#if isLoading}
-			<div class="loading-indicator">
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="spin">
-					<path
-						d="M8 0v4l3-3 1 1-3 3h4v2h-4l3 3-1 1-3-3v4H6v-4L3 9l-1-1 3-3H1V4h4L2 1l1-1 3 3V0h2z"
-					/>
-				</svg>
+		{#if show && results.length}
+			<div class="results">
+				{#each results as result}
+					<button onclick={() => select(result)}>
+						{result.place_name}
+					</button>
+				{/each}
 			</div>
 		{/if}
 	</div>
-
-	{#if showResults && searchResults.length > 0}
-		<div class="results-container">
-			{#each searchResults as result}
-				<button onclick={() => selectResult(result)} class="result-item">
-					<div class="result-name">
-						{result.display_name.split(',')[0]}
-					</div>
-					<div class="result-details">
-						{result.display_name}
-					</div>
-				</button>
-			{/each}
+{:else}
+	<div class="geocoder">
+		<div class="warning">
+			<p>Mapbox API key required</p>
+			<p>Get one free at <a href="https://mapbox.com" target="_blank">mapbox.com</a></p>
 		</div>
-	{:else if showResults && searchResults.length === 0 && !isLoading && searchQuery.length >= 2}
-		<div class="results-container">
-			<div class="no-results">No results found in Northern Ireland</div>
-		</div>
-	{/if}
-</div>
+	</div>
+{/if}
 
 <style>
-	.geocoder-container {
+	.geocoder {
 		position: relative;
-		width: 280px;
-		font-family: inherit;
+		width: 250px;
 	}
 
-	.search-input-container {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	.search-input {
+	input {
 		width: 100%;
-		padding: 8px 40px 8px 12px;
-		border: 1px solid #ccc;
+		padding: 8px 12px;
+		border: 1px solid #ddd;
 		border-radius: 4px;
-		font-size: 14px;
 		background: white;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 	}
 
-	.search-input:focus {
-		outline: none;
-		border-color: #0066cc;
-		box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
-	}
-
-	.clear-button {
-		position: absolute;
-		right: 8px;
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 4px;
-		color: #666;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.clear-button:hover {
-		color: #333;
-	}
-
-	.loading-indicator {
-		position: absolute;
-		right: 8px;
-		color: #666;
-		display: flex;
-		align-items: center;
-	}
-
-	.spin {
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.results-container {
+	.results {
 		position: absolute;
 		top: 100%;
 		left: 0;
 		right: 0;
 		background: white;
-		border: 1px solid #ccc;
+		border: 1px solid #ddd;
 		border-top: none;
 		border-radius: 0 0 4px 4px;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		max-height: 300px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		max-height: 200px;
 		overflow-y: auto;
 		z-index: 1000;
 	}
 
-	.result-item {
+	button {
 		width: 100%;
-		padding: 12px;
+		padding: 8px 12px;
 		border: none;
 		background: none;
 		text-align: left;
 		cursor: pointer;
-		border-bottom: 1px solid #eee;
-		display: block;
+		border-bottom: 1px solid #f0f0f0;
 	}
 
-	.result-item:hover {
-		background-color: #f5f5f5;
+	button:hover {
+		background: #f8f9fa;
 	}
 
-	.result-item:last-child {
+	button:last-child {
 		border-bottom: none;
 	}
 
-	.result-name {
-		font-weight: 500;
-		color: #333;
-		margin-bottom: 2px;
-	}
-
-	.result-details {
-		font-size: 12px;
-		color: #666;
-		line-height: 1.3;
-	}
-
-	.no-results {
+	.warning {
+		background: white;
+		border: 1px solid #ddd;
+		border-radius: 4px;
 		padding: 12px;
-		color: #666;
-		font-style: italic;
-		text-align: center;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		font-size: 14px;
+	}
+
+	.warning p {
+		margin: 0 0 8px 0;
+	}
+
+	.warning p:last-child {
+		margin-bottom: 0;
+	}
+
+	.warning a {
+		color: #0066cc;
+		text-decoration: none;
+	}
+
+	.warning a:hover {
+		text-decoration: underline;
 	}
 </style>
