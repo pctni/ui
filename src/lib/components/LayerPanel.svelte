@@ -60,7 +60,7 @@
 					<option value="bicycle_go_dutch">Go Dutch</option>
 				</select>
 			</div>
-			{#if legendConfig}
+			{#if legendConfig && (currentNetworkType === 'fast' || currentNetworkType === 'quiet')}
 				<div class="legend-container">
 					<Legend config={legendConfig} />
 				</div>
