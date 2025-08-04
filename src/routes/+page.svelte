@@ -33,17 +33,17 @@
 	let mapInstance = $state<import('maplibre-gl').Map | undefined>();
 	
 	// Layer states
-	const layerStates: Record<string, boolean> = {
+	let layerStates = $state<Record<string, boolean>>({
 		routeNetwork: false, // Off by default - user must actively select a network type
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
 		localAuthorities: false
-	};
+	});
 
 	// URL state management
 	let updateTimeout: ReturnType<typeof setTimeout>;
-	let isUpdatingFromURL = false;
+	let isUpdatingFromURL = $state(false);
 
 	// Initialize from URL hash on mount
 	onMount(() => {
@@ -140,6 +140,7 @@
 	
 	// Update URL with current map state
 	function updateURLHash() {
+		console.log('updateURLHash called', { browser, center, zoom });
 		if (!browser || !center || typeof zoom !== 'number') return;
 		
 		try {
@@ -154,8 +155,11 @@
 			// Format: #zoom/lat/lng/basemap/networkType/layers
 			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${networkTypeStr}/${layersStr}`;
 			
+			console.log('New hash:', newHash, 'Current hash:', window.location.hash);
+			
 			// Only update if hash actually changed
 			if (window.location.hash !== newHash) {
+				console.log('Updating URL hash to:', newHash);
 				window.history.replaceState(null, '', newHash);
 			}
 		} catch (error) {
@@ -171,15 +175,19 @@
 	
 	// Handle map events
 	function handleMoveEnd() {
+		console.log('handleMoveEnd called', { isUpdatingFromURL, mapInstance: !!mapInstance, showBasemapPanel, showLayersPanel });
 		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
 			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
+			console.log('Updating center:', center);
 			debouncedUpdateURL();
 		}
 	}
 	
 	function handleZoomEnd() {
+		console.log('handleZoomEnd called', { isUpdatingFromURL, mapInstance: !!mapInstance, showBasemapPanel, showLayersPanel });
 		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
 			zoom = mapInstance.getZoom();
+			console.log('Updating zoom:', zoom);
 			debouncedUpdateURL();
 		}
 	}
