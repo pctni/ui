@@ -42,8 +42,17 @@
 	}: Props = $props();
 </script>
 
-<div class="control-panel {position}" class:expanded={showPanel}>
-	<button class="panel-header" {title} aria-label={title} onclick={onToggle}>
+<div class="relative bg-white rounded-md shadow-lg z-50 transition-all duration-200 {position === 'left' ? (showPanel ? 'w-44' : 'w-[30px]') : (showPanel ? 'w-72' : 'min-w-48')}">
+	<button 
+		class="bg-none border-0 rounded-md cursor-pointer flex items-center font-medium text-gray-800 transition-colors duration-200 hover:bg-gray-50 
+		{position === 'left' 
+			? 'w-[30px] h-[30px] p-0 justify-center shrink-0' 
+			: 'w-full justify-between gap-2 py-2.5 px-4 text-base'
+		}" 
+		{title} 
+		aria-label={title} 
+		onclick={onToggle}
+	>
 		{#if position === 'left'}
 			<!-- Basemap icon -->
 			<svg
@@ -68,8 +77,7 @@
 				height="12"
 				fill="currentColor"
 				viewBox="0 0 16 16"
-				class="arrow-icon"
-				class:rotated={showPanel}
+				class="transition-transform duration-200 {showPanel ? 'rotate-180' : ''}"
 			>
 				<path
 					fill-rule="evenodd"
@@ -80,7 +88,7 @@
 	</button>
 
 	{#if showPanel}
-		<div class="panel-content">
+		<div class="px-4 pb-4 max-h-96 overflow-y-auto flex flex-col gap-2">
 			{#if controlType === 'basemap'}
 				<BasemapPanel {currentBasemap} {onBasemapSelect} {onToggle} />
 			{:else if controlType === 'layers'}
@@ -97,78 +105,4 @@
 	{/if}
 </div>
 
-<style>
-	.control-panel {
-		position: relative;
-		background-color: #fff;
-		border-radius: 6px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-		z-index: 100;
-		transition: all 0.2s ease;
-	}
 
-	.control-panel.left {
-		width: 30px;
-	}
-
-	.control-panel.right {
-		min-width: 200px;
-	}
-
-	.control-panel.expanded.left {
-		width: 180px;
-	}
-
-	.control-panel.expanded.right {
-		width: 300px;
-	}
-
-	.panel-header {
-		background: none;
-		border: 0;
-		border-radius: 6px;
-		cursor: pointer;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100%;
-		padding: 10px 15px;
-		font-size: 16px;
-		font-weight: 500;
-		color: #333;
-		transition: background-color 0.2s ease;
-	}
-
-	.control-panel.left .panel-header {
-		width: 30px;
-		height: 30px;
-		padding: 0;
-		justify-content: center;
-	}
-
-	.control-panel.right .panel-header {
-		justify-content: space-between;
-		gap: 8px;
-	}
-
-	.panel-header:hover {
-		background-color: #f0f0f0;
-	}
-
-	.panel-content {
-		padding: 0 15px 15px 15px;
-		max-height: 60vh;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.arrow-icon {
-		transition: transform 0.2s ease;
-	}
-
-	.arrow-icon.rotated {
-		transform: rotate(180deg);
-	}
-</style>
