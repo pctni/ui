@@ -143,22 +143,22 @@
 
 <svelte:window onclick={handleClickOutside} />
 
-<div class="geocoder-container">
-	<div class="search-input-container">
+<div class="relative w-70 font-inherit">
+	<div class="relative flex items-center">
 		<input
 			type="text"
 			bind:value={searchQuery}
 			oninput={handleInput}
 			onkeydown={handleKeydown}
 			placeholder="Search places in Northern Ireland..."
-			class="search-input"
+			class="w-full py-2 pr-10 pl-3 border border-gray-300 rounded text-sm bg-white shadow-sm focus:outline-none focus:border-blue-600 focus:shadow-md"
 			autocomplete="off"
 		/>
 
 		{#if searchQuery}
 			<button
 				onclick={clearSearch}
-				class="clear-button"
+				class="absolute right-2 bg-none border-none cursor-pointer p-1 text-gray-600 flex items-center justify-center hover:text-gray-800"
 				title="Clear search"
 				aria-label="Clear search"
 			>
@@ -171,8 +171,8 @@
 		{/if}
 
 		{#if isLoading}
-			<div class="loading-indicator">
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="spin">
+			<div class="absolute right-2 text-gray-600 flex items-center">
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="animate-spin">
 					<path
 						d="M8 0v4l3-3 1 1-3 3h4v2h-4l3 3-1 1-3-3v4H6v-4L3 9l-1-1 3-3H1V4h4L2 1l1-1 3 3V0h2z"
 					/>
@@ -182,21 +182,21 @@
 	</div>
 
 	{#if showResults && searchResults.length > 0}
-		<div class="results-container">
+		<div class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b shadow-lg max-h-75 overflow-y-auto z-50">
 			{#each searchResults as result}
-				<button onclick={() => selectResult(result)} class="result-item">
-					<div class="result-name">
+				<button onclick={() => selectResult(result)} class="w-full p-3 border-none bg-none text-left cursor-pointer border-b border-gray-200 block hover:bg-gray-50 last:border-b-0">
+					<div class="font-medium text-gray-800 mb-0.5">
 						{result.display_name.split(',')[0]}
 					</div>
-					<div class="result-details">
+					<div class="text-xs text-gray-600 leading-tight">
 						{result.display_name}
 					</div>
 				</button>
 			{/each}
 		</div>
 	{:else if showResults && searchResults.length === 0 && !isLoading && searchQuery.length >= 2}
-		<div class="results-container">
-			<div class="no-results">No results found in Northern Ireland</div>
+		<div class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b shadow-lg max-h-75 overflow-y-auto z-50">
+			<div class="p-3 text-gray-600 italic text-center">No results found in Northern Ireland</div>
 		</div>
 	{/if}
 </div>

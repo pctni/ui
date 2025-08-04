@@ -35,7 +35,7 @@
 {#if showAlphaModal}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="popup-overlay"
+		class="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000] backdrop-blur-sm"
 		onclick={handleOverlayClick}
 		onkeydown={handleKeydown}
 		role="dialog"
@@ -44,91 +44,50 @@
 		tabindex="-1"
 		bind:this={popupElement}
 	>
-		<div class="popup-content">
-			<div class="popup-header">
-				<h3 id="popup-title">Propensity to Cycle Tool for Northern Ireland - ALPHA</h3>
-				<button class="close-button" onclick={dismissModal} aria-label="Close alpha information">
+		<div class="popup-content bg-white rounded-lg shadow-xl max-w-2xl w-[90%] max-h-[90vh] overflow-auto">
+			<div class="flex justify-between items-center p-5 border-b border-gray-200 mb-4">
+				<h3 id="popup-title" class="m-0 text-gray-800 text-xl font-semibold">
+					Propensity to Cycle Tool for Northern Ireland - ALPHA
+				</h3>
+				<button 
+					class="bg-none border-0 text-2xl text-gray-500 cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 hover:text-gray-800 transition-colors"
+					onclick={dismissModal} 
+					aria-label="Close alpha information"
+				>
 					×
 				</button>
 			</div>
-			<div class="popup-body">
-				<p>
-					The Propensity to Cycle Tool for Northern Ireland (PCTNI) is an <a
-						href="https://github.com/pctni"
-						target="_blank"
-						rel="noopener noreferrer">open-source</a
-					>
-					planning support system that builds on the
-					<a href="https://www.pct.bike" target="_blank" rel="noopener noreferrer"
-						>Propensity to Cycle Tool for England and Wales (PCT)</a
-					>
-					and the
-					<a href="https://www.npt.scot" target="_blank" rel="noopener noreferrer"
-						>Network Planning Tool for Scotland (NPT)</a
-					>. The tool is currently under active development so results may change. This tool uses
-					imperfect input datasets including
-					<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer"
-						>OpenStreetMap</a
-					>. The results are intended to support planning and investment decisions, but should not
-					be used as the sole basis for such decisions. Users should verify outputs against local
-					knowledge and up-to-date datasets where available before proceeding with detailed design
-					or investment decisions.
+			<div class="px-5 pb-4">
+				<p class="mb-4 leading-relaxed text-gray-600">
+					The <strong class="text-gray-800">Propensity to Cycle Tool for Northern Ireland (PCTNI)</strong> is an 
+					<a href="https://github.com/pctni" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">open-source</a>
+					planning support system for cycling infrastructure. Currently in active development.
 				</p>
-				<p>
-					The estimates of cycling potential are currently based on 2011 Census data on travel to
-					work. The results should be interpreted based on the understanding that they highlight
-					places of high cycling demand to major and long-standing work-places. The tool currently
-					omits cycling potential for travel to schools, shopping, leisure and other purposes, a
-					limitation that we are working to address in future updates.
+				<p class="mb-4 leading-relaxed text-gray-600">
+					<strong class="text-gray-800">Data limitations:</strong> Based on 2011 Census work travel data and 
+					<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">OpenStreetMap</a>. 
+					Results highlight cycling demand to major workplaces but omit schools, shopping, and leisure trips.
 				</p>
-				<p>
-					Users are solely responsible for how they interpret and use the data. If you identify any
-					errors or have concerns about the data or tool, please let us know via the open access <a
-						href="https://github.com/pctni/ui/issues"
-						target="_blank"
-						rel="noopener noreferrer">issue tracker</a
-					>
-					(requires a
-					<a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub account</a
-					>).
-				</p>
-				<p>
-					<strong>Mapping data:</strong> Date of OSM data on which network results are based: July 2025.
+				<p class="mb-0 leading-relaxed text-gray-600">
+					<strong class="text-gray-800">Usage:</strong> Intended to support planning decisions. Verify outputs against local knowledge 
+					before detailed design or investment. Report issues via 
+					<a href="https://github.com/pctni/ui/issues" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">GitHub</a>.
 				</p>
 			</div>
-			<div class="popup-footer">
-				<button class="dismiss-button" onclick={dismissModal}> Continue </button>
+			<div class="flex justify-end p-5 pt-4">
+				<button 
+					class="bg-green-700 text-white border-0 px-5 py-2.5 rounded cursor-pointer text-sm font-medium hover:bg-green-800 transition-colors"
+					onclick={dismissModal}
+				> 
+					Continue 
+				</button>
 			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
-	.popup-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-		backdrop-filter: blur(2px);
-	}
-
-	.popup-content {
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-		max-width: 600px;
-		width: 90%;
-		max-height: 90vh;
-		overflow: auto;
-		animation: popup-appear 0.3s ease-out;
-	}
-
+	/* Minimal custom animations - most styling moved to Tailwind classes */
 	@keyframes popup-appear {
 		from {
 			opacity: 0;
@@ -140,101 +99,7 @@
 		}
 	}
 
-	.popup-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20px 20px 0 20px;
-		border-bottom: 1px solid #e5e5e5;
-		margin-bottom: 15px;
-	}
-
-	.popup-header h3 {
-		margin: 0;
-		color: #333;
-		font-size: 1.2em;
-		font-weight: 600;
-	}
-
-	.close-button {
-		background: none;
-		border: none;
-		font-size: 24px;
-		color: #666;
-		cursor: pointer;
-		padding: 0;
-		width: 30px;
-		height: 30px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition:
-			background-color 0.2s,
-			color 0.2s;
-	}
-
-	.close-button:hover {
-		background-color: #f0f0f0;
-		color: #333;
-	}
-
-	.popup-body {
-		padding: 0 20px 15px 20px;
-	}
-
-	.popup-body p {
-		margin: 0 0 15px 0;
-		line-height: 1.5;
-		color: #555;
-	}
-
-	.popup-body p:last-child {
-		margin-bottom: 0;
-	}
-
-	.popup-body strong {
-		color: #333;
-	}
-
-	.popup-footer {
-		padding: 15px 20px 20px 20px;
-		display: flex;
-		justify-content: flex-end;
-	}
-
-	.dismiss-button {
-		background-color: #00703c;
-		color: white;
-		border: none;
-		padding: 10px 20px;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 14px;
-		font-weight: 500;
-		transition: background-color 0.2s;
-	}
-
-	.dismiss-button:hover {
-		background-color: #005a30;
-	}
-
-	/* Mobile responsiveness */
-	@media (max-width: 480px) {
-		.popup-content {
-			width: 95%;
-			margin: 10px;
-		}
-
-		.popup-header,
-		.popup-body,
-		.popup-footer {
-			padding-left: 15px;
-			padding-right: 15px;
-		}
-
-		.popup-header h3 {
-			font-size: 1.1em;
-		}
+	.popup-content {
+		animation: popup-appear 0.3s ease-out;
 	}
 </style>
