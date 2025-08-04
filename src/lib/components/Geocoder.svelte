@@ -6,11 +6,13 @@
 	let query = $state('');
 	let results = $state<any[]>([]);
 	let showResults = $state(false);
+	let selectedIndex = $state(-1);
 
 	async function search() {
 		if (!query.trim() || !apiKey) {
 			results = [];
 			showResults = false;
+			selectedIndex = -1;
 			return;
 		}
 
@@ -21,9 +23,11 @@
 			const data = await response.json();
 			results = data.features || [];
 			showResults = true;
+			selectedIndex = -1;
 		} catch {
 			results = [];
 			showResults = false;
+			selectedIndex = -1;
 		}
 	}
 
@@ -33,12 +37,39 @@
 		}
 		query = result.text;
 		showResults = false;
+		selectedIndex = -1;
 	}
 
 	function clear() {
 		query = '';
 		results = [];
 		showResults = false;
+		selectedIndex = -1;
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (!showResults || !results.length) return;
+
+		switch (event.key) {
+			case 'ArrowDown':
+				event.preventDefault();
+				selectedIndex = selectedIndex < results.length - 1 ? selectedIndex + 1 : 0;
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				selectedIndex = selectedIndex > 0 ? selectedIndex - 1 : results.length - 1;
+				break;
+			case 'Enter':
+				event.preventDefault();
+				if (selectedIndex >= 0 && selectedIndex < results.length) {
+					select(results[selectedIndex]);
+				}
+				break;
+			case 'Escape':
+				showResults = false;
+				selectedIndex = -1;
+				break;
+		}
 	}
 </script>
 
@@ -46,6 +77,7 @@
 	<input
 		bind:value={query}
 		oninput={search}
+		onkeydown={handleKeydown}
 		disabled={!apiKey}
 		placeholder={apiKey ? "Search..." : "API key required"}
 		class="input"
@@ -58,8 +90,12 @@
 	
 	{#if showResults && results.length}
 		<div class="results">
-			{#each results as result}
-				<button onclick={() => select(result)} class="result">
+			{#each results as result, index}
+				<button 
+					onclick={() => select(result)} 
+					class="result"
+					class:selected={index === selectedIndex}
+				>
 					<div class="name">{result.text}</div>
 					<div class="details">{result.place_name}</div>
 				</button>
@@ -145,6 +181,10 @@
 
 	.result:hover {
 		background-color: #f5f5f5;
+	}
+
+	.result.selected {
+		background-color: #e3f2fd;
 	}
 
 	.result:last-child {
