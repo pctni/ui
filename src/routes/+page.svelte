@@ -35,7 +35,7 @@
 	
 	// Layer states
 	const layerStates: Record<string, boolean> = {
-		routeNetwork: false,
+		routeNetwork: true, // Default to true since currentNetworkType defaults to 'fast'
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
@@ -101,6 +101,8 @@
 				const networkType = parts[4];
 				if (networkType === 'fast' || networkType === 'quiet') {
 					currentNetworkType = networkType;
+				} else if (networkType === 'none' || networkType === '') {
+					currentNetworkType = '';
 				}
 			}
 			
@@ -123,6 +125,9 @@
 					});
 				}
 			}
+			
+			// Set route network layer state based on network type
+			layerStates.routeNetwork = currentNetworkType !== '' && (currentNetworkType === 'fast' || currentNetworkType === 'quiet');
 		} catch (error) {
 			console.warn('Failed to parse URL hash:', error);
 		} finally {
@@ -201,6 +206,9 @@
 
 	function setNetworkType(type: string) {
 		currentNetworkType = type;
+		// Enable/disable the route network layer based on whether a network type is selected
+		layerStates.routeNetwork = type !== '' && (type === 'fast' || type === 'quiet');
+		updateURLHash();
 	}
 
 	function setNetworkColor(color: string) {
