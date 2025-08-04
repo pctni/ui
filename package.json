@@ -6,14 +6,18 @@
 	"scripts": {
 		"dev": "./build.sh dev && vite dev",
 		"dev:clean": "./build.sh --clean && vite dev",
+		"dev:safe": "npm run deps:check && npm run dev", 
 		"build": "./build.sh && vite build",
 		"build:prod": "./build.sh --clean && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
+		"deps:check": "npm list --depth=0 || npm install",
+		"deps:clean": "rm -rf node_modules package-lock.json && npm install",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
+		"lint:fix": "prettier --write . && eslint . --fix",
 		"test:e2e": "playwright test",
 		"test": "npm run test:e2e"
 	},

@@ -1,5 +1,5 @@
 {
-	"name": "Node.js & Svelte",
+	"name": "PCTNI UI Development",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:20-bookworm",
 	"customizations": {
 		"vscode": {
@@ -8,13 +8,26 @@
 				"bradlc.vscode-tailwindcss",
 				"esbenp.prettier-vscode",
 				"github.copilot",
-				"github.copilot-chat"
+				"github.copilot-chat",
+				"ms-vscode.vscode-eslint",
+				"ms-vscode.vscode-typescript-next"
 			],
 			"settings": {
 				"editor.formatOnSave": true,
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": "explicit"
+				},
 				"[svelte]": {
 					"editor.defaultFormatter": "svelte.svelte-vscode"
-				}
+				},
+				"[typescript]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[javascript]": {
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"eslint.validate": ["javascript", "typescript", "svelte"],
+				"terminal.integrated.defaultProfile.linux": "bash"
 			}
 		}
 	},
@@ -25,7 +38,7 @@
 			"onAutoForward": "notify"
 		},
 		"4173": {
-			"label": "Vite Preview Server",
+			"label": "Vite Preview Server", 
 			"onAutoForward": "notify"
 		}
 	},
@@ -38,5 +51,9 @@
 		}
 	},
 	"remoteUser": "node",
-	"postCreateCommand": "npm install"
+	"postCreateCommand": "chmod +x build.sh && npm install",
+	"onCreateCommand": "git config --global --add safe.directory /workspaces/ui",
+	"mounts": [
+		"source=${localWorkspaceFolder}/node_modules,target=/workspaces/ui/node_modules,type=volume"
+	]
 }

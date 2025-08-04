@@ -4,6 +4,9 @@
 # Exit on any error
 set -e
 
+# Ensure we're in the right directory
+cd "$(dirname "$0")"
+
 # Function to detect if we're on Linux
 is_linux() {
     [[ "$(uname)" == "Linux" ]]
@@ -36,16 +39,19 @@ for FILENAME in "${PMTILES_FILES[@]}"; do
   DEST_FILE="$DEST_DIR/$FILENAME"
   URL="$BASE_URL/$FILENAME"
   
-  # Check if the file already exists
-  if [ ! -f "$DEST_FILE" ]; then
+  # Check if the file already exists and is not empty
+  if [ -f "$DEST_FILE" ] && [ -s "$DEST_FILE" ]; then
+    echo "File $DEST_FILE already exists. Skipping download."
+  else
     echo "File $DEST_FILE not found. Downloading..."
     
-    # Download the file using curl
-    curl -L -o "$DEST_FILE" "$URL"
-    
-    echo "Download of $FILENAME complete."
-  else
-    echo "File $DEST_FILE already exists. Skipping download."
+    # Download with retry
+    if ! curl -L --fail --retry 2 -o "$DEST_FILE" "$URL"; then
+      echo "Warning: Failed to download $FILENAME"
+      rm -f "$DEST_FILE" # Remove partial download
+    else
+      echo "Download of $FILENAME complete."
+    fi
   fi
 done
 
@@ -61,10 +67,11 @@ if [ "$1" = "--clean" ]; then
 fi
 
 # Check if this is a dev command
-if [ "$1" = "dev" ] || [[ "$0" == *"vite dev"* ]]; then
+if [ "$1" = "dev" ]; then
   # Skip build for dev mode, just ensure dependencies
   if [ ! -d "node_modules" ]; then
-    npm install --force
+    echo "Installing dependencies..."
+    npm install
   fi
 else
   # For production builds, just download pmtiles - vite build will be called separately
