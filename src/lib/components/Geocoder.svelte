@@ -76,11 +76,23 @@
 
 	input {
 		width: 100%;
-		padding: 8px 12px;
+		padding: 10px 14px;
 		border: 1px solid #ddd;
-		border-radius: 4px;
+		border-radius: 6px;
 		background: white;
 		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		font-size: 14px;
+		outline: none;
+		transition: border-color 0.2s ease;
+	}
+
+	input:focus {
+		border-color: #0066cc;
+		box-shadow: 0 2px 8px rgba(0,102,204,0.15);
+	}
+
+	.geocoder:focus-within input {
+		border-radius: 6px 6px 0 0;
 	}
 
 	.results {
@@ -91,21 +103,27 @@
 		background: white;
 		border: 1px solid #ddd;
 		border-top: none;
-		border-radius: 0 0 4px 4px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		max-height: 200px;
+		border-radius: 0 0 6px 6px;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+		max-height: 250px;
 		overflow-y: auto;
 		z-index: 1000;
+		margin-top: 1px;
 	}
 
 	button {
 		width: 100%;
-		padding: 8px 12px;
+		padding: 12px 16px;
 		border: none;
 		background: none;
 		text-align: left;
 		cursor: pointer;
-		border-bottom: 1px solid #f0f0f0;
+		border-bottom: 1px solid #eee;
+		font-size: 14px;
+		line-height: 1.4;
+		transition: background-color 0.2s ease;
+		margin: 0;
+		display: block;
 	}
 
 	button:hover {
@@ -114,6 +132,12 @@
 
 	button:last-child {
 		border-bottom: none;
+		border-radius: 0 0 6px 6px;
+	}
+
+	button:focus {
+		outline: none;
+		background: #e3f2fd;
 	}
 
 	.warning {
