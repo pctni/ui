@@ -25,7 +25,7 @@
 	let showBasemapPanel = false;
 	let showLayersPanel = false;
 	let currentBasemap = 'gray';
-	let currentNetworkType = 'fast';
+	let currentNetworkType = ''; // No network selected by default
 	let currentNetworkColor = 'bicycle';
 	
 	// Map state
@@ -35,7 +35,7 @@
 	
 	// Layer states
 	const layerStates: Record<string, boolean> = {
-		routeNetwork: true, // Default to true since currentNetworkType defaults to 'fast'
+		routeNetwork: false, // Off by default - user must actively select a network type
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
@@ -104,6 +104,8 @@
 				} else if (networkType === 'none' || networkType === '') {
 					currentNetworkType = '';
 				}
+			} else {
+				currentNetworkType = '';
 			}
 			
 			// Parse active layers
@@ -148,9 +150,10 @@
 				.map(([key, value]) => key);
 			
 			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
+			const networkTypeStr = currentNetworkType || 'none';
 			
 			// Format: #zoom/lat/lng/basemap/networkType/layers
-			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${currentNetworkType}/${layersStr}`;
+			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${networkTypeStr}/${layersStr}`;
 			
 			// Only update if hash actually changed
 			if (window.location.hash !== newHash) {
@@ -205,9 +208,15 @@
 	}
 
 	function setNetworkType(type: string) {
-		currentNetworkType = type;
-		// Enable/disable the route network layer based on whether a network type is selected
-		layerStates.routeNetwork = type !== '' && (type === 'fast' || type === 'quiet');
+		if (type === '' || currentNetworkType === type) {
+			// If already selected or explicitly turning off, turn off the layer
+			currentNetworkType = '';
+			layerStates.routeNetwork = false;
+		} else {
+			// Select the new network type and turn on the layer
+			currentNetworkType = type;
+			layerStates.routeNetwork = true;
+		}
 		updateURLHash();
 	}
 
