@@ -244,9 +244,9 @@
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
 
 	<!-- Search/Geocoder Control -->
-	<CustomControl position="top-right">
+	<div class="custom-geocoder-position">
 		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
-	</CustomControl>
+	</div>
 
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
@@ -281,4 +281,13 @@
 	<!-- Dynamic Layers -->
 	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
+
+<style>
+	.custom-geocoder-position {
+		position: absolute;
+		top: 10px;
+		left: 80px;
+		z-index: 1000;
+	}
+</style>
 

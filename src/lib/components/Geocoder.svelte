@@ -2,167 +2,243 @@
 	import type { Map } from 'maplibre-gl';
 
 	interface Props {
-		map: Map | null | undefined;
-		apiKey?: string;
+		map: Map | null;
+		apiKey: string;
 	}
 
-	let { map, apiKey = "" }: Props = $props();
+	let { map, apiKey }: Props = $props();
 
 	let query = $state('');
-	let results = $state<any[]>([]);
-	let show = $state(false);
+	let results: GeocodingResult[] = $state([]);
+	let isLoading = $state(false);
+	let showResults = $state(false);
+	let inputElement: HTMLInputElement;
+
+	interface GeocodingResult {
+		id: string;
+		place_name: string;
+		text: string;
+		center: [number, number];
+		context?: Array<{ id: string; text: string }>;
+	}
 
 	async function search() {
 		if (!query.trim() || !apiKey) {
 			results = [];
-			show = false;
+			showResults = false;
 			return;
 		}
 
+		isLoading = true;
 		try {
+			// Mapbox Geocoding API with Northern Ireland bounding box
 			const response = await fetch(
-				`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${apiKey}&country=gb&bbox=-8.2,54.0,-5.3,55.5&limit=5`
+				`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
+				new URLSearchParams({
+					access_token: apiKey,
+					country: 'gb',
+					bbox: '-8.2,54.0,-5.3,55.5', // Northern Ireland bounding box
+					limit: '5'
+				})
 			);
+
+			if (!response.ok) {
+				throw new Error(`Geocoding request failed: ${response.status}`);
+			}
+
 			const data = await response.json();
 			results = data.features || [];
-			show = true;
+			showResults = true;
 		} catch (error) {
 			console.error('Geocoding error:', error);
 			results = [];
+			showResults = false;
+		} finally {
+			isLoading = false;
 		}
 	}
 
-	function select(feature: any) {
-		if (map && feature.center) {
-			map.flyTo({ center: feature.center, zoom: 14 });
+	function select(result: GeocodingResult) {
+		if (map && result.center) {
+			map.flyTo({
+				center: result.center,
+				zoom: 14,
+				duration: 1500
+			});
 		}
-		query = feature.place_name;
-		show = false;
+		query = result.text;
+		showResults = false;
+		inputElement?.blur();
+	}
+
+	function clearSearch() {
+		query = '';
+		results = [];
+		showResults = false;
+		inputElement?.focus();
 	}
 </script>
 
-{#if apiKey}
-	<div class="geocoder">
+<div class="geocoder-container">
+	<div class="search-input-container">
 		<input
+			bind:this={inputElement}
 			bind:value={query}
 			oninput={search}
-			onblur={() => setTimeout(() => show = false, 200)}
-			placeholder="Search places in Northern Ireland..."
+			placeholder="Search for places..."
+			class="search-input"
+			type="text"
 		/>
-		{#if show && results.length}
-			<div class="results">
-				{#each results as result}
-					<button onclick={() => select(result)}>
-						{result.place_name}
-					</button>
-				{/each}
+		
+		{#if isLoading}
+			<div class="loading-indicator">
+				<svg width="16" height="16" class="spin" viewBox="0 0 24 24">
+					<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+						<animate attributeName="stroke-dashoffset" dur="1s" values="32;0" repeatCount="indefinite"/>
+					</circle>
+				</svg>
 			</div>
+		{:else if query}
+			<button onclick={clearSearch} class="clear-button" type="button" aria-label="Clear search">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 		{/if}
 	</div>
-{:else}
-	<div class="geocoder">
-		<div class="warning">
-			<p>Mapbox API key required</p>
-			<p>Get one free at <a href="https://mapbox.com" target="_blank">mapbox.com</a></p>
+	
+	{#if showResults}
+		<div class="results-container">
+			{#each results as result (result.id)}
+				<button onclick={() => select(result)} class="result-item" type="button">
+					<div class="result-name">{result.text}</div>
+					<div class="result-details">{result.place_name}</div>
+				</button>
+			{:else}
+				<div class="no-results">No results found</div>
+			{/each}
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>
 
 <style>
-	.geocoder {
+	.geocoder-container {
 		position: relative;
-		width: 250px;
+		width: 280px;
+		font-family: inherit;
 	}
 
-	input {
+	.search-input-container {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-input {
 		width: 100%;
-		padding: 10px 14px;
-		border: 1px solid #ddd;
-		border-radius: 6px;
-		background: white;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		padding: 8px 40px 8px 12px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
 		font-size: 14px;
+		background: white;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.search-input:focus {
 		outline: none;
-		transition: border-color 0.2s ease;
-	}
-
-	input:focus {
 		border-color: #0066cc;
-		box-shadow: 0 2px 8px rgba(0,102,204,0.15);
+		box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
 	}
 
-	.geocoder:focus-within input {
-		border-radius: 6px 6px 0 0;
+	.clear-button {
+		position: absolute;
+		right: 8px;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 4px;
+		color: #666;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.results {
+	.clear-button:hover {
+		color: #333;
+	}
+
+	.loading-indicator {
+		position: absolute;
+		right: 8px;
+		color: #666;
+		display: flex;
+		align-items: center;
+	}
+
+	.spin {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.results-container {
 		position: absolute;
 		top: 100%;
 		left: 0;
 		right: 0;
 		background: white;
-		border: 1px solid #ddd;
+		border: 1px solid #ccc;
 		border-top: none;
-		border-radius: 0 0 6px 6px;
-		box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-		max-height: 250px;
+		border-radius: 0 0 4px 4px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		max-height: 300px;
 		overflow-y: auto;
 		z-index: 1000;
-		margin-top: 1px;
 	}
 
-	button {
+	.result-item {
 		width: 100%;
-		padding: 12px 16px;
+		padding: 12px;
 		border: none;
 		background: none;
 		text-align: left;
 		cursor: pointer;
 		border-bottom: 1px solid #eee;
-		font-size: 14px;
-		line-height: 1.4;
-		transition: background-color 0.2s ease;
-		margin: 0;
 		display: block;
 	}
 
-	button:hover {
-		background: #f8f9fa;
+	.result-item:hover {
+		background-color: #f5f5f5;
 	}
 
-	button:last-child {
+	.result-item:last-child {
 		border-bottom: none;
-		border-radius: 0 0 6px 6px;
 	}
 
-	button:focus {
-		outline: none;
-		background: #e3f2fd;
+	.result-name {
+		font-weight: 500;
+		color: #333;
+		margin-bottom: 2px;
 	}
 
-	.warning {
-		background: white;
-		border: 1px solid #ddd;
-		border-radius: 4px;
+	.result-details {
+		font-size: 12px;
+		color: #666;
+		line-height: 1.3;
+	}
+
+	.no-results {
 		padding: 12px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		font-size: 14px;
-	}
-
-	.warning p {
-		margin: 0 0 8px 0;
-	}
-
-	.warning p:last-child {
-		margin-bottom: 0;
-	}
-
-	.warning a {
-		color: #0066cc;
-		text-decoration: none;
-	}
-
-	.warning a:hover {
-		text-decoration: underline;
+		color: #666;
+		font-style: italic;
+		text-align: center;
 	}
 </style>
