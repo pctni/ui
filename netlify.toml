@@ -2,7 +2,7 @@
   publish = "build"
   command = "chmod +x build.sh && npm run build"
 
-# PMTiles and static file headers for Firefox compatibility
+# PMTiles and static file headers
 [[headers]]
   for = "/static/*.pmtiles"
   [headers.values]

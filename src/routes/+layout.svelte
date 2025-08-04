@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Header from './Header.svelte';
-	import FirefoxWarning from '$lib/FirefoxWarning.svelte';
 	import AlphaModal from '$lib/AlphaModal.svelte';
 	import '../app.css';
 
@@ -13,7 +12,6 @@
 </script>
 
 <div class="app">
-	<FirefoxWarning />
 	<Header onAlphaModalClick={handleAlphaModalClick} />
 	<AlphaModal bind:showAlphaModal />
 
