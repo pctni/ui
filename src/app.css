@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import '@fontsource/fira-mono';
-@plugin '@tailwindcss/typography';
 
 :root {
 	--font-body:
