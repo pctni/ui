@@ -19,19 +19,18 @@
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
-	import Geocoder from '$lib/components/Geocoder.svelte';
 
 	// State - using simple reactive variables
-	let showBasemapPanel = false;
-	let showLayersPanel = false;
-	let currentBasemap = 'gray';
-	let currentNetworkType = ''; // No network selected by default
-	let currentNetworkColor = 'bicycle';
+	let showBasemapPanel = $state(false);
+	let showLayersPanel = $state(false);
+	let currentBasemap = $state('gray');
+	let currentNetworkType = $state(''); // No network selected by default
+	let currentNetworkColor = $state('bicycle');
 	
 	// Map state
-	let center: [number, number] = MAP_CONFIG.DEFAULT_CENTER;
-	let zoom: number = MAP_CONFIG.DEFAULT_ZOOM;
-	let mapInstance: import('maplibre-gl').Map | undefined;
+	let center = $state<[number, number]>(MAP_CONFIG.DEFAULT_CENTER);
+	let zoom = $state<number>(MAP_CONFIG.DEFAULT_ZOOM);
+	let mapInstance = $state<import('maplibre-gl').Map | undefined>();
 	
 	// Layer states
 	const layerStates: Record<string, boolean> = {
@@ -172,39 +171,44 @@
 	
 	// Handle map events
 	function handleMoveEnd() {
-		debouncedUpdateURL();
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
+			debouncedUpdateURL();
+		}
 	}
 	
 	function handleZoomEnd() {
-		debouncedUpdateURL();
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+			zoom = mapInstance.getZoom();
+			debouncedUpdateURL();
+		}
 	}
 
-	// Reactive statement to update URL when state changes
-	$: if (browser && !isUpdatingFromURL) {
-		debouncedUpdateURL();
-	}
+	// Note: URL updates are handled by explicit event handlers and function calls to avoid reactive loops
 
 	// Computed values
-	$: currentBasemapStyle = BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style;
+	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 
 	// Event handlers
 	function togglePanel(panel: 'basemap' | 'layers') {
 		if (panel === 'basemap') {
 			showBasemapPanel = !showBasemapPanel;
-			if (showBasemapPanel) showLayersPanel = false;
+			showLayersPanel = false; // Always close the other panel
 		} else {
 			showLayersPanel = !showLayersPanel;
-			if (showLayersPanel) showBasemapPanel = false;
+			showBasemapPanel = false; // Always close the other panel
 		}
 	}
 
 	function selectBasemap(key: string) {
 		currentBasemap = key;
 		showBasemapPanel = false;
+		debouncedUpdateURL();
 	}
 
 	function toggleLayer(key: string) {
 		layerStates[key] = !layerStates[key];
+		debouncedUpdateURL();
 	}
 
 	function setNetworkType(type: string) {
@@ -222,6 +226,7 @@
 
 	function setNetworkColor(color: string) {
 		currentNetworkColor = color;
+		debouncedUpdateURL();
 	}
 </script>
 
@@ -232,8 +237,8 @@
 <MapLibre
 	class="h-[calc(100vh-90px)]"
 	style={currentBasemapStyle}
-	bind:center
-	bind:zoom
+	center={center}
+	zoom={zoom}
 	bind:map={mapInstance}
 	onmoveend={handleMoveEnd}
 	onzoomend={handleZoomEnd}
@@ -242,11 +247,6 @@
 	<FullScreenControl position="top-left" />
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
-
-	<!-- Search/Geocoder Control -->
-	<CustomControl position="top-right">
-		<Geocoder map={mapInstance || null} />
-	</CustomControl>
 
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
@@ -267,7 +267,7 @@
 			controlType="layers"
 			showPanel={showLayersPanel}
 			onToggle={() => togglePanel('layers')}
-			title="Map Layers"
+			title="Layers"
 			position="right"
 			layerStates={layerStates}
 			currentNetworkType={currentNetworkType}
