@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-90px)] max-sm:h-screen"
+	class="h-[calc(100vh-90px)] max-sm:h-screen mobile-map-height"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
@@ -317,6 +317,13 @@
 		top: 10px;
 		left: 50px;
 		z-index: 1000;
+	}
+
+	/* Fix mobile viewport cropping with dynamic viewport height */
+	@media (max-width: 640px) {
+		:global(.mobile-map-height) {
+			height: 100dvh !important;
+		}
 	}
 
 	.mobile-alpha-button {
