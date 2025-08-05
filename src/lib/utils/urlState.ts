@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { BASEMAPS } from '$lib/config/basemaps.js';
 
-// Types for URL state management
 export interface MapState {
 	zoom: number;
 	center: [number, number];
@@ -18,9 +17,6 @@ export interface URLParseResult {
 	layerStates?: Record<string, boolean>;
 }
 
-/**
- * Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
- */
 export function parseURLHash(): URLParseResult {
 	if (!browser) return {};
 	
@@ -31,14 +27,13 @@ export function parseURLHash(): URLParseResult {
 		const parts = hash.split('/');
 		const result: URLParseResult = {};
 		
-		// Parse basic map position (zoom/lat/lng)
+		// Parse map position (zoom/lat/lng)
 		if (parts.length >= 3) {
 			const [zoomStr, latStr, lngStr] = parts;
 			const newZoom = parseFloat(zoomStr);
 			const newLat = parseFloat(latStr);
 			const newLng = parseFloat(lngStr);
 			
-			// Validate ranges
 			const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
 			const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
 			const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
