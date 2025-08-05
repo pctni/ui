@@ -25,13 +25,10 @@ export const LEGEND_CONFIGS: Record<
 			description: `${colorFieldLabels[networkColor] || 'Cycling levels'} - trips per day`,
 			items: [
 				{ color: '#808080', label: '1-49', value: 1 },
-				{ color: '#ffff00', label: '50-99', value: 50 },
-				{ color: '#80ff00', label: '100-249', value: 100 },
-				{ color: '#00ffff', label: '250-499', value: 250 },
-				{ color: '#80c0ff', label: '500-999', value: 500 },
-				{ color: '#0080ff', label: '1,000-1,999', value: 1000 },
-				{ color: '#0000ff', label: '2,000-2,999', value: 2000 },
-				{ color: '#ff00ff', label: '3,000+', value: 3000 }
+				{ color: '#ffff00', label: '50-199', value: 50 },
+				{ color: '#80ff00', label: '200-499', value: 200 },
+				{ color: '#0080ff', label: '500-999', value: 500 },
+				{ color: '#ff00ff', label: '1,000+', value: 1000 }
 			]
 		};
 	},
