@@ -19,6 +19,7 @@
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
+	import Geocoder from '$lib/components/Geocoder.svelte';
 
 	// State - using simple reactive variables
 	let showBasemapPanel = $state(false);
@@ -248,6 +249,11 @@
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
 
+	<!-- Search/Geocoder Control -->
+	<div class="custom-geocoder-position">
+		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
+	</div>
+
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
 		<MapControlPanel 
@@ -281,4 +287,13 @@
 	<!-- Dynamic Layers -->
 	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
 </MapLibre>
+
+<style>
+	.custom-geocoder-position {
+		position: absolute;
+		top: 10px;
+		left: 50px;
+		z-index: 1000;
+	}
+</style>
 
