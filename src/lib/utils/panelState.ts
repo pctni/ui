@@ -1,4 +1,3 @@
-// Types for panel management
 export type PanelType = 'basemap' | 'layers';
 
 export interface PanelState {
@@ -6,9 +5,6 @@ export interface PanelState {
 	showLayersPanel: boolean;
 }
 
-/**
- * Toggle a panel and ensure only one panel is open at a time
- */
 export function togglePanel(
 	currentState: PanelState,
 	panelToToggle: PanelType
@@ -16,29 +12,20 @@ export function togglePanel(
 	if (panelToToggle === 'basemap') {
 		return {
 			showBasemapPanel: !currentState.showBasemapPanel,
-			showLayersPanel: false // Always close the other panel
+			showLayersPanel: false
 		};
 	} else {
 		return {
 			showLayersPanel: !currentState.showLayersPanel,
-			showBasemapPanel: false // Always close the other panel
+			showBasemapPanel: false
 		};
 	}
 }
 
-/**
- * Close all panels
- */
 export function closeAllPanels(): PanelState {
-	return {
-		showBasemapPanel: false,
-		showLayersPanel: false
-	};
+	return { showBasemapPanel: false, showLayersPanel: false };
 }
 
-/**
- * Check if any panel is currently open
- */
 export function isAnyPanelOpen(state: PanelState): boolean {
 	return state.showBasemapPanel || state.showLayersPanel;
 }

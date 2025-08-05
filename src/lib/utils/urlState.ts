@@ -45,28 +45,20 @@ export function parseURLHash(): URLParseResult {
 		}
 		
 		// Parse basemap
-		if (parts.length >= 4 && parts[3]) {
-			const basemapName = parts[3];
-			if (BASEMAPS[basemapName]) {
-				result.currentBasemap = basemapName;
-			}
+		if (parts.length >= 4 && parts[3] && BASEMAPS[parts[3]]) {
+			result.currentBasemap = parts[3];
 		}
 		
 		// Parse network type
-		if (parts.length >= 5 && parts[4]) {
+		if (parts.length >= 5) {
 			const networkType = parts[4];
-			if (networkType === 'fast' || networkType === 'quiet') {
-				result.currentNetworkType = networkType;
-			} else if (networkType === 'none' || networkType === '') {
-				result.currentNetworkType = '';
-			}
+			result.currentNetworkType = (networkType === 'fast' || networkType === 'quiet') ? networkType : '';
 		} else {
 			result.currentNetworkType = '';
 		}
 		
 		// Parse active layers
 		if (parts.length >= 6 && parts[5]) {
-			const layersStr = parts[5];
 			const layerStates: Record<string, boolean> = {
 				routeNetwork: false,
 				coherentNetwork: false,
@@ -75,20 +67,16 @@ export function parseURLHash(): URLParseResult {
 				localAuthorities: false
 			};
 			
-			// Enable specified layers
-			if (layersStr !== 'none') {
-				const activeLayers = layersStr.split(',');
-				activeLayers.forEach(layerName => {
+			if (parts[5] !== 'none') {
+				parts[5].split(',').forEach(layerName => {
 					if (layerStates.hasOwnProperty(layerName)) {
 						layerStates[layerName] = true;
 					}
 				});
 			}
 			
-			// Set route network layer state based on network type
 			const networkType = result.currentNetworkType || '';
-			layerStates.routeNetwork = networkType !== '' && (networkType === 'fast' || networkType === 'quiet');
-			
+			layerStates.routeNetwork = networkType === 'fast' || networkType === 'quiet';
 			result.layerStates = layerStates;
 		}
 		
@@ -99,22 +87,17 @@ export function parseURLHash(): URLParseResult {
 	}
 }
 
-/**
- * Generate URL hash from current map state
- */
 export function generateURLHash(state: MapState): string {
 	if (!browser || !state.center || typeof state.zoom !== 'number') return '';
 	
 	try {
-		// Get active layers
 		const activeLayers = Object.entries(state.layerStates)
-			.filter(([key, value]) => value)
-			.map(([key, value]) => key);
+			.filter(([, value]) => value)
+			.map(([key]) => key);
 		
 		const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
 		const networkTypeStr = state.currentNetworkType || 'none';
 		
-		// Format: #zoom/lat/lng/basemap/networkType/layers
 		return `#${state.zoom.toFixed(2)}/${state.center[1].toFixed(4)}/${state.center[0].toFixed(4)}/${state.currentBasemap}/${networkTypeStr}/${layersStr}`;
 	} catch (error) {
 		console.warn('Failed to generate URL hash:', error);
@@ -122,26 +105,18 @@ export function generateURLHash(state: MapState): string {
 	}
 }
 
-/**
- * Update browser URL with current map state
- */
 export function updateBrowserURL(state: MapState): void {
 	const newHash = generateURLHash(state);
-	
 	if (newHash && window.location.hash !== newHash) {
 		window.history.replaceState(null, '', newHash);
 	}
 }
 
-/**
- * Create a debounced version of a function
- */
 export function debounce<T extends (...args: any[]) => void>(
 	func: T, 
 	delay: number
 ): (...args: Parameters<T>) => void {
 	let timeoutId: ReturnType<typeof setTimeout>;
-	
 	return (...args: Parameters<T>) => {
 		clearTimeout(timeoutId);
 		timeoutId = setTimeout(() => func(...args), delay);

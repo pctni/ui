@@ -23,29 +23,24 @@
 	import { createMapEventHandlers, shouldProcessMapUpdate } from '$lib/utils/mapEvents.js';
 	import { togglePanel as togglePanelUtil, type PanelType } from '$lib/utils/panelState.js';
 
-	// State - using simple reactive variables
+	// State variables
 	let showBasemapPanel = $state(false);
 	let showLayersPanel = $state(false);
 	let currentBasemap = $state('gray');
-	let currentNetworkType = $state(''); // No network selected by default
+	let currentNetworkType = $state('');
 	let currentNetworkColor = $state('bicycle');
-	
-	// Map state
 	let center = $state<[number, number]>(MAP_CONFIG.DEFAULT_CENTER);
 	let zoom = $state<number>(MAP_CONFIG.DEFAULT_ZOOM);
 	let mapInstance = $state<import('maplibre-gl').Map | undefined>();
+	let isUpdatingFromURL = $state(false);
 	
-	// Layer states
 	let layerStates = $state<Record<string, boolean>>({
-		routeNetwork: false, // Off by default - user must actively select a network type
+		routeNetwork: false,
 		coherentNetwork: false,
 		cycleNetwork: false,
 		gapAnalysis: false,
 		localAuthorities: false
 	});
-
-	// URL state management
-	let isUpdatingFromURL = $state(false);
 
 	// Initialize from URL hash on mount - using onMount to avoid circular dependencies
 	onMount(() => {
@@ -68,28 +63,21 @@
 	function applyURLState() {
 		if (!browser) return;
 		
-		try {
-			isUpdatingFromURL = true;
-			const urlState = parseURLHash();
-			
-			if (urlState.zoom !== undefined) zoom = urlState.zoom;
-			if (urlState.center !== undefined) center = urlState.center;
-			if (urlState.currentBasemap !== undefined) currentBasemap = urlState.currentBasemap;
-			if (urlState.currentNetworkType !== undefined) currentNetworkType = urlState.currentNetworkType;
-			if (urlState.layerStates !== undefined) {
-				// Update layer states
-				Object.assign(layerStates, urlState.layerStates);
-			}
-		} catch (error) {
-			console.warn('Failed to apply URL state:', error);
-		} finally {
-			setTimeout(() => {
-				isUpdatingFromURL = false;
-			}, 0);
-		}
+	try {
+		isUpdatingFromURL = true;
+		const urlState = parseURLHash();
+		
+		if (urlState.zoom !== undefined) zoom = urlState.zoom;
+		if (urlState.center !== undefined) center = urlState.center;
+		if (urlState.currentBasemap !== undefined) currentBasemap = urlState.currentBasemap;
+		if (urlState.currentNetworkType !== undefined) currentNetworkType = urlState.currentNetworkType;
+		if (urlState.layerStates !== undefined) Object.assign(layerStates, urlState.layerStates);
+	} catch (error) {
+		console.warn('Failed to apply URL state:', error);
+	} finally {
+		setTimeout(() => { isUpdatingFromURL = false; }, 0);
 	}
-	
-	// Debounced URL updates now handled by utility functions
+}	// Debounced URL updates now handled by utility functions
 
 	// Note: This app uses a hybrid approach with Svelte 5:
 	// - $state() for reactive state variables
@@ -155,7 +143,7 @@
 			currentNetworkType = type;
 			layerStates.routeNetwork = true;
 		}
-		updateURLHash(); // Immediate update for network changes
+		debouncedUpdateURL();
 	}
 
 	function setNetworkColor(color: string) {
