@@ -112,7 +112,7 @@
 	}
 
 	.control-panel.right {
-		min-width: 200px;
+		min-width: 100px;
 	}
 
 	.control-panel.expanded.left {

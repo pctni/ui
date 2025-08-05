@@ -107,7 +107,7 @@
 <style>
 	.geocoder {
 		position: relative;
-		width: 160px;
+		width: 120px;
 	}
 
 	.input {
