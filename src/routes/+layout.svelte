@@ -2,6 +2,7 @@
 	import Header from './Header.svelte';
 	import AlphaModal from '$lib/AlphaModal.svelte';
 	import '../app.css';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 	let showAlphaModal = $state(false);
@@ -9,6 +10,18 @@
 	function handleAlphaModalClick() {
 		showAlphaModal = true;
 	}
+
+	onMount(() => {
+		function handleCustomAlphaEvent() {
+			showAlphaModal = true;
+		}
+
+		window.addEventListener('show-alpha-modal', handleCustomAlphaEvent);
+		
+		return () => {
+			window.removeEventListener('show-alpha-modal', handleCustomAlphaEvent);
+		};
+	});
 </script>
 
 <div class="app">
