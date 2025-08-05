@@ -272,7 +272,7 @@
 
 	<!-- Geocoder with custom positioning -->
 	<div class="custom-geocoder-position">
-		<Geocoder map={mapInstance} />
+		<Geocoder map={mapInstance || null} />
 	</div>
 
 	<!-- Layers Control -->
