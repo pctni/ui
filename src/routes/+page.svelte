@@ -17,6 +17,11 @@
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
+	
+	// Import utilities
+	import { parseURLHash, updateBrowserURL, debounce, type MapState } from '$lib/utils/urlState.js';
+	import { createMapEventHandlers, shouldProcessMapUpdate } from '$lib/utils/mapEvents.js';
+	import { togglePanel as togglePanelUtil, type PanelType } from '$lib/utils/panelState.js';
 
 	// State - using simple reactive variables
 	let showBasemapPanel = $state(false);
@@ -40,16 +45,15 @@
 	});
 
 	// URL state management
-	let updateTimeout: ReturnType<typeof setTimeout>;
 	let isUpdatingFromURL = $state(false);
 
 	// Initialize from URL hash on mount - using onMount to avoid circular dependencies
 	onMount(() => {
 		if (browser) {
-			parseURLHash();
+			applyURLState();
 			
 			function handleHashChange() {
-				parseURLHash();
+				applyURLState();
 			}
 			
 			window.addEventListener('hashchange', handleHashChange);
@@ -60,80 +64,24 @@
 		}
 	});
 	
-	// Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
-	function parseURLHash() {
+	// Apply URL state to component state
+	function applyURLState() {
 		if (!browser) return;
 		
 		try {
 			isUpdatingFromURL = true;
-
-			const hash = window.location.hash.slice(1);
-			if (!hash) return;
+			const urlState = parseURLHash();
 			
-			const parts = hash.split('/');
-			
-			// Parse basic map position (zoom/lat/lng)
-			if (parts.length >= 3) {
-				const [zoomStr, latStr, lngStr] = parts;
-				const newZoom = parseFloat(zoomStr);
-				const newLat = parseFloat(latStr);
-				const newLng = parseFloat(lngStr);
-				
-				// Validate ranges
-				const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
-				const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
-				const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
-				
-				if (isValidZoom && isValidLat && isValidLng) {
-					zoom = newZoom;
-					center = [newLng, newLat];
-				}
+			if (urlState.zoom !== undefined) zoom = urlState.zoom;
+			if (urlState.center !== undefined) center = urlState.center;
+			if (urlState.currentBasemap !== undefined) currentBasemap = urlState.currentBasemap;
+			if (urlState.currentNetworkType !== undefined) currentNetworkType = urlState.currentNetworkType;
+			if (urlState.layerStates !== undefined) {
+				// Update layer states
+				Object.assign(layerStates, urlState.layerStates);
 			}
-			
-			// Parse basemap
-			if (parts.length >= 4 && parts[3]) {
-				const basemapName = parts[3];
-				if (BASEMAPS[basemapName]) {
-					currentBasemap = basemapName;
-				}
-			}
-			
-			// Parse network type
-			if (parts.length >= 5 && parts[4]) {
-				const networkType = parts[4];
-				if (networkType === 'fast' || networkType === 'quiet') {
-					currentNetworkType = networkType;
-				} else if (networkType === 'none' || networkType === '') {
-					currentNetworkType = '';
-				}
-			} else {
-				currentNetworkType = '';
-			}
-			
-			// Parse active layers
-			if (parts.length >= 6 && parts[5]) {
-				const layersStr = parts[5];
-				
-				// Reset all layers to false first
-				Object.keys(layerStates).forEach(key => {
-					layerStates[key] = false;
-				});
-				
-				// Enable specified layers
-				if (layersStr !== 'none') {
-					const activeLayers = layersStr.split(',');
-					activeLayers.forEach(layerName => {
-						if (layerStates.hasOwnProperty(layerName)) {
-							layerStates[layerName] = true;
-						}
-					});
-				}
-			}
-			
-			// Set route network layer state based on network type
-			layerStates.routeNetwork = currentNetworkType !== '' && (currentNetworkType === 'fast' || currentNetworkType === 'quiet');
 		} catch (error) {
-			console.warn('Failed to parse URL hash:', error);
+			console.warn('Failed to apply URL state:', error);
 		} finally {
 			setTimeout(() => {
 				isUpdatingFromURL = false;
@@ -141,22 +89,7 @@
 		}
 	}
 	
-	// Debounced URL updates now handled by $effect above
-	
-	// Handle map events
-	function handleMoveEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
-			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
-			debouncedUpdateURL();
-		}
-	}
-	
-	function handleZoomEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
-			zoom = mapInstance.getZoom();
-			debouncedUpdateURL();
-		}
-	}
+	// Debounced URL updates now handled by utility functions
 
 	// Note: This app uses a hybrid approach with Svelte 5:
 	// - $state() for reactive state variables
@@ -167,46 +100,38 @@
 	// Computed values
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 	
-	// Manual URL update function - simpler and more predictable
-	function updateURLHash() {
-		if (!browser || !center || typeof zoom !== 'number' || isUpdatingFromURL) return;
-		
-		try {
-			// Get active layers
-			const activeLayers = Object.entries(layerStates)
-				.filter(([key, value]) => value)
-				.map(([key, value]) => key);
-			
-			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
-			const networkTypeStr = currentNetworkType || 'none';
-			
-			// Format: #zoom/lat/lng/basemap/networkType/layers
-			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${networkTypeStr}/${layersStr}`;
-			
-			// Only update if hash actually changed
-			if (window.location.hash !== newHash) {
-				window.history.replaceState(null, '', newHash);
-			}
-		} catch (error) {
-			console.warn('Failed to update URL hash:', error);
+	// Create a debounced URL update function
+	const debouncedUpdateURL = debounce(() => {
+		if (!isUpdatingFromURL) {
+			const currentState: MapState = {
+				zoom,
+				center,
+				currentBasemap,
+				currentNetworkType,
+				layerStates
+			};
+			updateBrowserURL(currentState);
 		}
-	}
-	
-	// Debounced URL updates
-	function debouncedUpdateURL() {
-		clearTimeout(updateTimeout);
-		updateTimeout = setTimeout(updateURLHash, 100);
-	}
+	}, 100);
+
+	// Create map event handlers using utility
+	const mapEventHandlers = createMapEventHandlers(
+		(newCenter, newZoom) => {
+			center = newCenter;
+			zoom = newZoom;
+			debouncedUpdateURL();
+		},
+		() => shouldProcessMapUpdate(isUpdatingFromURL, mapInstance, showBasemapPanel, showLayersPanel)
+	);
 
 	// Event handlers
-	function togglePanel(panel: 'basemap' | 'layers') {
-		if (panel === 'basemap') {
-			showBasemapPanel = !showBasemapPanel;
-			showLayersPanel = false; // Always close the other panel
-		} else {
-			showLayersPanel = !showLayersPanel;
-			showBasemapPanel = false; // Always close the other panel
-		}
+	function togglePanel(panel: PanelType) {
+		const newState = togglePanelUtil(
+			{ showBasemapPanel, showLayersPanel },
+			panel
+		);
+		showBasemapPanel = newState.showBasemapPanel;
+		showLayersPanel = newState.showLayersPanel;
 	}
 
 	function selectBasemap(key: string) {
@@ -249,8 +174,8 @@
 	center={center}
 	zoom={zoom}
 	bind:map={mapInstance}
-	onmoveend={handleMoveEnd}
-	onzoomend={handleZoomEnd}
+	onmoveend={() => mapEventHandlers.onMoveEnd(mapInstance!)}
+	onzoomend={() => mapEventHandlers.onZoomEnd(mapInstance!)}
 >
 	<NavigationControl position="top-left" />
 	<FullScreenControl position="top-left" />
