@@ -4,9 +4,6 @@
 		FullScreenControl, 
 		GeolocateControl, 
 		ScaleControl,
-		VectorTileSource,
-		LineLayer,
-		FillLayer,
 		CustomControl,
 		NavigationControl
 	} from 'svelte-maplibre-gl';
@@ -46,14 +43,19 @@
 	let updateTimeout: ReturnType<typeof setTimeout>;
 	let isUpdatingFromURL = $state(false);
 
-	// Initialize from URL hash on mount
+	// Initialize from URL hash on mount - using onMount to avoid circular dependencies
 	onMount(() => {
 		if (browser) {
 			parseURLHash();
-			window.addEventListener('hashchange', parseURLHash);
+			
+			function handleHashChange() {
+				parseURLHash();
+			}
+			
+			window.addEventListener('hashchange', handleHashChange);
 			
 			return () => {
-				window.removeEventListener('hashchange', parseURLHash);
+				window.removeEventListener('hashchange', handleHashChange);
 			};
 		}
 	});
@@ -139,9 +141,35 @@
 		}
 	}
 	
-	// Update URL with current map state
+	// Debounced URL updates now handled by $effect above
+	
+	// Handle map events
+	function handleMoveEnd() {
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
+			debouncedUpdateURL();
+		}
+	}
+	
+	function handleZoomEnd() {
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+			zoom = mapInstance.getZoom();
+			debouncedUpdateURL();
+		}
+	}
+
+	// Note: This app uses a hybrid approach with Svelte 5:
+	// - $state() for reactive state variables
+	// - $derived() for simple computed values 
+	// - onMount() for initial setup and event listeners (avoids circular dependencies)
+	// - Manual functions for complex side effects like URL management
+
+	// Computed values
+	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
+	
+	// Manual URL update function - simpler and more predictable
 	function updateURLHash() {
-		if (!browser || !center || typeof zoom !== 'number') return;
+		if (!browser || !center || typeof zoom !== 'number' || isUpdatingFromURL) return;
 		
 		try {
 			// Get active layers
@@ -164,31 +192,11 @@
 		}
 	}
 	
-	// Debounce URL updates
+	// Debounced URL updates
 	function debouncedUpdateURL() {
 		clearTimeout(updateTimeout);
 		updateTimeout = setTimeout(updateURLHash, 100);
 	}
-	
-	// Handle map events
-	function handleMoveEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
-			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
-			debouncedUpdateURL();
-		}
-	}
-	
-	function handleZoomEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
-			zoom = mapInstance.getZoom();
-			debouncedUpdateURL();
-		}
-	}
-
-	// Note: URL updates are handled by explicit event handlers and function calls to avoid reactive loops
-
-	// Computed values
-	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
 
 	// Event handlers
 	function togglePanel(panel: 'basemap' | 'layers') {
@@ -222,7 +230,7 @@
 			currentNetworkType = type;
 			layerStates.routeNetwork = true;
 		}
-		updateURLHash();
+		updateURLHash(); // Immediate update for network changes
 	}
 
 	function setNetworkColor(color: string) {
@@ -249,11 +257,6 @@
 	<GeolocateControl position="top-left" />
 	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
 
-	<!-- Search/Geocoder Control -->
-	<div class="custom-geocoder-position">
-		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
-	</div>
-
 	<!-- Basemap Control -->
 	<CustomControl position="top-left">
 		<MapControlPanel 
@@ -266,6 +269,11 @@
 			onBasemapSelect={selectBasemap}
 		/>
 	</CustomControl>
+
+	<!-- Geocoder with custom positioning -->
+	<div class="custom-geocoder-position">
+		<Geocoder map={mapInstance} />
+	</div>
 
 	<!-- Layers Control -->
 	<CustomControl position="top-right">
@@ -289,11 +297,10 @@
 </MapLibre>
 
 <style>
-	.custom-geocoder-position {
+	:global(.custom-geocoder-position) {
 		position: absolute;
 		top: 10px;
 		left: 50px;
 		z-index: 1000;
 	}
 </style>
-
