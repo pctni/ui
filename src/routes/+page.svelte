@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-90px)]"
+	class="h-[calc(100vh-90px)] max-sm:h-screen"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
@@ -294,6 +294,21 @@
 
 	<!-- Dynamic Layers -->
 	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+	
+	<!-- Mobile-only floating Alpha button -->
+	<div class="mobile-alpha-button">
+		<button
+			class="alpha-mobile"
+			onclick={() => {
+				// Access parent component's alpha modal function
+				window.dispatchEvent(new CustomEvent('show-alpha-modal'));
+			}}
+			aria-label="Show alpha information"
+			type="button"
+		>
+			ALPHA
+		</button>
+	</div>
 </MapLibre>
 
 <style>
@@ -302,5 +317,38 @@
 		top: 10px;
 		left: 50px;
 		z-index: 1000;
+	}
+
+	.mobile-alpha-button {
+		position: absolute;
+		bottom: 35px;
+		right: 20px;
+		z-index: 1000;
+		display: none;
+	}
+
+	.alpha-mobile {
+		background-color: #00703c;
+		color: white;
+		padding: 8px 12px;
+		border-radius: 4px;
+		font-weight: bold;
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		cursor: pointer;
+		border: none;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		transition: background-color 0.2s;
+	}
+
+	.alpha-mobile:hover {
+		background-color: #005a30;
+	}
+
+	@media (max-width: 480px) {
+		.mobile-alpha-button {
+			display: block;
+		}
 	}
 </style>
