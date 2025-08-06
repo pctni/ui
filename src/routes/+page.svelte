@@ -319,6 +319,11 @@
 		z-index: 1000;
 	}
 
+	/* Fix white space below map on wider screens */
+	:global(.maplibregl-map) {
+		height: calc(100vh - 90px) !important;
+	}
+
 	/* Fix mobile viewport cropping with dynamic viewport height */
 	@media (max-width: 640px) {
 		:global(.mobile-map-height) {
