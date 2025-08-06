@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-80px)] max-sm:h-screen mobile-map-height"
+	class="map-container max-sm:h-screen mobile-map-height"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
@@ -327,8 +327,21 @@
 	}
 
 	/* Fix white space below map on wider screens */
+	.map-container {
+		height: calc(100vh - 90px);
+		width: 100%;
+	}
+
 	:global(.maplibregl-map) {
 		height: 100% !important;
+		width: 100% !important;
+	}
+
+	/* Ensure proper header height calculation */
+	@media (min-width: 641px) {
+		.map-container {
+			height: calc(100vh - 90px);
+		}
 	}
 
 	.mobile-alpha-button {
