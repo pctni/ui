@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-90px)] max-sm:h-screen mobile-map-height"
+	class="h-[calc(100vh-80px)] max-sm:h-screen mobile-map-height"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
@@ -326,6 +326,11 @@
 		}
 	}
 
+	/* Fix white space below map on wider screens */
+	:global(.maplibregl-map) {
+		height: 100% !important;
+	}
+
 	.mobile-alpha-button {
 		position: absolute;
 		bottom: 35px;
@@ -359,6 +364,3 @@
 		}
 	}
 </style>
-"/* Fix white space below map on wider screens */" 
-"	/* Fix white space below map on wider screens */" 
-"	:global(.maplibregl-map) { height: calc(100vh - 90px) !important; }" 
