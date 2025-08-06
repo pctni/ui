@@ -18,9 +18,9 @@
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 
-	// State - using simple reactive variables
+	// State: initial values and types
 	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(false);
+	let showLayersPanel = $state(true);
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
