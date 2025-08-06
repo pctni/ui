@@ -130,14 +130,10 @@
 
 	/* Mobile responsiveness */
 	@media (max-width: 768px) {
-		header {
-			padding: 0.5em;
-		}
-
 		.header-content {
 			flex-direction: column;
 			justify-content: center;
-			gap: 0.5rem;
+			gap: 1rem;
 		}
 
 		.header-right {
@@ -150,23 +146,40 @@
 
 		h1 {
 			order: 1;
-			font-size: 1.1em;
+			font-size: 1.3em;
 			text-align: center;
+		}
+
+		.logo {
+			height: 35px;
+		}
+
+		.alpha-box {
+			font-size: 0.8rem;
+			padding: 0.25rem 0.5rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		header {
+			padding: 0.8em;
+		}
+
+		.header-content {
+			gap: 0.8rem;
+		}
+
+		.logos-right {
+			flex-direction: column;
+			gap: 0.5rem;
 		}
 
 		.logo {
 			height: 30px;
 		}
 
-		.alpha-box {
-			font-size: 0.8rem;
-			padding: 0.2rem 0.4rem;
-		}
-	}
-
-	@media (max-width: 480px) {
-		header {
-			display: none;
+		h1 {
+			font-size: 1.2em;
 		}
 	}
 </style>
