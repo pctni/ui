@@ -75,7 +75,7 @@
 		padding: 0.3rem 0.6rem;
 		border-radius: 4px;
 		font-weight: bold;
-		font-size: 0.9rem;
+		font-size: 1rem;
 		text-transform: uppercase;
 		letter-spacing: 1px;
 		cursor: pointer;
@@ -122,7 +122,7 @@
 
 	h1 {
 		margin: 0;
-		font-size: 1.5em;
+		font-size: 1.8em;
 		color: #333;
 		text-align: left;
 		flex: 1;
@@ -150,7 +150,7 @@
 
 		h1 {
 			order: 1;
-			font-size: 1.1em;
+			font-size: 1.3em;
 			text-align: center;
 		}
 
@@ -159,7 +159,7 @@
 		}
 
 		.alpha-box {
-			font-size: 0.8rem;
+			font-size: 1rem;
 			padding: 0.2rem 0.4rem;
 		}
 	}
