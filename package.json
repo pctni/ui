@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "./build.sh dev && vite dev",
+		"dev": "vite dev",
 		"dev:clean": "./build.sh --clean && vite dev",
 		"build": "./build.sh && vite build",
 		"build:prod": "./build.sh --clean && vite build",
