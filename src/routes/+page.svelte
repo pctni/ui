@@ -359,3 +359,6 @@
 		}
 	}
 </style>
+"/* Fix white space below map on wider screens */" 
+"	/* Fix white space below map on wider screens */" 
+"	:global(.maplibregl-map) { height: calc(100vh - 90px) !important; }" 
