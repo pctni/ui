@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-90px)] max-sm:h-screen mobile-map-height"
+	class="h-[calc(100vh-70px)] max-sm:h-screen mobile-map-height"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
