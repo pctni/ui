@@ -244,7 +244,7 @@
 {/if}
 
 <MapLibre
-	class="h-[calc(100vh-70px)] max-sm:h-screen mobile-map-height"
+	class="h-full max-sm:h-screen mobile-map-height"
 	style={currentBasemapStyle}
 	center={center}
 	zoom={zoom}
@@ -325,6 +325,7 @@
 			height: 100dvh !important;
 		}
 	}
+
 
 	.mobile-alpha-button {
 		position: absolute;

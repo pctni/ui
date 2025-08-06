@@ -162,24 +162,7 @@
 
 	@media (max-width: 480px) {
 		header {
-			padding: 0.8em;
-		}
-
-		.header-content {
-			gap: 0.8rem;
-		}
-
-		.logos-right {
-			flex-direction: column;
-			gap: 0.5rem;
-		}
-
-		.logo {
-			height: 30px;
-		}
-
-		h1 {
-			font-size: 1.2em;
+			display: none;
 		}
 	}
 </style>
