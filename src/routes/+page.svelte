@@ -297,6 +297,21 @@
 					ALPHA
 				</button>
 			</div>
+
+			<!-- Mobile alpha button -->
+			<div class="mobile-alpha-button">
+				<button
+					class="alpha-mobile"
+					onclick={() => {
+						// Access parent component's alpha modal function
+						window.dispatchEvent(new CustomEvent('show-alpha-modal'));
+					}}
+					aria-label="Show alpha information"
+					type="button"
+				>
+					ALPHA
+				</button>
+			</div>
 		</MapLibre>
 	</div>
 
@@ -374,13 +389,38 @@
 			height: 100dvh !important;
 		}
 
-		/* Hide sidebar on mobile and show original dropdown behavior */
+		/* Show sidebar as bottom panel on mobile */
 		.app-container {
 			flex-direction: column;
 		}
 
+		.map-container {
+			height: 60vh; /* Map takes 60% of viewport height */
+		}
+
 		.layers-sidebar {
-			display: none;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			width: 100%;
+			height: 40vh; /* Panel takes 40% of viewport height */
+			border-left: none;
+			border-top: 1px solid #e2e8f0;
+			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+			z-index: 1000;
+		}
+
+		.sidebar-content {
+			padding: 0.75rem;
+		}
+
+		.sidebar-header {
+			padding: 0.75rem 1rem;
+		}
+
+		.sidebar-header h3 {
+			font-size: 1rem;
 		}
 	}
 
@@ -388,7 +428,7 @@
 		position: absolute;
 		bottom: 35px;
 		right: 20px;
-		z-index: 1000;
+		z-index: 9999;
 		display: none;
 	}
 
@@ -416,4 +456,6 @@
 			display: block;
 		}
 	}
+
+
 </style>
