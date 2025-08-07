@@ -56,7 +56,7 @@ This project was inspired by previous open-source projects including:
 - [Propensity to Cycle Tool (PCT)](https://www.pct.bike/)
 - The [Cycle Route Uptake and Scenario Estimation (CRUSE)](https://cruse.bike) tool for the Republic of Ireland
 - [Network Planning Tool for Scotland (NPT)](https://www.npt.scot/)
-- The related [Network Planning Workspace (NPW)](https://www.npw.scot/)
+- The related [Network Planning Workspace (NPW)](https://www.npw.scot/), which takes browser-based active travel network planning tools to a whole new level
 - Active Travel England's [Plan Your Active Travel Schemes (PYATS)](https://plan.activetravelengland.gov.uk/)
 
 ## Contributing
