@@ -51,10 +51,12 @@ The build process downloads required PMTiles data files and generates optimized 
 
 ## Links
 
-This project builds on and was inspired by work including:
+This project was inspired by previous open-source projects including:
 
-- [Propensity to Cycle Tool (PCT)](https://www.pct.bike/) 
-- [Network Planning Tool for Scotland (NPW)](https://www.npt.scot/)
+- [Propensity to Cycle Tool (PCT)](https://www.pct.bike/)
+- The [Cycle Route Uptake and Scenario Estimation (CRUSE)](https://cruse.bike) tool for the Republic of Ireland
+- [Network Planning Tool for Scotland (NPT)](https://www.npt.scot/)
+- The related [Network Planning Workspace (NPW)](https://www.npw.scot/)
 - Active Travel England's [Plan Your Active Travel Schemes (PYATS)](https://plan.activetravelengland.gov.uk/)
 
 ## Contributing
