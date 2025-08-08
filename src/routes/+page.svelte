@@ -22,6 +22,7 @@
 	// State: initial values and types
 	let showBasemapPanel = $state(false);
 	let showLayersPanel = $state(false);
+	let isLayerPanelMinimized = $state(false); // For mobile layer panel toggle
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
@@ -238,6 +239,10 @@
 		currentNetworkColor = color;
 		debouncedUpdateURL();
 	}
+
+	function toggleLayerPanelMinimized() {
+		isLayerPanelMinimized = !isLayerPanelMinimized;
+	}
 </script>
 
 {#if browser}
@@ -302,10 +307,19 @@
 	</div>
 
 	<!-- Right sidebar for layers -->
-	<div class="layers-sidebar">
+	<div class="layers-sidebar" class:minimized={isLayerPanelMinimized}>
 		<div class="sidebar-header">
 			<h3>Layers</h3>
+			<!-- Toggle button for both desktop and mobile -->
+			<button 
+				class="panel-toggle-btn"
+				onclick={toggleLayerPanelMinimized}
+				aria-label={isLayerPanelMinimized ? 'Expand layer panel' : 'Minimize layer panel'}
+			>
+				<div class="chevron-icon" class:minimized={isLayerPanelMinimized}></div>
+			</button>
 		</div>
+		{#if !isLayerPanelMinimized}
 		<div class="sidebar-content">
 			<LayerPanel
 				layerStates={layerStates}
@@ -316,6 +330,7 @@
 				onNetworkColorChange={setNetworkColor}
 			/>
 		</div>
+		{/if}
 	</div>
 </div>
 
@@ -340,12 +355,29 @@
 		display: flex;
 		flex-direction: column;
 		box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+		transition: width 0.3s ease;
+	}
+
+	/* Desktop minimized state */
+	.layers-sidebar.minimized {
+		width: 60px; /* Just show the toggle area */
+	}
+
+	.layers-sidebar.minimized .sidebar-header h3 {
+		display: none; /* Hide title when minimized */
+	}
+
+	.layers-sidebar.minimized .panel-toggle-btn {
+		margin: 0 auto; /* Center the toggle button when minimized */
 	}
 
 	.sidebar-header {
 		padding: 1rem;
 		border-bottom: 1px solid #e2e8f0;
 		background-color: #f8fafc;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 
 	.sidebar-header h3 {
@@ -353,6 +385,58 @@
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: #1e293b;
+	}
+
+	.panel-toggle-btn {
+		background: none;
+		border: none;
+		font-size: 1.2rem;
+		cursor: pointer;
+		padding: 0;
+		color: #64748b;
+		border-radius: 0.25rem;
+		transition: background-color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		min-height: 32px;
+	}
+
+	.panel-toggle-btn:hover {
+		background-color: #e2e8f0;
+	}
+
+	/* CSS-based chevron icon */
+	.chevron-icon {
+		width: 8px;
+		height: 8px;
+		border-top: 2px solid #64748b;
+		border-right: 2px solid #64748b;
+		transform: rotate(45deg);
+		transition: transform 0.2s ease;
+	}
+
+	/* Desktop: point left when expanded, right when minimized */
+	.chevron-icon {
+		transform: rotate(-135deg); /* Point left (hide panel) */
+	}
+
+	.chevron-icon.minimized {
+		transform: rotate(45deg); /* Point right (show panel) */
+	}
+
+	/* Mobile: point down when expanded, up when minimized */
+	@media (max-width: 640px) {
+		.chevron-icon {
+			transform: rotate(135deg); /* Point down (hide panel) */
+		}
+
+		.chevron-icon.minimized {
+			transform: rotate(-45deg); /* Point up (show panel) */
+		}
 	}
 
 	.sidebar-content {
@@ -368,7 +452,7 @@
 		z-index: 1000;
 	}
 
-	/* Fix mobile viewport cropping with dynamic viewport height */
+	/* Mobile responsive layout */
 	@media (max-width: 640px) {
 		:global(.mobile-map-height) {
 			height: 100dvh !important;
@@ -380,16 +464,18 @@
 		}
 
 		.map-container {
-			height: 60vh; /* Map takes 60% of viewport height */
+			height: 60vh; /* Map takes 60% of viewport height when panel is expanded */
 		}
 
-		/* Adjust map controls positioning on mobile to avoid overlap with bottom panel */
+		/* Dynamic map controls positioning based on panel state */
 		:global(.maplibregl-ctrl-bottom-left) {
-			bottom: 40vh !important;
+			bottom: 40vh !important; /* Default expanded state */
+			transition: bottom 0.3s ease;
 		}
 
 		:global(.maplibregl-ctrl-bottom-right) {
-			bottom: 40vh !important;
+			bottom: 40vh !important; /* Default expanded state */
+			transition: bottom 0.3s ease;
 		}
 
 		.layers-sidebar {
@@ -397,12 +483,38 @@
 			bottom: 0;
 			left: 0;
 			right: 0;
-			width: 100%;
-			height: 40vh; /* Panel takes 40% of viewport height */
+			width: 100% !important; /* Override desktop width */
+			height: 40vh; /* Panel takes 40% of viewport height when expanded */
 			border-left: none;
 			border-top: 1px solid #e2e8f0;
 			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
 			z-index: 1000;
+			transition: height 0.3s ease;
+		}
+
+		/* Mobile minimized state */
+		.layers-sidebar.minimized {
+			width: 100% !important; /* Keep full width on mobile */
+			height: auto; /* Only show header when minimized */
+		}
+
+		.layers-sidebar.minimized .sidebar-header h3 {
+			display: block; /* Show title on mobile even when minimized */
+		}
+
+		.layers-sidebar.minimized .panel-toggle-btn {
+			margin: 0; /* Reset margin on mobile */
+		}
+
+		/* Adjust map when panel is minimized on mobile */
+		.app-container:has(.layers-sidebar.minimized) .map-container {
+			height: calc(100vh - 60px); /* Full height minus header height */
+		}
+
+		/* Adjust controls when panel is minimized on mobile */
+		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-left),
+		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-right) {
+			bottom: 60px !important; /* Position above minimized header */
 		}
 
 		.sidebar-content {
