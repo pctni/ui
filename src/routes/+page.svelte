@@ -16,11 +16,13 @@
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
+	import LayerPanel from '$lib/components/LayerPanel.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 
 	// State: initial values and types
 	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(true);
+	let showLayersPanel = $state(false);
+	let isLayerPanelMinimized = $state(false); // For mobile layer panel toggle
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
@@ -237,81 +239,212 @@
 		currentNetworkColor = color;
 		debouncedUpdateURL();
 	}
+
+	function toggleLayerPanelMinimized() {
+		isLayerPanelMinimized = !isLayerPanelMinimized;
+	}
 </script>
 
 {#if browser}
 	<PMTilesProtocol />
 {/if}
 
-<MapLibre
-	class="h-full max-sm:h-screen mobile-map-height"
-	style={currentBasemapStyle}
-	center={center}
-	zoom={zoom}
-	bind:map={mapInstance}
-	onmoveend={handleMoveEnd}
-	onzoomend={handleZoomEnd}
->
-	<NavigationControl position="top-left" />
-	<FullScreenControl position="top-left" />
-	<GeolocateControl position="top-left" />
-	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
-
-	<!-- Basemap Control -->
-	<CustomControl position="top-left">
-		<MapControlPanel 
-			controlType="basemap"
-			showPanel={showBasemapPanel}
-			onToggle={() => togglePanel('basemap')}
-			title="Change basemap"
-			position="left"
-			currentBasemap={currentBasemap}
-			onBasemapSelect={selectBasemap}
-		/>
-	</CustomControl>
-
-	<!-- Geocoder with custom positioning -->
-	<div class="custom-geocoder-position">
-		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
-	</div>
-
-	<!-- Layers Control -->
-	<CustomControl position="top-right">
-		<MapControlPanel 
-			controlType="layers"
-			showPanel={showLayersPanel}
-			onToggle={() => togglePanel('layers')}
-			title="Layers"
-			position="right"
-			layerStates={layerStates}
-			currentNetworkType={currentNetworkType}
-			currentNetworkColor={currentNetworkColor}
-			onToggleLayer={toggleLayer}
-			onNetworkTypeChange={setNetworkType}
-			onNetworkColorChange={setNetworkColor}
-		/>
-	</CustomControl>
-
-	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
-	
-	<!-- Mobile-only floating Alpha button -->
-	<div class="mobile-alpha-button">
-		<button
-			class="alpha-mobile"
-			onclick={() => {
-				// Access parent component's alpha modal function
-				window.dispatchEvent(new CustomEvent('show-alpha-modal'));
-			}}
-			aria-label="Show alpha information"
-			type="button"
+<!-- Main container with sidebar layout -->
+<div class="app-container">
+	<!-- Map container -->
+	<div class="map-container">
+		<MapLibre
+			class="h-full max-sm:h-screen mobile-map-height"
+			style={currentBasemapStyle}
+			center={center}
+			zoom={zoom}
+			bind:map={mapInstance}
+			onmoveend={handleMoveEnd}
+			onzoomend={handleZoomEnd}
+			attributionControl={true}
 		>
-			ALPHA
-		</button>
+			<NavigationControl position="top-left" />
+			<FullScreenControl position="top-left" />
+			<GeolocateControl position="top-left" />
+			<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+
+			<!-- Basemap Control -->
+			<CustomControl position="top-left">
+				<MapControlPanel 
+					controlType="basemap"
+					showPanel={showBasemapPanel}
+					onToggle={() => togglePanel('basemap')}
+					title="Change basemap"
+					position="left"
+					currentBasemap={currentBasemap}
+					onBasemapSelect={selectBasemap}
+				/>
+			</CustomControl>
+
+			<!-- Geocoder with custom positioning -->
+			<div class="custom-geocoder-position">
+				<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
+			</div>
+
+			<!-- Dynamic Layers -->
+			<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+			
+			<!-- Mobile-only floating Alpha button -->
+			<div class="mobile-alpha-button">
+				<button
+					class="alpha-mobile"
+					onclick={() => {
+						// Access parent component's alpha modal function
+						window.dispatchEvent(new CustomEvent('show-alpha-modal'));
+					}}
+					aria-label="Show alpha information"
+					type="button"
+				>
+					ALPHA
+				</button>
+			</div>
+		</MapLibre>
 	</div>
-</MapLibre>
+
+	<!-- Right sidebar for layers -->
+	<div class="layers-sidebar" class:minimized={isLayerPanelMinimized}>
+		<div class="sidebar-header">
+			<h3>Layers</h3>
+			<!-- Toggle button for both desktop and mobile -->
+			<button 
+				class="panel-toggle-btn"
+				onclick={toggleLayerPanelMinimized}
+				aria-label={isLayerPanelMinimized ? 'Expand layer panel' : 'Minimize layer panel'}
+			>
+				<div class="chevron-icon" class:minimized={isLayerPanelMinimized}></div>
+			</button>
+		</div>
+		{#if !isLayerPanelMinimized}
+		<div class="sidebar-content">
+			<LayerPanel
+				layerStates={layerStates}
+				currentNetworkType={currentNetworkType}
+				currentNetworkColor={currentNetworkColor}
+				onToggleLayer={toggleLayer}
+				onNetworkTypeChange={setNetworkType}
+				onNetworkColorChange={setNetworkColor}
+			/>
+		</div>
+		{/if}
+	</div>
+</div>
 
 <style>
+	/* App layout with sidebar */
+	.app-container {
+		display: flex;
+		height: 100%; /* Use 100% to fill the main content area, not full viewport */
+		width: 100vw;
+	}
+
+	.map-container {
+		flex: 1;
+		height: 100%; /* Use 100% instead of 100vh to fill the available main content area */
+	}
+
+	.layers-sidebar {
+		width: 320px;
+		height: 100%; /* Match the main content area height */
+		background-color: white;
+		border-left: 1px solid #e2e8f0;
+		display: flex;
+		flex-direction: column;
+		box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+		transition: width 0.3s ease;
+	}
+
+	/* Desktop minimized state */
+	.layers-sidebar.minimized {
+		width: 60px; /* Just show the toggle area */
+	}
+
+	.layers-sidebar.minimized .sidebar-header h3 {
+		display: none; /* Hide title when minimized */
+	}
+
+	.layers-sidebar.minimized .panel-toggle-btn {
+		margin: 0 auto; /* Center the toggle button when minimized */
+	}
+
+	.sidebar-header {
+		padding: 1rem;
+		border-bottom: 1px solid #e2e8f0;
+		background-color: #f8fafc;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.sidebar-header h3 {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #1e293b;
+	}
+
+	.panel-toggle-btn {
+		background: none;
+		border: none;
+		font-size: 1.2rem;
+		cursor: pointer;
+		padding: 0;
+		color: #64748b;
+		border-radius: 0.25rem;
+		transition: background-color 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		min-height: 32px;
+	}
+
+	.panel-toggle-btn:hover {
+		background-color: #e2e8f0;
+	}
+
+	/* CSS-based chevron icon */
+	.chevron-icon {
+		width: 8px;
+		height: 8px;
+		border-top: 2px solid #64748b;
+		border-right: 2px solid #64748b;
+		transform: rotate(45deg);
+		transition: transform 0.2s ease;
+	}
+
+	/* Desktop: point left when expanded, right when minimized */
+	.chevron-icon {
+		transform: rotate(-135deg); /* Point left (hide panel) */
+	}
+
+	.chevron-icon.minimized {
+		transform: rotate(45deg); /* Point right (show panel) */
+	}
+
+	/* Mobile: point down when expanded, up when minimized */
+	@media (max-width: 640px) {
+		.chevron-icon {
+			transform: rotate(135deg); /* Point down (hide panel) */
+		}
+
+		.chevron-icon.minimized {
+			transform: rotate(-45deg); /* Point up (show panel) */
+		}
+	}
+
+	.sidebar-content {
+		flex: 1;
+		padding: 1rem;
+		overflow-y: auto;
+	}
+
 	:global(.custom-geocoder-position) {
 		position: absolute;
 		top: 10px;
@@ -319,19 +452,89 @@
 		z-index: 1000;
 	}
 
-	/* Fix mobile viewport cropping with dynamic viewport height */
+	/* Mobile responsive layout */
 	@media (max-width: 640px) {
 		:global(.mobile-map-height) {
 			height: 100dvh !important;
 		}
-	}
 
+		/* Show sidebar as bottom panel on mobile */
+		.app-container {
+			flex-direction: column;
+		}
+
+		.map-container {
+			height: 60vh; /* Map takes 60% of viewport height when panel is expanded */
+		}
+
+		/* Dynamic map controls positioning based on panel state */
+		:global(.maplibregl-ctrl-bottom-left) {
+			bottom: 40vh !important; /* Default expanded state */
+			transition: bottom 0.3s ease;
+		}
+
+		:global(.maplibregl-ctrl-bottom-right) {
+			bottom: 40vh !important; /* Default expanded state */
+			transition: bottom 0.3s ease;
+		}
+
+		.layers-sidebar {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			width: 100% !important; /* Override desktop width */
+			height: 40vh; /* Panel takes 40% of viewport height when expanded */
+			border-left: none;
+			border-top: 1px solid #e2e8f0;
+			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+			z-index: 1000;
+			transition: height 0.3s ease;
+		}
+
+		/* Mobile minimized state */
+		.layers-sidebar.minimized {
+			width: 100% !important; /* Keep full width on mobile */
+			height: auto; /* Only show header when minimized */
+		}
+
+		.layers-sidebar.minimized .sidebar-header h3 {
+			display: block; /* Show title on mobile even when minimized */
+		}
+
+		.layers-sidebar.minimized .panel-toggle-btn {
+			margin: 0; /* Reset margin on mobile */
+		}
+
+		/* Adjust map when panel is minimized on mobile */
+		.app-container:has(.layers-sidebar.minimized) .map-container {
+			height: calc(100vh - 60px); /* Full height minus header height */
+		}
+
+		/* Adjust controls when panel is minimized on mobile */
+		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-left),
+		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-right) {
+			bottom: 60px !important; /* Position above minimized header */
+		}
+
+		.sidebar-content {
+			padding: 0.75rem;
+		}
+
+		.sidebar-header {
+			padding: 0.75rem 1rem;
+		}
+
+		.sidebar-header h3 {
+			font-size: 1rem;
+		}
+	}
 
 	.mobile-alpha-button {
 		position: absolute;
 		bottom: 35px;
 		right: 20px;
-		z-index: 1000;
+		z-index: 9999;
 		display: none;
 	}
 
@@ -359,4 +562,6 @@
 			display: block;
 		}
 	}
+
+
 </style>
