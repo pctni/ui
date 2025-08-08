@@ -256,6 +256,7 @@
 			bind:map={mapInstance}
 			onmoveend={handleMoveEnd}
 			onzoomend={handleZoomEnd}
+			attributionControl={true}
 		>
 			<NavigationControl position="top-left" />
 			<FullScreenControl position="top-left" />
@@ -297,21 +298,6 @@
 					ALPHA
 				</button>
 			</div>
-
-			<!-- Mobile alpha button -->
-			<div class="mobile-alpha-button">
-				<button
-					class="alpha-mobile"
-					onclick={() => {
-						// Access parent component's alpha modal function
-						window.dispatchEvent(new CustomEvent('show-alpha-modal'));
-					}}
-					aria-label="Show alpha information"
-					type="button"
-				>
-					ALPHA
-				</button>
-			</div>
 		</MapLibre>
 	</div>
 
@@ -337,19 +323,18 @@
 	/* App layout with sidebar */
 	.app-container {
 		display: flex;
-		height: 100vh;
+		height: 100%; /* Use 100% to fill the main content area, not full viewport */
 		width: 100vw;
 	}
 
 	.map-container {
 		flex: 1;
-		height: 100vh;
-		overflow: hidden;
+		height: 100%; /* Use 100% instead of 100vh to fill the available main content area */
 	}
 
 	.layers-sidebar {
 		width: 320px;
-		height: 100vh;
+		height: 100%; /* Match the main content area height */
 		background-color: white;
 		border-left: 1px solid #e2e8f0;
 		display: flex;
@@ -396,6 +381,15 @@
 
 		.map-container {
 			height: 60vh; /* Map takes 60% of viewport height */
+		}
+
+		/* Adjust map controls positioning on mobile to avoid overlap with bottom panel */
+		:global(.maplibregl-ctrl-bottom-left) {
+			bottom: 40vh !important;
+		}
+
+		:global(.maplibregl-ctrl-bottom-right) {
+			bottom: 40vh !important;
 		}
 
 		.layers-sidebar {
