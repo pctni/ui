@@ -84,3 +84,99 @@
 		</div>
 	{/if}
 {/each}
+
+<style>
+	.layer-section {
+		margin-bottom: 1.5rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.layer-heading {
+		margin: 0 0 0.75rem 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.network-types {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.network-types label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: #4b5563;
+		cursor: pointer;
+	}
+
+	.network-types input[type="checkbox"] {
+		margin: 0;
+	}
+
+	.color-section {
+		margin-bottom: 1rem;
+	}
+
+	.color-label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+	}
+
+	.color-dropdown {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		background-color: white;
+	}
+
+	.color-dropdown:focus {
+		outline: none;
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	.option {
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.option:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	.option label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: #374151;
+		cursor: pointer;
+		margin-bottom: 0.5rem;
+	}
+
+	.option input[type="checkbox"] {
+		margin: 0;
+	}
+
+	.legend-container {
+		margin-top: 0.75rem;
+		padding: 0.75rem;
+		background-color: #f9fafb;
+		border-radius: 0.375rem;
+		border: 1px solid #e5e7eb;
+	}
+</style>
