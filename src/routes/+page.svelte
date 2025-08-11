@@ -21,7 +21,6 @@
 
 	// State: initial values and types
 	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(false);
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
