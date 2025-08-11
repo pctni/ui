@@ -401,7 +401,8 @@
 			border-left: none;
 			border-top: 1px solid #e2e8f0;
 			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
-			z-index: 1000;
+			/* Keep below the Alpha modal overlay (10,000) and mobile alpha button (9,999) */
+			z-index: 900;
 		}
 
 		.sidebar-content {
