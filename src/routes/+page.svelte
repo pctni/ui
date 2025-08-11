@@ -16,11 +16,11 @@
 	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
+	import LayerPanel from '$lib/components/LayerPanel.svelte';
 	import Geocoder from '$lib/components/Geocoder.svelte';
 
 	// State: initial values and types
 	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(true);
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
@@ -243,75 +243,123 @@
 	<PMTilesProtocol />
 {/if}
 
-<MapLibre
-	class="h-full max-sm:h-screen mobile-map-height"
-	style={currentBasemapStyle}
-	center={center}
-	zoom={zoom}
-	bind:map={mapInstance}
-	onmoveend={handleMoveEnd}
-	onzoomend={handleZoomEnd}
->
-	<NavigationControl position="top-left" />
-	<FullScreenControl position="top-left" />
-	<GeolocateControl position="top-left" />
-	<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
-
-	<!-- Basemap Control -->
-	<CustomControl position="top-left">
-		<MapControlPanel 
-			controlType="basemap"
-			showPanel={showBasemapPanel}
-			onToggle={() => togglePanel('basemap')}
-			title="Change basemap"
-			position="left"
-			currentBasemap={currentBasemap}
-			onBasemapSelect={selectBasemap}
-		/>
-	</CustomControl>
-
-	<!-- Geocoder with custom positioning -->
-	<div class="custom-geocoder-position">
-		<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
-	</div>
-
-	<!-- Layers Control -->
-	<CustomControl position="top-right">
-		<MapControlPanel 
-			controlType="layers"
-			showPanel={showLayersPanel}
-			onToggle={() => togglePanel('layers')}
-			title="Layers"
-			position="right"
-			layerStates={layerStates}
-			currentNetworkType={currentNetworkType}
-			currentNetworkColor={currentNetworkColor}
-			onToggleLayer={toggleLayer}
-			onNetworkTypeChange={setNetworkType}
-			onNetworkColorChange={setNetworkColor}
-		/>
-	</CustomControl>
-
-	<!-- Dynamic Layers -->
-	<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
-	
-	<!-- Mobile-only floating Alpha button -->
-	<div class="mobile-alpha-button">
-		<button
-			class="alpha-mobile"
-			onclick={() => {
-				// Access parent component's alpha modal function
-				window.dispatchEvent(new CustomEvent('show-alpha-modal'));
-			}}
-			aria-label="Show alpha information"
-			type="button"
+<!-- Main container with sidebar layout -->
+<div class="app-container">
+	<!-- Map container -->
+	<div class="map-container">
+		<MapLibre
+			class="h-full max-sm:h-screen mobile-map-height"
+			style={currentBasemapStyle}
+			center={center}
+			zoom={zoom}
+			bind:map={mapInstance}
+			onmoveend={handleMoveEnd}
+			onzoomend={handleZoomEnd}
+			attributionControl={true}
 		>
-			ALPHA
-		</button>
+			<NavigationControl position="top-left" />
+			<FullScreenControl position="top-left" />
+			<GeolocateControl position="top-left" />
+			<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+
+			<!-- Basemap Control -->
+			<CustomControl position="top-left">
+				<MapControlPanel 
+					controlType="basemap"
+					showPanel={showBasemapPanel}
+					onToggle={() => togglePanel('basemap')}
+					title="Change basemap"
+					position="left"
+					currentBasemap={currentBasemap}
+					onBasemapSelect={selectBasemap}
+				/>
+			</CustomControl>
+
+			<!-- Geocoder with custom positioning -->
+			<div class="custom-geocoder-position">
+				<Geocoder map={mapInstance || null} apiKey={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN} />
+			</div>
+
+			<!-- Dynamic Layers -->
+			<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
+			
+			<!-- Mobile-only floating Alpha button -->
+			<div class="mobile-alpha-button">
+				<button
+					class="alpha-mobile"
+					onclick={() => {
+						// Access parent component's alpha modal function
+						window.dispatchEvent(new CustomEvent('show-alpha-modal'));
+					}}
+					aria-label="Show alpha information"
+					type="button"
+				>
+					ALPHA
+				</button>
+			</div>
+		</MapLibre>
 	</div>
-</MapLibre>
+
+	<!-- Right sidebar for layers -->
+	<div class="layers-sidebar">
+		<div class="sidebar-header">
+			<h3>Layers</h3>
+		</div>
+		<div class="sidebar-content">
+			<LayerPanel
+				layerStates={layerStates}
+				currentNetworkType={currentNetworkType}
+				currentNetworkColor={currentNetworkColor}
+				onToggleLayer={toggleLayer}
+				onNetworkTypeChange={setNetworkType}
+				onNetworkColorChange={setNetworkColor}
+			/>
+		</div>
+	</div>
+</div>
 
 <style>
+	/* App layout with sidebar */
+	.app-container {
+		display: flex;
+		height: 100%; /* Use 100% to fill the full viewport height */
+		width: 100vw;
+	}
+
+	.map-container {
+		flex: 1;
+		height: 100%; /* Fill available height within the flex container */
+	}
+
+	.layers-sidebar {
+		width: 320px;
+		height: 100%; /* Match the main content area height */
+		background-color: white;
+		border-left: 1px solid #e2e8f0;
+		display: flex;
+		flex-direction: column;
+		box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.sidebar-header {
+		padding: 1rem;
+		border-bottom: 1px solid #e2e8f0;
+		background-color: #f8fafc;
+	}
+
+	.sidebar-header h3 {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #1e293b;
+	}
+
+	.sidebar-content {
+		flex: 1;
+		padding: 1rem;
+		overflow-y: auto;
+	}
+
 	:global(.custom-geocoder-position) {
 		position: absolute;
 		top: 10px;
@@ -324,14 +372,56 @@
 		:global(.mobile-map-height) {
 			height: 100dvh !important;
 		}
-	}
 
+		/* Show sidebar as bottom panel on mobile */
+		.app-container {
+			flex-direction: column;
+		}
+
+		.map-container {
+			height: 60vh; /* Map takes 60% of viewport height */
+		}
+
+		/* Adjust map controls positioning on mobile to avoid overlap with bottom panel */
+		:global(.maplibregl-ctrl-bottom-left) {
+			bottom: 40vh !important;
+		}
+
+		:global(.maplibregl-ctrl-bottom-right) {
+			bottom: 40vh !important;
+		}
+
+		.layers-sidebar {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			width: 100%;
+			height: 40vh; /* Panel takes 40% of viewport height */
+			border-left: none;
+			border-top: 1px solid #e2e8f0;
+			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+			z-index: 1000;
+		}
+
+		.sidebar-content {
+			padding: 0.75rem;
+		}
+
+		.sidebar-header {
+			padding: 0.75rem 1rem;
+		}
+
+		.sidebar-header h3 {
+			font-size: 1rem;
+		}
+	}
 
 	.mobile-alpha-button {
 		position: absolute;
 		bottom: 35px;
 		right: 20px;
-		z-index: 1000;
+		z-index: 9999;
 		display: none;
 	}
 
@@ -359,4 +449,6 @@
 			display: block;
 		}
 	}
+
+
 </style>
