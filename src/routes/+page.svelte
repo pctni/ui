@@ -328,7 +328,7 @@
 
 	.map-container {
 		flex: 1;
-		height: 100%; /* Use 100% instead of 100vh to fill the available main content area */
+		height: 100%; /* Fill available height within the flex container */
 	}
 
 	.layers-sidebar {
