@@ -322,7 +322,7 @@
 	/* App layout with sidebar */
 	.app-container {
 		display: flex;
-		height: 100%; /* Use 100% to fill the main content area, not full viewport */
+		height: 100%; /* Use 100% to fill the full viewport height */
 		width: 100vw;
 	}
 
