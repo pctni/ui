@@ -21,7 +21,6 @@
 
 	// State: initial values and types
 	let showBasemapPanel = $state(false);
-	let showLayersPanel = $state(false);
 	let isLayerPanelMinimized = $state(false); // For mobile layer panel toggle
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
@@ -147,14 +146,14 @@
 	
 	// Handle map events
 	function handleMoveEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel) {
 			center = [mapInstance.getCenter().lng, mapInstance.getCenter().lat];
 			debouncedUpdateURL();
 		}
 	}
 	
 	function handleZoomEnd() {
-		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel && !showLayersPanel) {
+		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel) {
 			zoom = mapInstance.getZoom();
 			debouncedUpdateURL();
 		}
@@ -201,13 +200,9 @@
 	}
 
 	// Event handlers
-	function togglePanel(panel: 'basemap' | 'layers') {
+	function togglePanel(panel: 'basemap') {
 		if (panel === 'basemap') {
 			showBasemapPanel = !showBasemapPanel;
-			showLayersPanel = false; // Always close the other panel
-		} else {
-			showLayersPanel = !showLayersPanel;
-			showBasemapPanel = false; // Always close the other panel
 		}
 	}
 
@@ -261,7 +256,6 @@
 			bind:map={mapInstance}
 			onmoveend={handleMoveEnd}
 			onzoomend={handleZoomEnd}
-			attributionControl={true}
 		>
 			<NavigationControl position="top-left" />
 			<FullScreenControl position="top-left" />
@@ -338,13 +332,13 @@
 	/* App layout with sidebar */
 	.app-container {
 		display: flex;
-		height: 100%; /* Use 100% to fill the main content area, not full viewport */
+		height: 100%; /* Use 100% to fill the full viewport height */
 		width: 100vw;
 	}
 
 	.map-container {
 		flex: 1;
-		height: 100%; /* Use 100% instead of 100vh to fill the available main content area */
+		height: 100%; /* Fill available height within the flex container */
 	}
 
 	.layers-sidebar {
@@ -438,7 +432,6 @@
 			transform: rotate(-45deg); /* Point up (show panel) */
 		}
 	}
-
 	.sidebar-content {
 		flex: 1;
 		padding: 1rem;
@@ -488,7 +481,7 @@
 			border-left: none;
 			border-top: 1px solid #e2e8f0;
 			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
-			z-index: 1000;
+			z-index: 900; /* Keep below the Alpha modal overlay and mobile alpha button */
 			transition: height 0.3s ease;
 		}
 
