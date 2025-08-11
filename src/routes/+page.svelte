@@ -403,33 +403,27 @@
 		background-color: #e2e8f0;
 	}
 
-	/* CSS-based chevron icon */
+	/* Consolidated chevron icon styles */
 	.chevron-icon {
 		width: 8px;
 		height: 8px;
 		border-top: 2px solid #64748b;
 		border-right: 2px solid #64748b;
-		transform: rotate(45deg);
+		transform: rotate(-135deg); /* Default: point left (hide panel) */
 		transition: transform 0.2s ease;
 	}
 
-	/* Desktop: point left when expanded, right when minimized */
-	.chevron-icon {
-		transform: rotate(-135deg); /* Point left (hide panel) */
-	}
-
 	.chevron-icon.minimized {
-		transform: rotate(45deg); /* Point right (show panel) */
+		transform: rotate(45deg); /* Point right (show panel) on desktop */
 	}
 
-	/* Mobile: point down when expanded, up when minimized */
 	@media (max-width: 640px) {
 		.chevron-icon {
-			transform: rotate(135deg); /* Point down (hide panel) */
+			transform: rotate(135deg); /* Point down (hide panel) on mobile */
 		}
 
 		.chevron-icon.minimized {
-			transform: rotate(-45deg); /* Point up (show panel) */
+			transform: rotate(-45deg); /* Point up (show panel) on mobile */
 		}
 	}
 	.sidebar-content {
@@ -445,69 +439,39 @@
 		z-index: 1000;
 	}
 
-	/* Mobile responsive layout */
+	/* Mobile responsive layout - simplified modal approach */
 	@media (max-width: 640px) {
 		:global(.mobile-map-height) {
 			height: 100dvh !important;
 		}
 
-		/* Show sidebar as bottom panel on mobile */
 		.app-container {
 			flex-direction: column;
 		}
 
 		.map-container {
-			height: 60vh; /* Map takes 60% of viewport height when panel is expanded */
+			height: calc(100vh - 60px); /* Full height minus panel header */
 		}
 
-		/* Dynamic map controls positioning based on panel state */
-		:global(.maplibregl-ctrl-bottom-left) {
-			bottom: 40vh !important; /* Default expanded state */
-			transition: bottom 0.3s ease;
-		}
-
-		:global(.maplibregl-ctrl-bottom-right) {
-			bottom: 40vh !important; /* Default expanded state */
-			transition: bottom 0.3s ease;
-		}
-
+		/* Simplified mobile panel - always at bottom, expands to full screen */
 		.layers-sidebar {
 			position: fixed;
 			bottom: 0;
 			left: 0;
 			right: 0;
-			width: 100% !important; /* Override desktop width */
-			height: 40vh; /* Panel takes 40% of viewport height when expanded */
+			width: 100%;
+			height: 60px; /* Minimized height */
 			border-left: none;
 			border-top: 1px solid #e2e8f0;
 			box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
-			z-index: 900; /* Keep below the Alpha modal overlay and mobile alpha button */
+			z-index: 900;
 			transition: height 0.3s ease;
 		}
 
-		/* Mobile minimized state */
-		.layers-sidebar.minimized {
-			width: 100% !important; /* Keep full width on mobile */
-			height: auto; /* Only show header when minimized */
-		}
-
-		.layers-sidebar.minimized .sidebar-header h3 {
-			display: block; /* Show title on mobile even when minimized */
-		}
-
-		.layers-sidebar.minimized .panel-toggle-btn {
-			margin: 0; /* Reset margin on mobile */
-		}
-
-		/* Adjust map when panel is minimized on mobile */
-		.app-container:has(.layers-sidebar.minimized) .map-container {
-			height: calc(100vh - 60px); /* Full height minus header height */
-		}
-
-		/* Adjust controls when panel is minimized on mobile */
-		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-left),
-		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-right) {
-			bottom: 60px !important; /* Position above minimized header */
+		/* When expanded, take full screen like a modal */
+		.layers-sidebar:not(.minimized) {
+			height: 100vh;
+			border-radius: 0;
 		}
 
 		.sidebar-content {
@@ -523,6 +487,7 @@
 		}
 	}
 
+	/* Unified alpha button positioning */
 	.mobile-alpha-button {
 		position: absolute;
 		top: 10px;
