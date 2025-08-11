@@ -247,7 +247,7 @@
 {/if}
 
 <!-- Main container with sidebar layout -->
-<div class="app-container">
+<div class="app-container" class:panel-minimized={isLayerPanelMinimized}>
 	<!-- Map container -->
 	<div class="map-container">
 		<MapLibre
@@ -506,13 +506,13 @@
 		}
 
 		/* Adjust map when panel is minimized on mobile */
-		.app-container.sidebar-minimized .map-container {
+		.app-container.panel-minimized .map-container {
 			height: calc(100vh - 60px); /* Full height minus header height */
 		}
 
 		/* Adjust controls when panel is minimized on mobile */
-		.app-container.sidebar-minimized :global(.maplibregl-ctrl-bottom-left),
-		.app-container.sidebar-minimized :global(.maplibregl-ctrl-bottom-right) {
+		.app-container.panel-minimized :global(.maplibregl-ctrl-bottom-left),
+		.app-container.panel-minimized :global(.maplibregl-ctrl-bottom-right) {
 			bottom: 60px !important; /* Position above minimized header */
 		}
 
