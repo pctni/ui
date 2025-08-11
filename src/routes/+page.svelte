@@ -506,13 +506,13 @@
 		}
 
 		/* Adjust map when panel is minimized on mobile */
-		.app-container:has(.layers-sidebar.minimized) .map-container {
+		.app-container.sidebar-minimized .map-container {
 			height: calc(100vh - 60px); /* Full height minus header height */
 		}
 
 		/* Adjust controls when panel is minimized on mobile */
-		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-left),
-		.app-container:has(.layers-sidebar.minimized) :global(.maplibregl-ctrl-bottom-right) {
+		.app-container.sidebar-minimized :global(.maplibregl-ctrl-bottom-left),
+		.app-container.sidebar-minimized :global(.maplibregl-ctrl-bottom-right) {
 			bottom: 60px !important; /* Position above minimized header */
 		}
 
