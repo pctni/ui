@@ -1,14 +1,11 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "svelte": true,
-  "entry": [
-    "src/app.html",
-    "src/routes/**/+page.svelte",
-    "src/routes/**/+layout.svelte",
-    "src/routes/**/+page.ts"
-  ],
-  "project": [
-    "src/**/*.{js,ts,svelte}",
-    "static/**/*"
-  ]
+	"$schema": "https://unpkg.com/knip@5/schema.json",
+	"svelte": true,
+	"entry": [
+		"src/app.html",
+		"src/routes/**/+page.svelte",
+		"src/routes/**/+layout.svelte",
+		"src/routes/**/+page.ts"
+	],
+	"project": ["src/**/*.{js,ts,svelte}", "static/**/*"]
 }

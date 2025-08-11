@@ -17,7 +17,7 @@
 		}
 
 		window.addEventListener('show-alpha-modal', handleCustomAlphaEvent);
-		
+
 		return () => {
 			window.removeEventListener('show-alpha-modal', handleCustomAlphaEvent);
 		};

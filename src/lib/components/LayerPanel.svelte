@@ -115,7 +115,7 @@
 		cursor: pointer;
 	}
 
-	.network-types input[type="checkbox"] {
+	.network-types input[type='checkbox'] {
 		margin: 0;
 	}
 
@@ -168,7 +168,7 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.option input[type="checkbox"] {
+	.option input[type='checkbox'] {
 		margin: 0;
 	}
 

@@ -1,9 +1,12 @@
 import type { StyleSpecification } from 'maplibre-gl';
 
-export const BASEMAPS: Record<string, {
-	name: string;
-	style: string | StyleSpecification;
-}> = {
+export const BASEMAPS: Record<
+	string,
+	{
+		name: string;
+		style: string | StyleSpecification;
+	}
+> = {
 	gray: {
 		name: 'Gray',
 		style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'

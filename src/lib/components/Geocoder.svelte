@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Map } from 'maplibre-gl';
 
-	let { map, apiKey = "" }: { map: Map | null; apiKey?: string } = $props();
+	let { map, apiKey = '' }: { map: Map | null; apiKey?: string } = $props();
 
 	let query = $state('');
 	let results = $state<any[]>([]);
@@ -79,20 +79,20 @@
 		oninput={search}
 		onkeydown={handleKeydown}
 		disabled={!apiKey}
-		placeholder={apiKey ? "Search..." : "API key required"}
+		placeholder={apiKey ? 'Search...' : 'API key required'}
 		class="input"
 		class:disabled={!apiKey}
 	/>
-	
+
 	{#if query && apiKey}
 		<button onclick={clear} class="clear">×</button>
 	{/if}
-	
+
 	{#if showResults && results.length}
 		<div class="results">
 			{#each results as result, index}
-				<button 
-					onclick={() => select(result)} 
+				<button
+					onclick={() => select(result)}
 					class="result"
 					class:selected={index === selectedIndex}
 				>
