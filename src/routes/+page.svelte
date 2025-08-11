@@ -525,7 +525,7 @@
 
 	.mobile-alpha-button {
 		position: absolute;
-		bottom: 35px;
+		top: 10px;
 		right: 20px;
 		z-index: 9999;
 		display: none;
