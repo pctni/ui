@@ -2,7 +2,7 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/d566e223-2100-4bba-ac82-92dd37964b73/deploy-status)](https://app.netlify.com/projects/pctni/deploys)
 
-Visualise cycling potential in Northern Ireland. 
+Visualise cycling potential in Northern Ireland.
 
 > This project is a work in progress. Features and data are being actively developed and may change.
 
@@ -19,7 +19,7 @@ Users can toggle different data layers, search for locations, change basemap sty
 
 ## Implementation
 
-Built with [Svelte 5](https://svelte.dev/), [MapLibre GL JS](https://maplibre.org/), and [PMTiles](https://github.com/protomaps/PMTiles). 
+Built with [Svelte 5](https://svelte.dev/), [MapLibre GL JS](https://maplibre.org/), and [PMTiles](https://github.com/protomaps/PMTiles).
 
 ## Development
 

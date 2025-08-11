@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { 
-		MapLibre, 
-		FullScreenControl, 
-		GeolocateControl, 
+	import {
+		MapLibre,
+		FullScreenControl,
+		GeolocateControl,
 		ScaleControl,
 		CustomControl,
 		NavigationControl
@@ -10,10 +10,10 @@
 	import { PMTilesProtocol } from '@svelte-maplibre-gl/pmtiles';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	
+
 	// Import configuration
 	import { BASEMAPS } from '$lib/config/basemaps.js';
-	import { LAYERS, MAP_CONFIG } from '$lib/config/layers.js';
+	import { MAP_CONFIG } from '$lib/config/layers.js';
 	import MapControlPanel from '$lib/components/MapControlPanel.svelte';
 	import MapLayers from '$lib/components/MapLayers.svelte';
 	import LayerPanel from '$lib/components/LayerPanel.svelte';
@@ -25,12 +25,12 @@
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
 	let currentNetworkColor = $state('bicycle');
-	
+
 	// Map state
 	let center = $state<[number, number]>(MAP_CONFIG.DEFAULT_CENTER);
 	let zoom = $state<number>(MAP_CONFIG.DEFAULT_ZOOM);
 	let mapInstance = $state<import('maplibre-gl').Map | undefined>();
-	
+
 	// Layer states
 	let layerStates = $state<Record<string, boolean>>({
 		routeNetwork: false, // Off by default - user must actively select a network type
@@ -48,49 +48,49 @@
 	onMount(() => {
 		if (browser) {
 			parseURLHash();
-			
+
 			function handleHashChange() {
 				parseURLHash();
 			}
-			
+
 			window.addEventListener('hashchange', handleHashChange);
-			
+
 			return () => {
 				window.removeEventListener('hashchange', handleHashChange);
 			};
 		}
 	});
-	
+
 	// Parse URL hash pattern: #zoom/lat/lng/basemap/networkType/layers
 	function parseURLHash() {
 		if (!browser) return;
-		
+
 		try {
 			isUpdatingFromURL = true;
 
 			const hash = window.location.hash.slice(1);
 			if (!hash) return;
-			
+
 			const parts = hash.split('/');
-			
+
 			// Parse basic map position (zoom/lat/lng)
 			if (parts.length >= 3) {
 				const [zoomStr, latStr, lngStr] = parts;
 				const newZoom = parseFloat(zoomStr);
 				const newLat = parseFloat(latStr);
 				const newLng = parseFloat(lngStr);
-				
+
 				// Validate ranges
 				const isValidZoom = !isNaN(newZoom) && newZoom >= 0 && newZoom <= 24;
 				const isValidLat = !isNaN(newLat) && newLat >= -90 && newLat <= 90;
 				const isValidLng = !isNaN(newLng) && newLng >= -180 && newLng <= 180;
-				
+
 				if (isValidZoom && isValidLat && isValidLng) {
 					zoom = newZoom;
 					center = [newLng, newLat];
 				}
 			}
-			
+
 			// Parse basemap
 			if (parts.length >= 4 && parts[3]) {
 				const basemapName = parts[3];
@@ -98,7 +98,7 @@
 					currentBasemap = basemapName;
 				}
 			}
-			
+
 			// Parse network type
 			if (parts.length >= 5 && parts[4]) {
 				const networkType = parts[4];
@@ -110,29 +110,31 @@
 			} else {
 				currentNetworkType = '';
 			}
-			
+
 			// Parse active layers
 			if (parts.length >= 6 && parts[5]) {
 				const layersStr = parts[5];
-				
+
 				// Reset all layers to false first
-				Object.keys(layerStates).forEach(key => {
+				Object.keys(layerStates).forEach((key) => {
 					layerStates[key] = false;
 				});
-				
+
 				// Enable specified layers
 				if (layersStr !== 'none') {
 					const activeLayers = layersStr.split(',');
-					activeLayers.forEach(layerName => {
-						if (layerStates.hasOwnProperty(layerName)) {
+					activeLayers.forEach((layerName) => {
+						if (Object.prototype.hasOwnProperty.call(layerStates, layerName)) {
 							layerStates[layerName] = true;
 						}
 					});
 				}
 			}
-			
+
 			// Set route network layer state based on network type
-			layerStates.routeNetwork = currentNetworkType !== '' && (currentNetworkType === 'fast' || currentNetworkType === 'quiet');
+			layerStates.routeNetwork =
+				currentNetworkType !== '' &&
+				(currentNetworkType === 'fast' || currentNetworkType === 'quiet');
 		} catch (error) {
 			console.warn('Failed to parse URL hash:', error);
 		} finally {
@@ -141,9 +143,9 @@
 			}, 0);
 		}
 	}
-	
+
 	// Debounced URL updates now handled by $effect above
-	
+
 	// Handle map events
 	function handleMoveEnd() {
 		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel) {
@@ -151,7 +153,7 @@
 			debouncedUpdateURL();
 		}
 	}
-	
+
 	function handleZoomEnd() {
 		if (!isUpdatingFromURL && mapInstance && !showBasemapPanel) {
 			zoom = mapInstance.getZoom();
@@ -161,29 +163,29 @@
 
 	// Note: This app uses a hybrid approach with Svelte 5:
 	// - $state() for reactive state variables
-	// - $derived() for simple computed values 
+	// - $derived() for simple computed values
 	// - onMount() for initial setup and event listeners (avoids circular dependencies)
 	// - Manual functions for complex side effects like URL management
 
 	// Computed values
 	const currentBasemapStyle = $derived(BASEMAPS[currentBasemap]?.style || BASEMAPS.gray.style);
-	
+
 	// Manual URL update function - simpler and more predictable
 	function updateURLHash() {
 		if (!browser || !center || typeof zoom !== 'number' || isUpdatingFromURL) return;
-		
+
 		try {
 			// Get active layers
 			const activeLayers = Object.entries(layerStates)
-				.filter(([key, value]) => value)
-				.map(([key, value]) => key);
-			
+				.filter(([, value]) => value)
+				.map(([key]) => key);
+
 			const layersStr = activeLayers.length > 0 ? activeLayers.join(',') : 'none';
 			const networkTypeStr = currentNetworkType || 'none';
-			
+
 			// Format: #zoom/lat/lng/basemap/networkType/layers
 			const newHash = `#${zoom.toFixed(2)}/${center[1].toFixed(4)}/${center[0].toFixed(4)}/${currentBasemap}/${networkTypeStr}/${layersStr}`;
-			
+
 			// Only update if hash actually changed
 			if (window.location.hash !== newHash) {
 				window.history.replaceState(null, '', newHash);
@@ -192,7 +194,7 @@
 			console.warn('Failed to update URL hash:', error);
 		}
 	}
-	
+
 	// Debounced URL updates
 	function debouncedUpdateURL() {
 		clearTimeout(updateTimeout);
@@ -249,10 +251,10 @@
 	<!-- Map container -->
 	<div class="map-container">
 		<MapLibre
-			class="h-full max-sm:h-screen mobile-map-height"
+			class="mobile-map-height h-full max-sm:h-screen"
 			style={currentBasemapStyle}
-			center={center}
-			zoom={zoom}
+			{center}
+			{zoom}
 			bind:map={mapInstance}
 			onmoveend={handleMoveEnd}
 			onzoomend={handleZoomEnd}
@@ -260,17 +262,17 @@
 			<NavigationControl position="top-left" />
 			<FullScreenControl position="top-left" />
 			<GeolocateControl position="top-left" />
-			<ScaleControl position="bottom-left" unit="metric" maxWidth={200}/>
+			<ScaleControl position="bottom-left" unit="metric" maxWidth={200} />
 
 			<!-- Basemap Control -->
 			<CustomControl position="top-left">
-				<MapControlPanel 
+				<MapControlPanel
 					controlType="basemap"
 					showPanel={showBasemapPanel}
 					onToggle={() => togglePanel('basemap')}
 					title="Change basemap"
 					position="left"
-					currentBasemap={currentBasemap}
+					{currentBasemap}
 					onBasemapSelect={selectBasemap}
 				/>
 			</CustomControl>
@@ -281,8 +283,12 @@
 			</div>
 
 			<!-- Dynamic Layers -->
-			<MapLayers activeLayers={layerStates} networkType={currentNetworkType} networkColor={currentNetworkColor} />
-			
+			<MapLayers
+				activeLayers={layerStates}
+				networkType={currentNetworkType}
+				networkColor={currentNetworkColor}
+			/>
+
 			<!-- Mobile-only floating Alpha button -->
 			<div class="mobile-alpha-button">
 				<button
@@ -305,7 +311,7 @@
 		<div class="sidebar-header">
 			<h3>Layers</h3>
 			<!-- Toggle button for both desktop and mobile -->
-			<button 
+			<button
 				class="panel-toggle-btn"
 				onclick={toggleLayerPanelMinimized}
 				aria-label={isLayerPanelMinimized ? 'Expand layer panel' : 'Minimize layer panel'}
@@ -314,16 +320,16 @@
 			</button>
 		</div>
 		{#if !isLayerPanelMinimized}
-		<div class="sidebar-content">
-			<LayerPanel
-				layerStates={layerStates}
-				currentNetworkType={currentNetworkType}
-				currentNetworkColor={currentNetworkColor}
-				onToggleLayer={toggleLayer}
-				onNetworkTypeChange={setNetworkType}
-				onNetworkColorChange={setNetworkColor}
-			/>
-		</div>
+			<div class="sidebar-content">
+				<LayerPanel
+					{layerStates}
+					{currentNetworkType}
+					{currentNetworkColor}
+					onToggleLayer={toggleLayer}
+					onNetworkTypeChange={setNetworkType}
+					onNetworkColorChange={setNetworkColor}
+				/>
+			</div>
 		{/if}
 	</div>
 </div>
@@ -555,6 +561,4 @@
 			display: block;
 		}
 	}
-
-
 </style>
