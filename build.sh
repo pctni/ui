@@ -16,7 +16,7 @@ is_windows() {
 
 # --- Download PMTiles files if they don't exist ---
 DEST_DIR="static"
-BASE_URL="https://github.com/pctni/ui/releases/download/v0.0.1"
+BASE_URL="https://github.com/pctni/ui/releases/download/v2025-08-14"
 
 # Array of pmtiles files to download
 PMTILES_FILES=(
