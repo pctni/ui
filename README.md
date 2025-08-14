@@ -41,13 +41,13 @@ npm run dev
 
 Open the application at http://localhost:5173
 
-Build for production:
+Build for production (cross‑platform):
 
 ```sh
 npm run build
 ```
 
-The build process downloads required PMTiles data files and generates optimized static assets for deployment.
+The build process (via `scripts/prebuild.mjs`) ensures required PMTiles data files are present (downloading any that are missing) and then generates optimized static assets for deployment. The previous platform-specific `build.sh` / `build.ps1` scripts have been replaced by this single cross‑platform Node script.
 
 ## Links
 
