@@ -58,6 +58,8 @@
 					<option value="bicycle">Baseline cycling</option>
 					<option value="bicycle_govtarget">Government target</option>
 					<option value="bicycle_godutch">Go Dutch</option>
+					<option value="quietness">Cycle friendliness (quietness)</option>
+					<option value="gradient">Average gradient %</option>
 				</select>
 			</div>
 			{#if legendConfig && (currentNetworkType === 'fast' || currentNetworkType === 'quiet')}

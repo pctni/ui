@@ -14,12 +14,34 @@ export const LEGEND_CONFIGS: Record<
 	LegendConfig | ((networkType?: string, networkColor?: string) => LegendConfig)
 > = {
 	routeNetwork: (networkType: string = 'fast', networkColor: string = 'bicycle') => {
+		if (['quietness'].includes(networkColor)) {
+			return {
+				type: 'gradient' as const,
+				description: 'Cycle friendliness score (quietness)',
+				items: [
+					{ color: '#5a0f52', label: '0-25', value: 0 },
+					{ color: '#d6899d', label: '25-50', value: 25 },
+					{ color: '#4cb4b2', label: '50-75', value: 50 },
+					{ color: '#0b651f', label: '75-100', value: 75 }
+				]
+			};
+		}
+		if (['gradient'].includes(networkColor)) {
+			return {
+				type: 'gradient' as const,
+				description: 'Average gradient %',
+				items: [
+					{ color: '#6f5138', label: '0-3%', value: 0 },
+					{ color: '#d89078', label: '4-5%', value: 0.04 },
+					{ color: '#f8bfb4', label: '5%+', value: 0.05 }
+				]
+			};
+		}
 		const colorFieldLabels: Record<string, string> = {
 			bicycle: 'Baseline cycling',
 			bicycle_govtarget: 'Government target',
 			bicycle_godutch: 'Go Dutch'
 		};
-
 		return {
 			type: 'gradient' as const,
 			description: `${colorFieldLabels[networkColor] || 'Cycling levels'} - trips per day`,

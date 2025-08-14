@@ -27,8 +27,50 @@ export const LAYERS: Record<string, LayerConfig> = {
 					: 'pmtiles:///route_network_quietest.pmtiles';
 			const sourceLayer =
 				networkType === 'fast' ? 'route_network_fastest' : 'route_network_quietest';
-			// Attribute names in tiles now directly match dropdown values (e.g. bicycle, bicycle_govtarget, bicycle_godutch)
+			// Attribute names in tiles now directly match dropdown values
 			const colorAttr = networkColor;
+			let lineColor: any;
+			if (['bicycle', 'bicycle_govtarget', 'bicycle_godutch'].includes(networkColor)) {
+				// Trips per day ramp
+				lineColor = [
+					'interpolate',
+					['linear'],
+					['get', colorAttr],
+					1, '#808080',
+					49, '#808080',
+					50, '#ffff00',
+					199, '#ffff00',
+					200, '#80ff00',
+					499, '#80ff00',
+					500, '#0080ff',
+					999, '#0080ff',
+					1000, '#ff00ff'
+				];
+			} else if (networkColor === 'quietness') {
+				// Quietness score 0-100 (cycle friendliness) bins: 0-25 / 25-50 / 50-75 / 75-100
+				// Colors approximated from provided legend screenshot
+				lineColor = [
+					'step',
+					['get', 'quietness'],
+					'#5a0f52',
+					25, '#d6899d',
+					50, '#4cb4b2',
+					75, '#0b651f'
+				];
+			} else if (networkColor === 'gradient') {
+				// Gradient fraction (e.g. 0.02 = 2%). Bins: 0-0.03, 0.04-0.05, >0.05
+				// Update: least steep now uses previous middle tan, steeper segments lighter & redder
+				lineColor = [
+					'step',
+					['get', 'gradient'],
+					'#6f5138', // 0 - 0.029.. gentle (darker for stronger contrast)
+					0.04, '#d89078', // 0.04 - 0.049.. moderate (mid tone)
+					0.05, '#f8bfb4' // 0.05+ steep (lightest & redder)
+				];
+			} else {
+				// Fallback single color
+				lineColor = '#808080';
+			}
 			return {
 				name: 'Route Network',
 				id: layerId,
@@ -36,29 +78,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 				sourceLayer,
 				type: 'line' as const,
 				paint: {
-					'line-color': [
-						'interpolate',
-						['linear'],
-						['get', colorAttr],
-						1,
-						'#808080',
-						49,
-						'#808080',
-						50,
-						'#ffff00',
-						199,
-						'#ffff00',
-						200,
-						'#80ff00',
-						499,
-						'#80ff00',
-						500,
-						'#0080ff',
-						999,
-						'#0080ff',
-						1000,
-						'#ff00ff'
-					],
+					'line-color': lineColor,
 					'line-width': [
 						'interpolate',
 						['linear'],
