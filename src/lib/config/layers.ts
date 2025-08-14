@@ -27,12 +27,8 @@ export const LAYERS: Record<string, LayerConfig> = {
 					: 'pmtiles:///route_network_quietest.pmtiles';
 			const sourceLayer =
 				networkType === 'fast' ? 'route_network_fastest' : 'route_network_quietest';
-			// Map dropdown value to correct attribute
-			let colorAttr = networkColor;
-			if (networkColor === 'bicycle_go_dutch') {
-				colorAttr =
-					networkType === 'fast' ? 'all_fastest_bicycle_go_dutch' : 'all_quietest_bicycle_go_dutch';
-			}
+			// Attribute names in tiles now directly match dropdown values (e.g. bicycle, bicycle_govtarget, bicycle_godutch)
+			const colorAttr = networkColor;
 			return {
 				name: 'Route Network',
 				id: layerId,
@@ -95,7 +91,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 		paint: {
 			'line-color': [
 				'step',
-				['to-number', ['get', 'all_fastest_bicycle_go_dutch'], 0],
+				['to-number', ['get', 'bicycle_godutch'], 0],
 				'#ffbf00',
 				1000,
 				'#de3163'

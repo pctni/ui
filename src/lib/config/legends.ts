@@ -17,7 +17,7 @@ export const LEGEND_CONFIGS: Record<
 		const colorFieldLabels: Record<string, string> = {
 			bicycle: 'Baseline cycling',
 			bicycle_govtarget: 'Government target',
-			bicycle_go_dutch: 'Go Dutch'
+			bicycle_godutch: 'Go Dutch'
 		};
 
 		return {
