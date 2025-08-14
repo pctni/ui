@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /**
- * Cross-platform prebuild script to ensure required PMTiles assets are present.
- * Replaces build.sh and build.ps1 to avoid shell incompatibilities on Windows.
+ * Prebuild (pure): ensure required PMTiles assets exist.
+ * No dependency installs or side-effects beyond downloading absent data files.
  */
-import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { basename } from 'node:path';
+import { existsSync, mkdirSync, createWriteStream } from 'node:fs';
 import https from 'node:https';
-import { createWriteStream } from 'node:fs';
+import { basename } from 'node:path';
 
 const DEST_DIR = 'static';
 const BASE_URL = 'https://github.com/pctni/ui/releases/download/v2025-08-14';
@@ -24,22 +22,22 @@ function log(msg) { console.log(`[prebuild] ${msg}`); }
 
 mkdirSync(DEST_DIR, { recursive: true });
 
-async function download(url, dest) {
+function download(url, dest) {
   return new Promise((resolve, reject) => {
-    const file = createWriteStream(dest);
+    const out = createWriteStream(dest);
     https.get(url, res => {
-      if (res.statusCode && res.statusCode >= 400) {
-        file.close();
-        return reject(new Error(`Failed ${url}: ${res.statusCode}`));
+      if (res.statusCode >= 400) {
+        out.close();
+        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
       }
-      if (res.statusCode && res.statusCode >= 300 && res.headers.location) {
-        file.close();
+      if (res.statusCode >= 300 && res.headers.location) {
+        out.close();
         return resolve(download(res.headers.location, dest));
       }
-      res.pipe(file);
-      file.on('finish', () => file.close(() => resolve(undefined)));
+      res.pipe(out);
+      out.on('finish', () => out.close(resolve));
     }).on('error', err => {
-      file.close();
+      out.close();
       reject(err);
     });
   });
@@ -57,15 +55,8 @@ async function download(url, dest) {
     await download(url, dest);
     log(`Downloaded ${name}`);
   }
-  // Handle optional clean flag passed via npm script: npm run build -- --clean
-  if (process.argv.includes('--clean')) {
-    log('Clean flag detected: removing node_modules and lock file');
-    try { unlinkSync('package-lock.json'); } catch {}
-    try { execSync('rimraf node_modules', { stdio: 'inherit' }); } catch {
-      // fallback cross-platform removal
-      try { execSync('rm -rf node_modules', { stdio: 'inherit' }); } catch {}
-      try { execSync('rmdir /s /q node_modules', { stdio: 'inherit' }); } catch {}
-    }
-    execSync('npm install --force', { stdio: 'inherit' });
-  }
-})();
+  log('Prebuild complete.');
+})().catch(err => {
+  console.error('[prebuild] Error', err);
+  process.exit(1);
+});

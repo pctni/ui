@@ -5,9 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node scripts/prebuild.mjs && vite dev",
-		"dev:clean": "node scripts/prebuild.mjs --clean && vite dev",
 		"build": "node scripts/prebuild.mjs && vite build",
-		"build:prod": "node scripts/prebuild.mjs --clean && vite build",
+		"clean": "node scripts/clean.mjs",
+		"rebuild": "npm run clean && npm ci && npm run build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -41,7 +41,6 @@
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
-		"vite": "^7.0.6",
-		"rimraf": "^5.0.5"
+		"vite": "^7.0.6"
 	}
 }
