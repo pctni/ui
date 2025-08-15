@@ -1,12 +1,4 @@
-import type { StyleSpecification } from 'maplibre-gl';
-
-export const BASEMAPS: Record<
-	string,
-	{
-		name: string;
-		style: string | StyleSpecification;
-	}
-> = {
+export const BASEMAPS = {
 	gray: {
 		name: 'Gray',
 		style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -18,10 +10,10 @@ export const BASEMAPS: Record<
 	cycling: {
 		name: 'Cycling',
 		style: {
-			version: 8 as const,
+			version: 8,
 			sources: {
 				'cyclosm-raster': {
-					type: 'raster' as const,
+					type: 'raster',
 					tiles: [
 						'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
 						'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
@@ -31,7 +23,7 @@ export const BASEMAPS: Record<
 					attribution: '© CyclOSM | Map data: © OpenStreetMap contributors'
 				}
 			},
-			layers: [{ id: 'cyclosm-raster', type: 'raster' as const, source: 'cyclosm-raster' }]
+			layers: [{ id: 'cyclosm-raster', type: 'raster', source: 'cyclosm-raster' }]
 		}
 	},
 	dark: {

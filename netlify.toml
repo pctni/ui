@@ -1,6 +1,6 @@
 [build]
   publish = "build"
-  command = "chmod +x build.sh && npm run build"
+  command = "npm run build"
 
 # PMTiles and static file headers
 [[headers]]
