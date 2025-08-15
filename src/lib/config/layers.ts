@@ -13,9 +13,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 	routeNetwork: {
 		name: 'Route Network',
 		id: 'route-network',
-		// Using .pmtiles.gz extension as a workaround for Firefox + GitHub Pages
-		// range request compression issue (renaming disables CDN auto-gzip)
-		url: 'pmtiles:///route_network_fastest.pmtiles.gz',
+		url: 'pmtiles:///route_network_fastest.pmtiles',
 		sourceLayer: 'route_network_fastest',
 		type: 'line',
 		hasNetworkTypes: true,
@@ -25,8 +23,8 @@ export const LAYERS: Record<string, LayerConfig> = {
 			const layerId = `route-network-${networkType}-${networkColor}`;
 			const url =
 				networkType === 'fast'
-					? 'pmtiles:///route_network_fastest.pmtiles.gz'
-					: 'pmtiles:///route_network_quietest.pmtiles.gz';
+					? 'pmtiles:///route_network_fastest.pmtiles'
+					: 'pmtiles:///route_network_quietest.pmtiles';
 			const sourceLayer =
 				networkType === 'fast' ? 'route_network_fastest' : 'route_network_quietest';
 			// Attribute names in tiles now directly match dropdown values
@@ -107,7 +105,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 	coherentNetwork: {
 		name: 'Coherent Network',
 		id: 'coherent-network',
-		url: 'pmtiles:///corenet_network_ni.pmtiles.gz',
+		url: 'pmtiles:///corenet_network_ni.pmtiles',
 		sourceLayer: 'corenet_network_ni_2025-06',
 		type: 'line',
 		paint: {
@@ -124,7 +122,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 	cycleNetwork: {
 		name: 'Cycle Network',
 		id: 'cycle-network',
-		url: 'pmtiles:///cycle_net_processed.pmtiles.gz',
+		url: 'pmtiles:///cycle_net_processed.pmtiles',
 		sourceLayer: 'cycle_net_processed',
 		type: 'line',
 		paint: {
@@ -149,7 +147,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 	gapAnalysis: {
 		name: 'Gap Analysis',
 		id: 'gap-analysis',
-		url: 'pmtiles:///gap_map.pmtiles.gz',
+		url: 'pmtiles:///gap_map.pmtiles',
 		sourceLayer: 'gap_map_2025-06',
 		type: 'line',
 		paint: {
@@ -172,7 +170,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 	localAuthorities: {
 		name: 'Local Authority Boundaries',
 		id: 'local-authorities',
-		url: 'pmtiles:///Local_Authority.pmtiles.gz',
+		url: 'pmtiles:///Local_Authority.pmtiles',
 		sourceLayer: 'Local_Authority_2025-06',
 		type: 'line',
 		paint: {

@@ -8,18 +8,15 @@ import https from 'node:https';
 import { basename } from 'node:path';
 
 const DEST_DIR = 'static';
-const RELEASE_TAG = process.env.RELEASE_TAG || 'v2025-08-15';
+const RELEASE_TAG = process.env.RELEASE_TAG || 'v2025-08-14';
 const BASE_URL = `https://github.com/pctni/ui/releases/download/${RELEASE_TAG}`;
-// NOTE: .pmtiles files renamed to .pmtiles.gz (content itself is NOT gzip-compressed)
-// to disable GitHub Pages CDN automatic compression which breaks Firefox range requests.
-// See: Firefox + GitHub Pages 416 range bug workaround.
 const FILES = [
-  'corenet_network_ni.pmtiles.gz',
-  'gap_map.pmtiles.gz',
-  'cycle_net_processed.pmtiles.gz',
-  'Local_Authority.pmtiles.gz',
-  'route_network_fastest.pmtiles.gz',
-  'route_network_quietest.pmtiles.gz'
+  'corenet_network_ni.pmtiles',
+  'gap_map.pmtiles',
+  'cycle_net_processed.pmtiles',
+  'Local_Authority.pmtiles',
+  'route_network_fastest.pmtiles',
+  'route_network_quietest.pmtiles'
 ];
 
 function log(msg) { console.log(`[prebuild] ${msg}`); }
