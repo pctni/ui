@@ -57,7 +57,7 @@ This project was inspired by previous open-source projects including:
 - The [Cycle Route Uptake and Scenario Estimation (CRUSE)](https://cruse.bike) tool for the Republic of Ireland
 - [Network Planning Tool for Scotland (NPT)](https://www.npt.scot/)
 - The related [Network Planning Workspace (NPW)](https://www.npw.scot/), which takes browser-based active travel network planning tools to a whole new level
-- Active Travel England's [Plan Your Active Travel Schemes (PYATS)](https://plan.activetravelengland.gov.uk/)
+- Active Travel England's [Plan Your Active Travel Schemes (PYATS)](https://plan.activetravelengland.gov.uk/), the source code of which can be found at [github.com/acteng/atip](https://github.com/acteng/atip).
 
 ## Contributing
 
