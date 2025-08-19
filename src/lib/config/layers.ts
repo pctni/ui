@@ -106,7 +106,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 		name: 'Coherent Network',
 		id: 'coherent-network',
 		url: 'pmtiles:///corenet_network_ni.pmtiles',
-		sourceLayer: 'corenet_network_ni_2025-06',
+		sourceLayer: 'corenet_network_ni',
 		type: 'line',
 		paint: {
 			'line-color': '#ffbf00',
