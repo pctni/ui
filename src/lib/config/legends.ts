@@ -46,7 +46,7 @@ export const LEGEND_CONFIGS: Record<
 			type: 'gradient' as const,
 			description: `${colorFieldLabels[networkColor] || 'Cycling levels'} - trips per day`,
 			items: [
-				{ color: '#808080', label: '1-49', value: 1 },
+				{ color: '#bfbfbf', label: '30-49', value: 30 },
 				{ color: '#ffff00', label: '50-199', value: 50 },
 				{ color: '#80ff00', label: '200-499', value: 200 },
 				{ color: '#0080ff', label: '500-999', value: 500 },
