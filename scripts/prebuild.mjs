@@ -8,7 +8,7 @@ import https from 'node:https';
 import { basename } from 'node:path';
 
 const DEST_DIR = 'static';
-const RELEASE_TAG = process.env.RELEASE_TAG || 'v2025-08-14';
+const RELEASE_TAG = process.env.RELEASE_TAG || 'v2025-08-19';
 const BASE_URL = `https://github.com/pctni/ui/releases/download/${RELEASE_TAG}`;
 const FILES = [
   'corenet_network_ni.pmtiles',
