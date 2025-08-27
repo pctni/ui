@@ -55,11 +55,6 @@ export const LEGEND_CONFIGS: Record<
 		};
 	},
 
-	coherentNetwork: {
-		type: 'categorical' as const,
-		description: 'Coherent network alignment',
-		items: [{ color: '#ffbf00', label: 'Coherent Network' }]
-	},
 
 	cycleNetwork: {
 		type: 'categorical' as const,
@@ -74,14 +69,4 @@ export const LEGEND_CONFIGS: Record<
 		]
 	},
 
-	gapAnalysis: {
-		type: 'categorical' as const,
-		description: 'Priority gaps in cycle network',
-		items: [
-			{ color: '#ff0000', label: 'Critical Gap' },
-			{ color: '#ff8000', label: 'High Priority Gap' },
-			{ color: '#ffff00', label: 'Medium Priority Gap' },
-			{ color: '#cccccc', label: 'No Gap' }
-		]
-	}
 };
