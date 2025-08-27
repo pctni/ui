@@ -56,12 +56,9 @@ export const LEGEND_CONFIGS: Record<
 	},
 
 	coherentNetwork: {
-		type: 'gradient' as const,
-		description: 'Go Dutch cycling potential - trips per day',
-		items: [
-			{ color: '#ffbf00', label: '0-999', value: 0 },
-			{ color: '#de3163', label: '1,000+', value: 1000 }
-		]
+		type: 'categorical' as const,
+		description: 'Coherent network alignment',
+		items: [{ color: '#ffbf00', label: 'Coherent Network' }]
 	},
 
 	cycleNetwork: {
