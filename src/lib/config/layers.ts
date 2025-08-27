@@ -32,20 +32,33 @@ export const LAYERS: Record<string, LayerConfig> = {
 			let lineColor: any;
 			if (['bicycle', 'bicycle_govtarget', 'bicycle_godutch'].includes(networkColor)) {
 				// Trips per day ramp
-				lineColor = [
-					'interpolate',
-					['linear'],
-					['get', colorAttr],
-					30, '#bfbfbf',
-					49, '#bfbfbf',
-					50, '#ffff00',
-					199, '#ffff00',
-					200, '#80ff00',
-					499, '#80ff00',
-					500, '#0080ff',
-					999, '#0080ff',
-					1000, '#ff00ff'
-				];
+				   lineColor = [
+					   'interpolate',
+					   ['linear'],
+					   ['get', colorAttr],
+					   0,
+					   'rgba(0,0,0,0)', // Fully transparent for <30
+					   29.99,
+					   'rgba(0,0,0,0)', // Still transparent up to 29.99
+					   30,
+					   '#bfbfbf',
+					   49,
+					   '#bfbfbf',
+					   50,
+					   '#ffff00',
+					   199,
+					   '#ffff00',
+					   200,
+					   '#80ff00',
+					   499,
+					   '#80ff00',
+					   500,
+					   '#0080ff',
+					   999,
+					   '#0080ff',
+					   1000,
+					   '#ff00ff'
+				   ];
 			} else if (networkColor === 'quietness') {
 				// Quietness score 0-100 (cycle friendliness) bins: 0-25 / 25-50 / 50-75 / 75-100
 				// Colors approximated from provided legend screenshot
@@ -53,9 +66,12 @@ export const LAYERS: Record<string, LayerConfig> = {
 					'step',
 					['get', 'quietness'],
 					'#5a0f52',
-					25, '#d6899d',
-					50, '#4cb4b2',
-					75, '#0b651f'
+					25,
+					'#d6899d',
+					50,
+					'#4cb4b2',
+					75,
+					'#0b651f'
 				];
 			} else if (networkColor === 'gradient') {
 				// Gradient fraction (e.g. 0.02 = 2%). Bins: 0-0.03, 0.04-0.05, >0.05
@@ -64,8 +80,10 @@ export const LAYERS: Record<string, LayerConfig> = {
 					'step',
 					['get', 'gradient'],
 					'#6f5138', // 0 - 0.029.. gentle (darker for stronger contrast)
-					0.04, '#d89078', // 0.04 - 0.049.. moderate (mid tone)
-					0.05, '#f8bfb4' // 0.05+ steep (lightest & redder)
+					0.04,
+					'#d89078', // 0.04 - 0.049.. moderate (mid tone)
+					0.05,
+					'#f8bfb4' // 0.05+ steep (lightest & redder)
 				];
 			} else {
 				// Fallback single color
@@ -109,7 +127,7 @@ export const LAYERS: Record<string, LayerConfig> = {
 		sourceLayer: 'corenet_network_ni',
 		type: 'line',
 		paint: {
-			'line-color': '#ffbf00',
+			'line-color': '#0000ff',
 			'line-width': ['interpolate', ['linear'], ['zoom'], 8, 3, 12, 5, 16, 8]
 		}
 	},
