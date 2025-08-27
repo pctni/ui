@@ -34,9 +34,7 @@
 	// Layer states
 	let layerStates = $state<Record<string, boolean>>({
 		routeNetwork: false, // Off by default - user must actively select a network type
-		coherentNetwork: false,
 		cycleNetwork: false,
-		gapAnalysis: false,
 		localAuthorities: false
 	});
 
