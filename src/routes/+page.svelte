@@ -24,7 +24,7 @@
 	let isLayerPanelMinimized = $state(false); // For mobile layer panel toggle
 	let currentBasemap = $state('gray');
 	let currentNetworkType = $state(''); // No network selected by default
-	let currentNetworkColor = $state('bicycle');
+	let currentNetworkColor = $state('bicycle_godutch');
 
 	// Map state
 	let center = $state<[number, number]>(MAP_CONFIG.DEFAULT_CENTER);
