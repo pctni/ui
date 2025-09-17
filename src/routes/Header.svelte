@@ -4,7 +4,7 @@
 
 <header>
 	<div class="header-content">
-		<h1>Propensity to Cycle Tool for Northern Ireland</h1>
+		<h1>Propensity to Cycle Tool NI</h1>
 		<div class="header-right">
 			<button
 				class="alpha-box"
@@ -22,9 +22,9 @@
 					href="https://www.infrastructure-ni.gov.uk/"
 					target="_blank"
 					rel="noopener noreferrer"
-					aria-label="Visit Infrastructure NI website"
+					aria-label="Visit Department for Infrastructure website"
 				>
-					<img src="/ini-logo-long.png" alt="Infrastructure NI" class="logo ini-logo" />
+					<img src="/dfi-bilogo-1x.png" alt="Department for Infrastructure" class="logo dfi-logo" />
 				</a>
 				<a
 					href="https://aecom.com/"
@@ -32,7 +32,7 @@
 					rel="noopener noreferrer"
 					aria-label="Visit AECOM website"
 				>
-					<img src="/aecom-logo.png" alt="AECOM" class="logo aecom-logo" />
+					<img src="/AECOM-Logo.wine_-1024x295.png" alt="AECOM" class="logo aecom-logo" />
 				</a>
 				<a
 					href="https://environment.leeds.ac.uk/transport"
