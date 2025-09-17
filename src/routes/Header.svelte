@@ -4,7 +4,7 @@
 
 <header>
 	<div class="header-content">
-		<h1>Propensity to Cycle Tool for Northern Ireland</h1>
+		<h1>Propensity to Cycle Tool NI</h1>
 		<div class="header-right">
 			<button
 				class="alpha-box"
